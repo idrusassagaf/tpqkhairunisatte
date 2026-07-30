@@ -1,0 +1,208 @@
+/* =========================
+   GOOGLE FONT
+========================= */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+/* =========================
+   TAILWIND CORE
+========================= */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =========================
+   ROOT DESIGN SYSTEM
+========================= */
+:root {
+  /* TEXT */
+  --text: #374151;
+  --text-h: #111827;
+
+  /* BACKGROUND */
+  --bg: #f5f6fa;
+  --card: #ffffff;
+
+  /* BORDER */
+  --border: #e5e7eb;
+
+  /* ACCENT */
+  --accent: #9333ea;
+  --accent-hover: #7e22ce;
+
+  /* SHADOW */
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 10px 20px rgba(0, 0, 0, 0.03);
+
+  /* FONT */
+  --sans: "Inter", system-ui, sans-serif;
+
+  font-family: var(--sans);
+
+  color: var(--text);
+  background: var(--bg);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* =========================
+   BASE
+========================= */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* =========================
+   BODY
+========================= */
+body {
+  font-family: var(--sans);
+
+  background: var(--bg);
+
+  color: var(--text);
+
+  overflow-x: hidden;
+
+  font-size: 14px;
+
+  line-height: 1.5;
+}
+
+/* =========================
+   ROOT APP
+========================= */
+#root {
+  display: flex;
+  flex-direction: column;
+}
+
+/* =========================
+   TYPOGRAPHY
+========================= */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+
+  color: var(--text-h);
+
+  font-weight: 600;
+
+  letter-spacing: -0.3px;
+}
+
+h1 {
+  font-size: 28px;
+}
+
+h2 {
+  font-size: 22px;
+}
+
+h3 {
+  font-size: 18px;
+}
+
+p {
+  margin: 0;
+}
+
+/* =========================
+   INPUT / SELECT / TEXTAREA
+========================= */
+input,
+select,
+textarea {
+  font-family: var(--sans);
+
+  font-size: 14px;
+
+  color: #111827;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #9ca3af;
+}
+
+/* =========================
+   BUTTON
+========================= */
+button {
+  font-family: var(--sans);
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+/* =========================
+   TABLE
+========================= */
+table {
+  border-collapse: collapse;
+}
+
+th {
+  font-weight: 600;
+
+  color: #111827;
+}
+
+td {
+  color: #374151;
+}
+
+/* =========================
+   SCROLLBAR
+========================= */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* =========================
+   MOBILE
+========================= */
+@media (max-width: 768px) {
+  body {
+    font-size: 13px;
+  }
+
+  h1 {
+    font-size: 22px;
+  }
+
+  h2 {
+    font-size: 18px;
+  }
+
+  h3 {
+    font-size: 16px;
+  }
+}
