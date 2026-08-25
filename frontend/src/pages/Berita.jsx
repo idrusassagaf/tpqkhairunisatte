@@ -2,10 +2,6 @@ import { Newspaper, Plus, Search, FileText, CalendarDays } from "lucide-react";
 import { useState, useEffect } from "react";
 import { api } from "../api";
 
-const STORAGE_URL = (
-  import.meta.env.VITE_API_URL ?? "http://localhost:8080/api"
-).replace(/\/api\/?$/, "");
-
 export default function Berita() {
   // const dataBerita = [];
   const [showModal, setShowModal] = useState(false);
@@ -48,7 +44,6 @@ export default function Berita() {
   );
 
   const [editId, setEditId] = useState(null);
-
   useEffect(() => {
     loadBerita();
   }, []);
@@ -153,7 +148,7 @@ export default function Berita() {
     });
 
     if (item.foto) {
-      setPreview(`${STORAGE_URL}/storage/${item.foto}`);
+      setPreview(`http://127.0.0.1:8000/storage/${item.foto}`);
     } else {
       setPreview(null);
     }
@@ -222,11 +217,11 @@ export default function Berita() {
               setShowModal(true);
             }}
             className="
-              flex items-center gap-2
-              bg-blue-600 text-white
-              px-4 py-2 rounded-lg
-              hover:bg-blue-700
-            "
+    flex items-center gap-2
+    bg-blue-600 text-white
+    px-4 py-2 rounded-lg
+    hover:bg-blue-700
+  "
           >
             <Plus size={18} />
             Tambah Berita
@@ -241,10 +236,10 @@ export default function Berita() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="
-                border rounded-lg
-                pl-10 pr-4 py-2
-                w-full md:w-72
-              "
+    border rounded-lg
+    pl-10 pr-4 py-2
+    w-full md:w-72
+  "
             />
           </div>
         </div>
@@ -261,7 +256,7 @@ export default function Berita() {
             >
               {item.foto && (
                 <img
-                  src={`${STORAGE_URL}/storage/${item.foto}`}
+                  src={`http://127.0.0.1:8000/storage/${item.foto}`}
                   alt=""
                   className="w-full h-40 object-cover rounded-lg mb-3"
                 />
@@ -334,7 +329,7 @@ export default function Berita() {
                     <td className="p-3">
                       {item.foto ? (
                         <img
-                          src={`${STORAGE_URL}/storage/${item.foto}`}
+                          src={`http://127.0.0.1:8000/storage/${item.foto}`}
                           alt=""
                           className="w-14 h-14 object-cover rounded"
                         />
@@ -389,15 +384,15 @@ export default function Berita() {
           <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
             <div
               className="
-                bg-white
-                w-full
-                max-w-2xl
-                rounded-xl
-                shadow-xl
-                p-6
-                max-h-[90vh]
-                overflow-y-auto
-              "
+    bg-white
+    w-full
+    max-w-2xl
+    rounded-xl
+    shadow-xl
+    p-6
+    max-h-[90vh]
+    overflow-y-auto
+  "
             >
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold">
@@ -463,6 +458,7 @@ export default function Berita() {
                   }
                 >
                   <option value="Draft">Draft</option>
+
                   <option value="Publish">Publish</option>
                 </select>
 
@@ -483,22 +479,20 @@ export default function Berita() {
                     setPreview(URL.createObjectURL(file));
                   }}
                 />
-
                 {preview && (
                   <div className="border rounded-lg p-2">
                     <img
                       src={preview}
                       alt="Preview"
                       className="
-                        w-28
-                        h-18
-                        object-cover
-                        rounded-lg
-                      "
+    w-28
+    h-18
+    object-cover
+    rounded-lg
+  "
                     />
                   </div>
                 )}
-
                 <div className="flex justify-end gap-2">
                   <button
                     onClick={() => {

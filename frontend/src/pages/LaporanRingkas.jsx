@@ -3,10 +3,6 @@ import { api } from "../api";
 import { Eye, Download, Save } from "lucide-react";
 import RichTextEditor from "../components/laporan/RichTextEditor";
 
-const API_URL = (
-  import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api"
-).replace(/\/+$/, "");
-
 export default function LaporanRingkas() {
   const [loading, setLoading] = useState(true);
 
@@ -63,32 +59,34 @@ export default function LaporanRingkas() {
   };
 
   const previewPdf = () => {
-    window.open(`${API_URL}/laporan-ringkas/view`, "_blank");
+    window.open("http://127.0.0.1:8000/api/laporan-ringkas/view", "_blank");
   };
 
   const downloadPdf = () => {
-    window.open(`${API_URL}/laporan-ringkas/pdf`, "_blank");
+    window.open("http://127.0.0.1:8000/api/laporan-ringkas/pdf", "_blank");
   };
 
   if (loading) {
-    return <div>Memuat Pengaturan...</div>;
+    return <div className="p-10 text-center">Memuat Pengaturan...</div>;
   }
 
   return (
     <div className="p-6">
-      {/* HEADER */}
-      <div className="bg-white rounded-2xl shadow overflow-hidden">
-        <div className="border-b px-8 py-6">
-          <h1 className="text-2xl font-semibold">Pengaturan Laporan Ringkas</h1>
+      <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl border">
+        {/* HEADER */}
+        <div className="border-b bg-gray-50 px-8 py-6">
+          <h1 className="text-xl font-light text-gray-800">
+            Pengaturan Laporan Ringkas
+          </h1>
 
           <p className="text-gray-500 mt-1">
             Kelola judul, sub judul, dan narasi setiap bagian laporan ringkas
             TPQ Khairunissa.
           </p>
         </div>
-
         <div className="p-8 space-y-6">
           {/* BARIS ATAS */}
+
           <div className="grid grid-cols-12 gap-5">
             <div className="col-span-3">
               <label className="font-semibold block mb-2">Topik</label>
@@ -148,6 +146,7 @@ export default function LaporanRingkas() {
           </div>
 
           {/* EDITOR */}
+
           <div>
             <label className="font-semibold block mb-3">Narasi</label>
 
@@ -166,6 +165,7 @@ export default function LaporanRingkas() {
           </div>
 
           {/* STATUS + BUTTON */}
+
           <div className="flex items-center justify-between flex-wrap gap-5">
             <div className="flex items-center gap-3">
               <span className="font-semibold">Status</span>
