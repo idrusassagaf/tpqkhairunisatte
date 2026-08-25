@@ -2,7 +2,9 @@ import { Newspaper, Plus, Search, FileText, CalendarDays } from "lucide-react";
 import { useState, useEffect } from "react";
 import { api } from "../api";
 
-const STORAGE_URL = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, "");
+const STORAGE_URL = (
+  import.meta.env.VITE_API_URL ?? "http://localhost:8080/api"
+).replace(/\/api\/?$/, "");
 
 export default function Berita() {
   // const dataBerita = [];
