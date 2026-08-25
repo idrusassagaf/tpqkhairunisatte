@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
 
+const STORAGE_URL = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, "");
+
 export default function Galeri() {
   const [judul, setJudul] = useState("");
   const [foto, setFoto] = useState(null);
@@ -59,7 +61,7 @@ export default function Galeri() {
 
   return (
     <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Galeri TPQ</h1>
+      <h1 className="text-2xl font-semibold mb-6">Galeri TPQ</h1>
 
       {/* FORM */}
       <div className="bg-white rounded-2xl shadow p-6 mb-8">
@@ -98,7 +100,7 @@ export default function Galeri() {
             className="bg-white rounded-2xl shadow overflow-hidden"
           >
             <img
-              src={`http://127.0.0.1:8000/storage/${item.foto}`}
+              src={`${STORAGE_URL}/storage/${item.foto}`}
               alt={item.judul}
               className="w-full h-56 object-cover"
             />

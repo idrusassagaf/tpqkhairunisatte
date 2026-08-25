@@ -39,13 +39,24 @@ export default function MasterData() {
     foto: null,
   });
 
-  // ================= TAMBAHAN DATA VIEW =================
+  // ================= DATA VIEW =================
   const [dataSantri, setDataSantri] = useState([]);
   const [searchSantri, setSearchSantri] = useState("");
+
   const [dataGuru, setDataGuru] = useState([]);
   const [searchGuru, setSearchGuru] = useState("");
+
   const [editSantriId, setEditSantriId] = useState(null);
   const [editGuruId, setEditGuruId] = useState(null);
+
+  // =========================================================
+  // PAGINATION
+  // =========================================================
+
+  const ITEMS_PER_PAGE = 10;
+
+  const [santriPage, setSantriPage] = useState(1);
+  const [guruPage, setGuruPage] = useState(1);
 
   // ================= SANTRI =================
   const handleChange = (e) => {
@@ -87,6 +98,7 @@ export default function MasterData() {
     const value = e.target.value;
 
     let statusAnak = "";
+
     if (value === "ayah_wafat") statusAnak = "Anak Yatim";
     else if (value === "ibu_wafat") statusAnak = "Anak Piatu";
     else if (value === "keduanya_wafat") statusAnak = "Yatim Piatu";
@@ -104,7 +116,6 @@ export default function MasterData() {
 
     console.log("EDIT ID:", editSantriId);
 
-    // 🔥 VALIDASI WAJIB
     if (!form.nama || !form.tanggal_lahir || !form.status_orangtua) {
       alert("Isi data wajib dulu bro!");
       return;
@@ -112,7 +123,6 @@ export default function MasterData() {
 
     const formData = new FormData();
 
-    // isi data biasa
     formData.append("nama", form.nama);
     formData.append("nis", form.nis);
     formData.append("kelas", form.kelas);
@@ -124,18 +134,15 @@ export default function MasterData() {
     formData.append("status_orangtua", form.status_orangtua);
     formData.append("status_anak", form.status_anak);
 
-    // orang tua
     formData.append("orang_tua[nama_ayah]", form.nama_ayah);
     formData.append("orang_tua[pekerjaan_ayah]", form.pekerjaan_ayah);
     formData.append("orang_tua[nama_ibu]", form.nama_ibu);
     formData.append("orang_tua[pekerjaan_ibu]", form.pekerjaan_ibu);
 
-    // 🔥 FOTO (INI KUNCI)
     if (form.foto) {
       formData.append("foto", form.foto);
     }
 
-    // 🔥 EDIT SANTRI
     const request = editSantriId
       ? api.post(`/master-data/${editSantriId}?_method=PUT`, formData, {
           headers: {
@@ -152,9 +159,10 @@ export default function MasterData() {
       .then((res) => {
         console.log("HASIL SIMPAN:", res.data);
 
-        alert("Alhamdulillah...Data santri berhasil");
+        alert("Alhamdulillah... Data santri berhasil");
+
         setEditSantriId(null);
-        // reset form
+
         setForm({
           nama: "",
           nis: "",
@@ -173,17 +181,20 @@ export default function MasterData() {
           status_anak: "",
         });
 
-        // 🔥 REFRESH + PINDAH TAB
         fetchSantri();
+
+        setSantriPage(1);
         setTab("viewSantri");
       })
       .catch((err) => {
         console.error("ERROR FULL:", err);
         console.error("ERROR DATA:", err.response?.data);
         console.error("ERROR VALIDATION:", err.response?.data?.errors);
+
         alert(err.response?.data?.error || "Gagal input santri");
       });
   };
+
   // ================= GURU =================
   const handleChangeGuru = (e) => {
     setFormGuru({
@@ -228,7 +239,6 @@ export default function MasterData() {
     });
   };
 
-  // 🔥 TAMBAHKAN DI SINI
   const handleSubmitGuru = (e) => {
     e.preventDefault();
 
@@ -248,7 +258,6 @@ export default function MasterData() {
     formData.append("pekerjaan", formGuru.pekerjaan);
     formData.append("kontak", formGuru.kontak);
 
-    // 🔥 foto (backend belum pakai, tapi tidak error)
     if (formGuru.foto) {
       formData.append("foto", formGuru.foto);
     }
@@ -264,9 +273,10 @@ export default function MasterData() {
             "Content-Type": "multipart/form-data",
           },
         });
+
     request
       .then(() => {
-        alert("Ahamdulillah...Data guru berhasil");
+        alert("Alhamdulillah... Data guru berhasil");
 
         setEditGuruId(null);
 
@@ -283,6 +293,8 @@ export default function MasterData() {
         });
 
         fetchGuru();
+
+        setGuruPage(1);
         setTab("viewGuru");
       })
       .catch((err) => {
@@ -290,12 +302,14 @@ export default function MasterData() {
         alert("Gagal simpan guru");
       });
   };
+
   // ================= FETCH DATA =================
   const fetchSantri = async () => {
     try {
       const res = await api.get("/master-data");
+
       console.log("SANTRI:", res.data);
-      // ✅ pastikan array
+
       setDataSantri(res?.data?.data?.santri || []);
     } catch (err) {
       console.error(err);
@@ -306,7 +320,9 @@ export default function MasterData() {
   const fetchGuru = async () => {
     try {
       const res = await api.get("/master-data");
+
       console.log("GURU:", res.data);
+
       setDataGuru(res?.data?.data?.guru || []);
     } catch (err) {
       console.error(err);
@@ -316,7 +332,6 @@ export default function MasterData() {
 
   // ================= EFFECT =================
   useEffect(() => {
-    // 🔥 TAMBAHAN INI
     if (tab === "santri") {
       setForm((prev) => ({
         ...prev,
@@ -332,22 +347,37 @@ export default function MasterData() {
     }
 
     if (tab === "viewSantri") {
+      setSantriPage(1);
       fetchSantri();
     }
 
     if (tab === "viewGuru") {
+      setGuruPage(1);
       fetchGuru();
     }
   }, [tab]);
 
-  // ================= UI =================
+  // ================= DELETE =================
   const handleDeleteSantri = async (id) => {
     if (!confirm("Yakin mau hapus?")) return;
 
     try {
       await api.delete(`/master-data/${id}`);
+
       alert("Berhasil dihapus");
-      fetchSantri(); // refresh tabel
+
+      fetchSantri();
+
+      // Pastikan halaman tetap valid setelah data dihapus
+      setSantriPage((prev) => {
+        const totalAfterDelete = filteredSantri.length - 1;
+        const maxPage = Math.max(
+          1,
+          Math.ceil(totalAfterDelete / ITEMS_PER_PAGE),
+        );
+
+        return Math.min(prev, maxPage);
+      });
     } catch (err) {
       console.error(err);
       alert("Gagal hapus");
@@ -358,20 +388,36 @@ export default function MasterData() {
     if (!confirm("Yakin mau hapus guru?")) return;
 
     try {
-      await api.delete(`/guru/${id}`); // ✅ FIX
+      await api.delete(`/guru/${id}`);
+
       alert("Guru berhasil dihapus");
+
       fetchGuru();
+
+      setGuruPage((prev) => {
+        const totalAfterDelete = filteredGuru.length - 1;
+        const maxPage = Math.max(
+          1,
+          Math.ceil(totalAfterDelete / ITEMS_PER_PAGE),
+        );
+
+        return Math.min(prev, maxPage);
+      });
     } catch (err) {
       console.error(err);
       alert("Gagal hapus guru");
     }
   };
 
+  // =========================================================
+  // FILTER SANTRI
+  // =========================================================
+
   const filteredSantri = dataSantri.filter((d) => {
     const keyword = searchSantri.toLowerCase();
 
-    // 🔥 KONVERSI JK
-    const jkText = d.jenis_kelamin === "L" ? "laki-laki" : "perempuan";
+    const jkText =
+      d.jenis_kelamin === "L" ? "laki-laki laki laki" : "perempuan";
 
     const matchSearch =
       d.nama?.toLowerCase().includes(keyword) ||
@@ -382,18 +428,30 @@ export default function MasterData() {
       String(d.usia || "").includes(keyword) ||
       d.alamat?.toLowerCase().includes(keyword) ||
       d.kontak?.toLowerCase().includes(keyword) ||
+      d.orang_tua?.nama_ayah?.toLowerCase().includes(keyword) ||
+      d.orang_tua?.nama_ibu?.toLowerCase().includes(keyword) ||
+      d.orang_tua?.pekerjaan_ayah?.toLowerCase().includes(keyword) ||
+      d.orang_tua?.pekerjaan_ibu?.toLowerCase().includes(keyword) ||
       d.status_orangtua?.toLowerCase().includes(keyword) ||
       d.status_anak?.toLowerCase().includes(keyword);
 
     return matchSearch;
   });
+
+  // =========================================================
+  // FILTER GURU
+  // =========================================================
+
   const filteredGuru = dataGuru.filter((g) => {
     const keyword = searchGuru.toLowerCase();
+
+    const jkText =
+      g.jenis_kelamin === "L" ? "laki-laki laki laki" : "perempuan";
 
     return (
       g.nama_guru?.toLowerCase().includes(keyword) ||
       g.nig?.toLowerCase().includes(keyword) ||
-      g.jenis_kelamin?.toLowerCase().includes(keyword) ||
+      jkText.includes(keyword) ||
       g.tanggal_lahir?.toLowerCase().includes(keyword) ||
       String(g.usia || "").includes(keyword) ||
       g.pendidikan?.toLowerCase().includes(keyword) ||
@@ -401,6 +459,74 @@ export default function MasterData() {
       g.kontak?.toLowerCase().includes(keyword)
     );
   });
+
+  // =========================================================
+  // PAGINATION SANTRI
+  // =========================================================
+
+  const totalSantriPages = Math.max(
+    1,
+    Math.ceil(filteredSantri.length / ITEMS_PER_PAGE),
+  );
+
+  const safeSantriPage = Math.min(santriPage, totalSantriPages);
+
+  const startSantriIndex = (safeSantriPage - 1) * ITEMS_PER_PAGE;
+
+  const paginatedSantri = filteredSantri.slice(
+    startSantriIndex,
+    startSantriIndex + ITEMS_PER_PAGE,
+  );
+
+  const santriStart = filteredSantri.length === 0 ? 0 : startSantriIndex + 1;
+
+  const santriEnd = Math.min(
+    startSantriIndex + ITEMS_PER_PAGE,
+    filteredSantri.length,
+  );
+
+  // =========================================================
+  // PAGINATION GURU
+  // =========================================================
+
+  const totalGuruPages = Math.max(
+    1,
+    Math.ceil(filteredGuru.length / ITEMS_PER_PAGE),
+  );
+
+  const safeGuruPage = Math.min(guruPage, totalGuruPages);
+
+  const startGuruIndex = (safeGuruPage - 1) * ITEMS_PER_PAGE;
+
+  const paginatedGuru = filteredGuru.slice(
+    startGuruIndex,
+    startGuruIndex + ITEMS_PER_PAGE,
+  );
+
+  const guruStart = filteredGuru.length === 0 ? 0 : startGuruIndex + 1;
+
+  const guruEnd = Math.min(
+    startGuruIndex + ITEMS_PER_PAGE,
+    filteredGuru.length,
+  );
+
+  // =========================================================
+  // HELPER PAGINATION
+  // =========================================================
+
+  const getPageNumbers = (totalPages, currentPage) => {
+    const pages = [];
+
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push(i);
+    }
+
+    return pages;
+  };
+
+  // =========================================================
+  // UI
+  // =========================================================
 
   return (
     <div className="space-y-4 p-4">
@@ -412,36 +538,47 @@ export default function MasterData() {
       <div className="grid grid-cols-2 md:flex gap-4">
         <button
           onClick={() => setTab("santri")}
-          className={`px-4 py-2 font-light rounded ${tab === "santri" ? "bg-purple-600 text-white" : "bg-gray-200"}`}
+          className={`px-4 py-2 font-light rounded ${
+            tab === "santri" ? "bg-purple-600 text-white" : "bg-gray-200"
+          }`}
         >
           Form Santri
         </button>
 
         <button
           onClick={() => setTab("guru")}
-          className={`px-4 py-2 font-light rounded ${tab === "guru" ? "bg-purple-600 text-white" : "bg-gray-200"}`}
+          className={`px-4 py-2 font-light rounded ${
+            tab === "guru" ? "bg-purple-600 text-white" : "bg-gray-200"
+          }`}
         >
           Form Guru
         </button>
 
         <button
           onClick={() => setTab("viewSantri")}
-          className={`px-4 py-2 font-light rounded ${tab === "viewSantri" ? "bg-green-600 text-white" : "bg-gray-200"}`}
+          className={`px-4 py-2 font-light rounded ${
+            tab === "viewSantri" ? "bg-green-600 text-white" : "bg-gray-200"
+          }`}
         >
           View Santri
         </button>
 
         <button
           onClick={() => setTab("viewGuru")}
-          className={`px-4 py-2 font-light rounded ${tab === "viewGuru" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+          className={`px-4 py-2 font-light rounded ${
+            tab === "viewGuru" ? "bg-blue-600 text-white" : "bg-gray-200"
+          }`}
         >
           View Guru
         </button>
       </div>
 
-      {/* ================= SANTRI ================= */}
+      {/* ===================================================== */}
+      {/* SANTRI FORM */}
+      {/* ===================================================== */}
+
       {tab === "santri" && (
-        <div className="bg-white p-4 md:p-4 rounded-xl shadow-sm md:border ">
+        <div className="bg-white p-4 md:p-4 rounded-xl shadow-sm md:border">
           <div className="md:max-w-4xl md:mx-auto">
             <form
               onSubmit={handleSubmit}
@@ -451,6 +588,7 @@ export default function MasterData() {
                 Isi Data Santri dan Orangtua berdasarkan dokumen resmi KTP/Kartu
                 Keluarga dan keterangan orangtua
               </div>
+
               <input
                 name="nama"
                 placeholder="Nama Santri"
@@ -458,6 +596,7 @@ export default function MasterData() {
                 onChange={handleChange}
                 className="border p-2 md:px-2 md:py-1.5 rounded md:text-sm font-extralight"
               />
+
               <input
                 value={form.nis}
                 readOnly
@@ -480,6 +619,7 @@ export default function MasterData() {
                 onChange={handleTanggalSantri}
                 className="border p-2 rounded"
               />
+
               <input
                 value={form.usia}
                 readOnly
@@ -488,7 +628,12 @@ export default function MasterData() {
 
               <select
                 value={form.kelas || ""}
-                onChange={(e) => setForm({ ...form, kelas: e.target.value })}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    kelas: e.target.value,
+                  })
+                }
                 className="border p-2 rounded w-full font-light"
               >
                 <option value="">Pilih Kelas</option>
@@ -503,12 +648,13 @@ export default function MasterData() {
                 onChange={handleChange}
                 className="border p-2 rounded md:col-span-2"
               />
+
               <input
                 type="file"
                 onChange={handleFotoSantri}
                 className="border p-2 rounded md:col-span-2"
               />
-              {/* PREVIEW FOTO */}
+
               {form.foto && (
                 <img
                   src={URL.createObjectURL(form.foto)}
@@ -516,6 +662,7 @@ export default function MasterData() {
                   className="w-24 h-24 object-cover rounded border md:col-span-2"
                 />
               )}
+
               <input
                 name="nama_ayah"
                 placeholder="Nama Ayah"
@@ -523,6 +670,7 @@ export default function MasterData() {
                 onChange={handleChange}
                 className="border p-2 rounded"
               />
+
               <input
                 name="pekerjaan_ayah"
                 placeholder="Pekerjaan Ayah"
@@ -538,6 +686,7 @@ export default function MasterData() {
                 onChange={handleChange}
                 className="border p-2 rounded"
               />
+
               <input
                 name="pekerjaan_ibu"
                 placeholder="Pekerjaan Ibu"
@@ -573,14 +722,17 @@ export default function MasterData() {
               />
 
               <button className="md:col-span-2 bg-purple-600 text-white py-2 rounded">
-                Simpan Data Santri
+                {editSantriId ? "Update Data Santri" : "Simpan Data Santri"}
               </button>
             </form>
           </div>
         </div>
       )}
 
-      {/* ================= GURU ================= */}
+      {/* ===================================================== */}
+      {/* GURU FORM */}
+      {/* ===================================================== */}
+
       {tab === "guru" && (
         <div className="bg-white p-4 md:p-4 rounded-xl shadow-sm md:border">
           <div className="md:max-w-4xl md:mx-auto">
@@ -655,6 +807,7 @@ export default function MasterData() {
                 onChange={handleFotoGuru}
                 className="border p-2 rounded"
               />
+
               {formGuru.foto && (
                 <img
                   src={URL.createObjectURL(formGuru.foto)}
@@ -667,262 +820,364 @@ export default function MasterData() {
                 type="submit"
                 className="md:col-span-2 bg-blue-600 text-white py-2 rounded"
               >
-                Simpan Data Guru
+                {editGuruId ? "Update Data Guru" : "Simpan Data Guru"}
               </button>
             </form>
           </div>
         </div>
       )}
 
-      {/* ================= VIEW SANTRI ================= */}
+      {/* ===================================================== */}
+      {/* VIEW SANTRI */}
+      {/* ===================================================== */}
 
       {tab === "viewSantri" && (
         <div className="bg-white p-5 rounded-xl shadow">
-          {/* 🔍 SEARCH PINDAH KE SINI */}
-          <div className="mb-4">
+          {/* SEARCH */}
+          <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <input
               type="text"
               placeholder="Cari data santri..."
               value={searchSantri}
-              onChange={(e) => setSearchSantri(e.target.value)}
+              onChange={(e) => {
+                setSearchSantri(e.target.value);
+                setSantriPage(1);
+              }}
               className="border p-2 rounded w-full md:w-64"
             />
+
+            <div className="text-xs text-gray-500">
+              Menampilkan {santriStart}–{santriEnd} dari {filteredSantri.length}{" "}
+              data
+            </div>
           </div>
 
-          {/* ================= MOBILE (AMAN) ================= */}
+          {/* ================= MOBILE ================= */}
           <div className="block md:hidden space-y-3 mb-4">
-            {filteredSantri.map((d, i) => (
-              <div
-                key={i}
-                className="border rounded-2xl shadow overflow-hidden bg-white"
-              >
-                {/* HEADER */}
-                <div className="bg-purple-600 text-white text-center py-2 px-4">
-                  <div className="flex justify-center mb-3">
-                    {d.foto ? (
-                      <img
-                        src={`http://localhost:8000/storage/${d.foto}`}
-                        alt="foto"
-                        className="w-24 h-24 object-cover rounded-full border-4 border-white shadow"
-                      />
-                    ) : (
-                      <div className="w-24 h-24 bg-white text-gray-800 rounded-full flex items-center justify-center text-xs border-4 border-white">
-                        No Foto
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="font-bold text-lg uppercase">{d.nama}</div>
-                </div>
-                {/* NIS + KELAS */}
-                <div className="text-base p-4 space-y-3 bg-gray-200 text-gray-700 text-justify">
-                  Adalah santri TPQ Khairunisa Ternate - nomor ID {d.nis} Kelas{" "}
-                  pada {d.kelas || "-"} dengan jenis kelamin{" "}
-                  {d.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"} berusia{" "}
-                  {d.usia} tahun Kelahiran tanggal {d.tanggal_lahir}
-                  Santri adalah anak dari Ayah bernama {
-                    d.orang_tua?.nama_ayah
-                  }{" "}
-                  pekerjaan {d.orang_tua?.pekerjaan_ayah} dan Ibu bernama{" "}
-                  {d.orang_tua?.nama_ibu} {d.orang_tua?.pekerjaan_ibu} Status
-                  kedua orangtua {d.status_orangtua} dan santri adalah{" "}
-                  {d.status_anak} Santri beralamat di kelurahan {d.alamat} Kota
-                  Ternate. Nomor Kontak {d.kontak}
-                </div>
-                <div className="flex justify-end gap-5  bg-gray-300 p-2">
-                  <button
-                    onClick={() => {
-                      setForm({
-                        nama: d.nama,
-                        nis: d.nis,
-                        kelas: d.kelas || "", // ✅ TAMBAHKAN
-                        jenis_kelamin: d.jenis_kelamin,
-                        tanggal_lahir: d.tanggal_lahir,
-                        usia: d.usia,
-                        alamat: d.alamat,
-                        kontak: d.kontak,
-                        status_orangtua: d.status_orangtua,
-                        status_anak: d.status_anak,
-                        nama_ayah: d.orang_tua?.nama_ayah || "",
-                        pekerjaan_ayah: d.orang_tua?.pekerjaan_ayah || "",
-                        nama_ibu: d.orang_tua?.nama_ibu || "",
-                        pekerjaan_ibu: d.orang_tua?.pekerjaan_ibu || "",
-                      });
-
-                      setEditSantriId(d.id);
-                      setTab("santri");
-                      console.log("MODE:", editSantriId ? "EDIT" : "CREATE");
-                    }}
-                  >
-                    ✏️
-                  </button>
-
-                  <button onClick={() => handleDeleteSantri(d.id)}>🗑️</button>
-                </div>
+            {paginatedSantri.length === 0 ? (
+              <div className="text-center text-gray-500 py-4">
+                Data tidak ditemukan
               </div>
-            ))}
-          </div>
-
-          <table className="hidden md:table w-full text-xs text-black border">
-            {/* ================= HEADER ================= */}
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="p-2 text-left">Foto</th>
-                <th className="p-2 text-left">Nama - NIS - Kelas</th>
-                <th className="p-2 text-left">JK - Usia - Kelahiran</th>
-                <th className="p-2 text-left">Alamat - Kontak</th>
-                <th className="p-2 text-left">Ayah - Pekerjaan</th>
-                <th className="p-2 text-left">Ibu - Pekerjaan</th>
-                <th className="p-2 text-left">Status OT-Anak</th>
-                <th className="p-2 text-center">Aksi</th>
-              </tr>
-            </thead>
-
-            {/* ================= BODY ================= */}
-            <tbody>
-              {filteredSantri.length === 0 ? (
-                <tr>
-                  <td colSpan="7" className="text-center p-4">
-                    Data tidak ditemukan
-                  </td>
-                </tr>
-              ) : (
-                filteredSantri.map((d, i) => (
-                  <tr key={i} className="border-t hover:bg-gray-50">
-                    <td className="p-2">
+            ) : (
+              paginatedSantri.map((d, i) => (
+                <div
+                  key={d.id || i}
+                  className="border rounded-2xl shadow overflow-hidden bg-white"
+                >
+                  {/* HEADER */}
+                  <div className="bg-purple-600 text-white text-center py-2 px-4">
+                    <div className="flex justify-center mb-3">
                       {d.foto ? (
                         <img
                           src={`http://localhost:8000/storage/${d.foto}`}
                           alt="foto"
-                          className="w-12 h-12 object-cover rounded"
+                          className="w-24 h-24 object-cover rounded-full border-4 border-white shadow"
                         />
                       ) : (
-                        <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-xs">
-                          No Img
+                        <div className="w-24 h-24 bg-white text-gray-800 rounded-full flex items-center justify-center text-xs border-4 border-white">
+                          No Foto
                         </div>
                       )}
-                    </td>
-                    {/* 1. Nama - NIS- Kelas */}
-                    <td className="p-2">
-                      <div className="font-semibold">{d.nama}</div>
-                      <div className="text-xs text-gray-500">
-                        {d.nis} | Kelas {d.kelas || "-"}
-                      </div>
-                    </td>
+                    </div>
 
-                    {/* 2. JK, Usia - Kelahiran */}
-                    <td className="p-2">
-                      <div>
-                        {d.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"},{" "}
-                        {d.usia} Th
-                      </div>
+                    <div className="font-bold text-lg uppercase">{d.nama}</div>
+                  </div>
 
-                      <div className="text-xs text-gray-500">
-                        {d.tanggal_lahir}
-                      </div>
-                    </td>
+                  {/* NARASI */}
+                  <div className="text-base p-4 space-y-3 bg-gray-200 text-gray-700 text-justify">
+                    Adalah santri TPQ Khairunisa Ternate - nomor ID {d.nis}{" "}
+                    Kelas pada {d.kelas || "-"} dengan jenis kelamin{" "}
+                    {d.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"}{" "}
+                    berusia {d.usia} tahun Kelahiran tanggal {d.tanggal_lahir}.
+                    Santri adalah anak dari Ayah bernama{" "}
+                    {d.orang_tua?.nama_ayah || "-"} pekerjaan{" "}
+                    {d.orang_tua?.pekerjaan_ayah || "-"} dan Ibu bernama{" "}
+                    {d.orang_tua?.nama_ibu || "-"}{" "}
+                    {d.orang_tua?.pekerjaan_ibu || "-"}. Status kedua orangtua{" "}
+                    {d.status_orangtua || "-"} dan santri adalah{" "}
+                    {d.status_anak || "-"}. Santri beralamat di kelurahan{" "}
+                    {d.alamat || "-"} Kota Ternate. Nomor Kontak{" "}
+                    {d.kontak || "-"}.
+                  </div>
 
-                    {/* 4. Alamat - Kontak */}
-                    <td className="p-2">
-                      <div>{d.alamat}</div>
-                      <div className="text-xs text-gray-500">{d.kontak}</div>
-                    </td>
+                  {/* AKSI */}
+                  <div className="flex justify-end gap-5 bg-gray-300 p-2">
+                    <button
+                      className="text-blue-600"
+                      onClick={() => {
+                        setForm({
+                          nama: d.nama,
+                          nis: d.nis,
+                          kelas: d.kelas || "",
+                          jenis_kelamin: d.jenis_kelamin,
+                          tanggal_lahir: d.tanggal_lahir,
+                          usia: d.usia,
+                          alamat: d.alamat,
+                          kontak: d.kontak,
+                          status_orangtua: d.status_orangtua,
+                          status_anak: d.status_anak,
+                          foto: null,
+                          nama_ayah: d.orang_tua?.nama_ayah || "",
+                          pekerjaan_ayah: d.orang_tua?.pekerjaan_ayah || "",
+                          nama_ibu: d.orang_tua?.nama_ibu || "",
+                          pekerjaan_ibu: d.orang_tua?.pekerjaan_ibu || "",
+                        });
 
-                    {/* 4. Ayah - Pekerjaan */}
-                    <td className="p-2">
-                      <div>{d.orang_tua?.nama_ayah}</div>
-                      <div className="text-xs text-gray-500">
-                        {d.orang_tua?.pekerjaan_ayah}
-                      </div>
-                    </td>
+                        setEditSantriId(d.id);
+                        setTab("santri");
+                      }}
+                    >
+                      ✏️
+                    </button>
 
-                    {/* 5. Ibu - Pekerjaan */}
-                    <td className="p-2">
-                      <div>{d.orang_tua?.nama_ibu}</div>
-                      <div className="text-xs text-gray-500">
-                        {d.orang_tua?.pekerjaan_ibu}
-                      </div>
-                    </td>
+                    <button
+                      className="text-red-600"
+                      onClick={() => handleDeleteSantri(d.id)}
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
 
-                    {/* 6. Status Ortu - Anak */}
-                    <td className="p-2">
-                      <div>{d.status_orangtua}</div>
-                      <div className="text-xs text-gray-500">
-                        {d.status_anak}
-                      </div>
-                    </td>
+          {/* ================= DESKTOP ================= */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full text-xs text-black border">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="p-2 text-left">Foto</th>
+                  <th className="p-2 text-left">Nama - NIS - Kelas</th>
+                  <th className="p-2 text-left">JK - Usia - Kelahiran</th>
+                  <th className="p-2 text-left">Alamat - Kontak</th>
+                  <th className="p-2 text-left">Ayah - Pekerjaan</th>
+                  <th className="p-2 text-left">Ibu - Pekerjaan</th>
+                  <th className="p-2 text-left">Status OT-Anak</th>
+                  <th className="p-2 text-center">Aksi</th>
+                </tr>
+              </thead>
 
-                    {/* 7. Aksi */}
-                    <td className="p-2 text-center">
-                      <div className="flex justify-center gap-2">
-                        <button
-                          className="text-blue-600"
-                          onClick={() => {
-                            setForm({
-                              nama: d.nama,
-                              nis: d.nis,
-                              kelas: d.kelas || "", // ✅ TAMBAHKAN
-                              jenis_kelamin: d.jenis_kelamin,
-                              tanggal_lahir: d.tanggal_lahir,
-                              usia: d.usia,
-                              alamat: d.alamat,
-                              kontak: d.kontak,
-                              status_orangtua: d.status_orangtua,
-                              status_anak: d.status_anak,
-
-                              nama_ayah: d.orang_tua?.nama_ayah || "",
-                              pekerjaan_ayah: d.orang_tua?.pekerjaan_ayah || "",
-                              nama_ibu: d.orang_tua?.nama_ibu || "",
-                              pekerjaan_ibu: d.orang_tua?.pekerjaan_ibu || "",
-                            });
-
-                            setEditSantriId(d.id);
-                            setTab("santri");
-                          }}
-                        >
-                          ✏️
-                        </button>
-
-                        <button
-                          className="text-red-600"
-                          onClick={() => handleDeleteSantri(d.id)}
-                        >
-                          🗑️
-                        </button>
-                      </div>
+              <tbody>
+                {paginatedSantri.length === 0 ? (
+                  <tr>
+                    <td colSpan="8" className="text-center p-4">
+                      Data tidak ditemukan
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  paginatedSantri.map((d, i) => (
+                    <tr key={d.id || i} className="border-t hover:bg-gray-50">
+                      {/* FOTO */}
+                      <td className="p-2">
+                        {d.foto ? (
+                          <img
+                            src={`http://localhost:8000/storage/${d.foto}`}
+                            alt="foto"
+                            className="w-12 h-12 object-cover rounded"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-xs">
+                            No Img
+                          </div>
+                        )}
+                      </td>
+
+                      {/* NAMA */}
+                      <td className="p-2">
+                        <div className="font-semibold">{d.nama}</div>
+
+                        <div className="text-xs text-gray-500">
+                          {d.nis} | Kelas {d.kelas || "-"}
+                        </div>
+                      </td>
+
+                      {/* JK */}
+                      <td className="p-2">
+                        <div>
+                          {d.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"},{" "}
+                          {d.usia} Th
+                        </div>
+
+                        <div className="text-xs text-gray-500">
+                          {d.tanggal_lahir}
+                        </div>
+                      </td>
+
+                      {/* ALAMAT */}
+                      <td className="p-2">
+                        <div>{d.alamat || "-"}</div>
+
+                        <div className="text-xs text-gray-500">
+                          {d.kontak || "-"}
+                        </div>
+                      </td>
+
+                      {/* AYAH */}
+                      <td className="p-2">
+                        <div>{d.orang_tua?.nama_ayah || "-"}</div>
+
+                        <div className="text-xs text-gray-500">
+                          {d.orang_tua?.pekerjaan_ayah || "-"}
+                        </div>
+                      </td>
+
+                      {/* IBU */}
+                      <td className="p-2">
+                        <div>{d.orang_tua?.nama_ibu || "-"}</div>
+
+                        <div className="text-xs text-gray-500">
+                          {d.orang_tua?.pekerjaan_ibu || "-"}
+                        </div>
+                      </td>
+
+                      {/* STATUS */}
+                      <td className="p-2">
+                        <div>{d.status_orangtua || "-"}</div>
+
+                        <div className="text-xs text-gray-500">
+                          {d.status_anak || "-"}
+                        </div>
+                      </td>
+
+                      {/* AKSI */}
+                      <td className="p-2 text-center">
+                        <div className="flex justify-center gap-2">
+                          <button
+                            className="text-blue-600"
+                            onClick={() => {
+                              setForm({
+                                nama: d.nama,
+                                nis: d.nis,
+                                kelas: d.kelas || "",
+                                jenis_kelamin: d.jenis_kelamin,
+                                tanggal_lahir: d.tanggal_lahir,
+                                usia: d.usia,
+                                alamat: d.alamat,
+                                kontak: d.kontak,
+                                status_orangtua: d.status_orangtua,
+                                status_anak: d.status_anak,
+                                foto: null,
+                                nama_ayah: d.orang_tua?.nama_ayah || "",
+                                pekerjaan_ayah:
+                                  d.orang_tua?.pekerjaan_ayah || "",
+                                nama_ibu: d.orang_tua?.nama_ibu || "",
+                                pekerjaan_ibu: d.orang_tua?.pekerjaan_ibu || "",
+                              });
+
+                              setEditSantriId(d.id);
+                              setTab("santri");
+                            }}
+                          >
+                            ✏️
+                          </button>
+
+                          <button
+                            className="text-red-600"
+                            onClick={() => handleDeleteSantri(d.id)}
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* ================= PAGINATION SANTRI ================= */}
+          {filteredSantri.length > 0 && (
+            <div className="mt-4 flex flex-col md:flex-row items-center justify-between gap-3">
+              <div className="text-xs text-gray-500">
+                Halaman {safeSantriPage} dari {totalSantriPages}
+              </div>
+
+              <div className="flex items-center gap-1 flex-wrap justify-center">
+                <button
+                  disabled={safeSantriPage === 1}
+                  onClick={() => setSantriPage((prev) => Math.max(1, prev - 1))}
+                  className={`px-3 py-1.5 text-xs rounded border ${
+                    safeSantriPage === 1
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-white hover:bg-gray-100"
+                  }`}
+                >
+                  Sebelumnya
+                </button>
+
+                {getPageNumbers(totalSantriPages, safeSantriPage).map(
+                  (page) => (
+                    <button
+                      key={page}
+                      onClick={() => setSantriPage(page)}
+                      className={`min-w-[32px] px-2 py-1.5 text-xs rounded border ${
+                        safeSantriPage === page
+                          ? "bg-green-600 text-white border-green-600"
+                          : "bg-white hover:bg-gray-100"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ),
+                )}
+
+                <button
+                  disabled={safeSantriPage === totalSantriPages}
+                  onClick={() =>
+                    setSantriPage((prev) =>
+                      Math.min(totalSantriPages, prev + 1),
+                    )
+                  }
+                  className={`px-3 py-1.5 text-xs rounded border ${
+                    safeSantriPage === totalSantriPages
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-white hover:bg-gray-100"
+                  }`}
+                >
+                  Berikutnya
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
-      {/* ================= VIEW GURU ================= */}
+      {/* ===================================================== */}
+      {/* VIEW GURU */}
+      {/* ===================================================== */}
+
       {tab === "viewGuru" && (
         <div className="bg-white p-5 rounded-xl shadow">
           {/* SEARCH */}
-          <div className="mb-4">
+          <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <input
               type="text"
               placeholder="Cari data guru..."
               value={searchGuru}
-              onChange={(e) => setSearchGuru(e.target.value)}
+              onChange={(e) => {
+                setSearchGuru(e.target.value);
+                setGuruPage(1);
+              }}
               className="border p-2 rounded w-full md:w-64"
             />
+
+            <div className="text-xs text-gray-500">
+              Menampilkan {guruStart}–{guruEnd} dari {filteredGuru.length} data
+            </div>
           </div>
 
           {/* ================= MOBILE VIEW GURU ================= */}
           <div className="block md:hidden space-y-3 mb-4">
-            {filteredGuru.length === 0 ? (
+            {paginatedGuru.length === 0 ? (
               <div className="text-center text-gray-500 py-4">
                 Data guru kosong
               </div>
             ) : (
-              filteredGuru.map((g, i) => (
+              paginatedGuru.map((g, i) => (
                 <div
-                  key={i}
+                  key={g.id || i}
                   className="border rounded-2xl shadow overflow-hidden bg-white"
                 >
                   {/* HEADER */}
@@ -940,11 +1195,13 @@ export default function MasterData() {
                         </div>
                       )}
                     </div>
+
                     <div className="font-bold text-lg uppercase">
                       {g.nama_guru}
                     </div>
                   </div>
-                  {/* NARASI GURU */}
+
+                  {/* NARASI */}
                   <div className="text-base p-4 space-y-3 bg-gray-200 text-gray-700 text-justify">
                     Adalah guru TPQ Khairunnisa Ternate dengan nomor ID {g.nig}.
                     Berjenis kelamin{" "}
@@ -956,7 +1213,7 @@ export default function MasterData() {
                   </div>
 
                   {/* AKSI */}
-                  <div className="flex justify-end gap-3 pt-2 bg-gray-300">
+                  <div className="flex justify-end gap-3 pt-2 bg-gray-300 p-2">
                     <button
                       className="text-blue-600"
                       onClick={() => {
@@ -969,6 +1226,7 @@ export default function MasterData() {
                           pendidikan: g.pendidikan,
                           pekerjaan: g.pekerjaan,
                           kontak: g.kontak,
+                          foto: null,
                         });
 
                         setEditGuruId(g.id);
@@ -990,108 +1248,166 @@ export default function MasterData() {
             )}
           </div>
 
-          <table className="hidden md:table w-full text-xs text-black border">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="p-2 text-left">Foto</th>
-                <th className="p-2 text-left">Nama - NIG</th>
-                <th className="p-2 text-left">JK, Usia - Kelahiran</th>
-                <th className="p-2 text-left">Pendidikan - Pekerjaan</th>
-                <th className="p-2 text-left">Kontak</th>
-                <th className="p-2 text-center">Aksi</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {filteredGuru.length === 0 ? (
+          {/* ================= DESKTOP VIEW GURU ================= */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full text-xs text-black border">
+              <thead className="bg-gray-100">
                 <tr>
-                  <td colSpan="6" className="text-center p-3">
-                    Data guru kosong
-                  </td>
+                  <th className="p-2 text-left">Foto</th>
+                  <th className="p-2 text-left">Nama - NIG</th>
+                  <th className="p-2 text-left">JK, Usia - Kelahiran</th>
+                  <th className="p-2 text-left">Pendidikan - Pekerjaan</th>
+                  <th className="p-2 text-left">Kontak</th>
+                  <th className="p-2 text-center">Aksi</th>
                 </tr>
-              ) : (
-                filteredGuru.map((g, i) => (
-                  <tr key={i} className="border-t hover:bg-gray-50">
-                    {/* FOTO */}
-                    <td className="p-2">
-                      {g.foto ? (
-                        <img
-                          src={g.foto_url}
-                          alt="foto"
-                          className="w-12 h-12 object-cover rounded"
-                        />
-                      ) : (
-                        <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-xs">
-                          No Img
-                        </div>
-                      )}
-                    </td>
+              </thead>
 
-                    {/* NAMA */}
-                    <td className="p-2">
-                      <div className="font-semibold">{g.nama_guru}</div>
-                      <div className="text-xs text-gray-500">{g.nig}</div>
-                    </td>
-
-                    {/* JK */}
-                    <td className="p-2">
-                      <div>
-                        {g.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"}{" "}
-                        {g.usia} Th
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {g.tanggal_lahir}
-                      </div>
-                    </td>
-
-                    {/* PENDIDIKAN */}
-                    <td className="p-2">
-                      <div>{g.pendidikan || "-"}</div>
-                      <div className="text-xs text-gray-500">
-                        {g.pekerjaan || "-"}
-                      </div>
-                    </td>
-
-                    {/* KONTAK */}
-                    <td className="p-2">{g.kontak || "-"}</td>
-
-                    {/* AKSI */}
-                    <td className="p-2 text-center">
-                      <div className="flex justify-center gap-2">
-                        <button
-                          className="text-blue-600"
-                          onClick={() => {
-                            setFormGuru({
-                              nama_guru: g.nama_guru,
-                              nig: g.nig,
-                              jenis_kelamin: g.jenis_kelamin,
-                              tanggal_lahir: g.tanggal_lahir,
-                              usia: g.usia,
-                              pendidikan: g.pendidikan,
-                              pekerjaan: g.pekerjaan,
-                              kontak: g.kontak,
-                            });
-
-                            setEditGuruId(g.id);
-                            setTab("guru");
-                          }}
-                        >
-                          ✏️
-                        </button>
-
-                        <button
-                          className="text-red-600"
-                          onClick={() => handleDeleteGuru(g.id)}
-                        >
-                          🗑️
-                        </button>
-                      </div>
+              <tbody>
+                {paginatedGuru.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="text-center p-3">
+                      Data guru kosong
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  paginatedGuru.map((g, i) => (
+                    <tr key={g.id || i} className="border-t hover:bg-gray-50">
+                      {/* FOTO */}
+                      <td className="p-2">
+                        {g.foto ? (
+                          <img
+                            src={g.foto_url}
+                            alt="foto"
+                            className="w-12 h-12 object-cover rounded"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-xs">
+                            No Img
+                          </div>
+                        )}
+                      </td>
+
+                      {/* NAMA */}
+                      <td className="p-2">
+                        <div className="font-semibold">{g.nama_guru}</div>
+
+                        <div className="text-xs text-gray-500">{g.nig}</div>
+                      </td>
+
+                      {/* JK */}
+                      <td className="p-2">
+                        <div>
+                          {g.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"}{" "}
+                          {g.usia} Th
+                        </div>
+
+                        <div className="text-xs text-gray-500">
+                          {g.tanggal_lahir}
+                        </div>
+                      </td>
+
+                      {/* PENDIDIKAN */}
+                      <td className="p-2">
+                        <div>{g.pendidikan || "-"}</div>
+
+                        <div className="text-xs text-gray-500">
+                          {g.pekerjaan || "-"}
+                        </div>
+                      </td>
+
+                      {/* KONTAK */}
+                      <td className="p-2">{g.kontak || "-"}</td>
+
+                      {/* AKSI */}
+                      <td className="p-2 text-center">
+                        <div className="flex justify-center gap-2">
+                          <button
+                            className="text-blue-600"
+                            onClick={() => {
+                              setFormGuru({
+                                nama_guru: g.nama_guru,
+                                nig: g.nig,
+                                jenis_kelamin: g.jenis_kelamin,
+                                tanggal_lahir: g.tanggal_lahir,
+                                usia: g.usia,
+                                pendidikan: g.pendidikan,
+                                pekerjaan: g.pekerjaan,
+                                kontak: g.kontak,
+                                foto: null,
+                              });
+
+                              setEditGuruId(g.id);
+                              setTab("guru");
+                            }}
+                          >
+                            ✏️
+                          </button>
+
+                          <button
+                            className="text-red-600"
+                            onClick={() => handleDeleteGuru(g.id)}
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* ================= PAGINATION GURU ================= */}
+          {filteredGuru.length > 0 && (
+            <div className="mt-4 flex flex-col md:flex-row items-center justify-between gap-3">
+              <div className="text-xs text-gray-500">
+                Halaman {safeGuruPage} dari {totalGuruPages}
+              </div>
+
+              <div className="flex items-center gap-1 flex-wrap justify-center">
+                <button
+                  disabled={safeGuruPage === 1}
+                  onClick={() => setGuruPage((prev) => Math.max(1, prev - 1))}
+                  className={`px-3 py-1.5 text-xs rounded border ${
+                    safeGuruPage === 1
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-white hover:bg-gray-100"
+                  }`}
+                >
+                  Sebelumnya
+                </button>
+
+                {getPageNumbers(totalGuruPages, safeGuruPage).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => setGuruPage(page)}
+                    className={`min-w-[32px] px-2 py-1.5 text-xs rounded border ${
+                      safeGuruPage === page
+                        ? "bg-blue-600 text-white border-blue-600"
+                        : "bg-white hover:bg-gray-100"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                <button
+                  disabled={safeGuruPage === totalGuruPages}
+                  onClick={() =>
+                    setGuruPage((prev) => Math.min(totalGuruPages, prev + 1))
+                  }
+                  className={`px-3 py-1.5 text-xs rounded border ${
+                    safeGuruPage === totalGuruPages
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-white hover:bg-gray-100"
+                  }`}
+                >
+                  Berikutnya
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

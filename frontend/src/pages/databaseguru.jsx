@@ -4,19 +4,32 @@ import { api } from "../api";
 export default function DatabaseGuru() {
   const [data, setData] = useState([]);
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // ================= PAGINATION SETTING =================
+  const itemsPerPage = 10;
+
+  // ================= FETCH DATA =================
   useEffect(() => {
-    api.get("/master-data").then((res) => {
-      setData(res?.data?.data?.guru || []);
-    });
+    api
+      .get("/master-data")
+      .then((res) => {
+        setData(res?.data?.data?.guru || []);
+      })
+      .catch((err) => {
+        console.error("Gagal ambil data guru:", err);
+        setData([]);
+      });
   }, []);
 
+  // ================= FILTER DATA =================
   const filteredData = data.filter((g) => {
     const keyword = search.toLowerCase();
 
     const semuaData = `
     ${g.nama_guru || ""}
     ${g.nig || ""}
-   ${g.jenis_kelamin === "L" ? "laki laki" : "perempuan"}
+    ${g.jenis_kelamin === "L" ? "laki laki" : "perempuan"}
     ${g.tanggal_lahir || ""}
     ${g.usia || ""}
     ${g.pendidikan || ""}
@@ -27,8 +40,40 @@ export default function DatabaseGuru() {
     return semuaData.includes(keyword);
   });
 
+  // ================= PAGINATION CALCULATION =================
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+
+  const paginatedData = filteredData.slice(
+    startIndex,
+    startIndex + itemsPerPage,
+  );
+
+  // ================= SEARCH =================
+  const handleSearch = (e) => {
+    setSearch(e.target.value);
+
+    // Kembali ke halaman pertama ketika pencarian berubah
+    setCurrentPage(1);
+  };
+
+  // ================= PAGINATION HANDLER =================
+  const handlePreviousPage = () => {
+    setCurrentPage((prev) => Math.max(prev - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
   return (
     <div className="p-4 space-y-4">
+      {/* ================= HEADER ================= */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         {/* TITLE */}
         <h1 className="text-xl font-light text-black tracking-wide">
@@ -39,9 +84,9 @@ export default function DatabaseGuru() {
         <div>
           <input
             type="text"
-            placeholder="Cari data santri..."
+            placeholder="Cari data guru..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={handleSearch}
             className="border p-2 text-xs rounded w-full md:w-64"
           />
         </div>
@@ -52,9 +97,9 @@ export default function DatabaseGuru() {
         {filteredData.length === 0 ? (
           <div className="text-center text-gray-500">Data tidak ditemukan</div>
         ) : (
-          filteredData.map((g, i) => (
+          paginatedData.map((g, i) => (
             <div
-              key={i}
+              key={g.id || i}
               className="overflow-hidden rounded-2xl shadow bg-white border"
             >
               {/* HEADER */}
@@ -77,7 +122,7 @@ export default function DatabaseGuru() {
               </div>
 
               {/* NARASI */}
-              <div className="bg-gray-300 p-4  font-extralight text-sm  text-gray-800 space-y-3 text-justify">
+              <div className="bg-gray-300 p-4 font-extralight text-sm text-gray-800 space-y-3 text-justify">
                 <p>
                   Adalah guru TPQ Khairunisa Ternate dengan nomor ID{" "}
                   <b>{g.nig}</b>. Berjenis kelamin{" "}
@@ -99,7 +144,7 @@ export default function DatabaseGuru() {
         <table className="w-full text-xs font-medium">
           <thead className="bg-gray-100 text-black">
             <tr>
-              <th className="text-left p-2">Foto</th> {/* 🔥 TAMBAH INI */}
+              <th className="text-left p-2">Foto</th>
               <th className="text-left p-2">Nama / NIG</th>
               <th className="text-left p-2">JK, Usia / Kelahiran</th>
               <th className="text-left p-2">Pendidikan / Pekerjaan</th>
@@ -108,55 +153,125 @@ export default function DatabaseGuru() {
           </thead>
 
           <tbody>
-            {filteredData.map((d, i) => (
-              <tr key={i} className="border-t hover:bg-gray-50 align-top">
-                {/* FOTO */}
-                <td className="p-2">
-                  {d.foto_url ? (
-                    <img
-                      src={d.foto_url}
-                      alt="foto"
-                      className="w-12 h-12 object-cover rounded"
-                    />
-                  ) : (
-                    <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-xs">
-                      No Img
-                    </div>
-                  )}
-                </td>
-
-                {/* KOLOM 1 */}
-                <td className="p-2">
-                  <div className="font-medium">{d.nama_guru}</div>
-                  <div className="text-gray-500 text-xs">{d.nig}</div>
-                </td>
-
-                {/* KOLOM 2 */}
-                <td className="p-2">
-                  <div>
-                    {d.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"},{" "}
-                    {d.usia} Th
-                  </div>
-                  <div className="text-gray-500 text-xs">{d.tanggal_lahir}</div>
-                </td>
-
-                {/* KOLOM 3 */}
-                <td className="p-2">
-                  <div>{d.pendidikan || "-"}</div>
-                  <div className="text-gray-500 text-xs">
-                    {d.pekerjaan || "-"}
-                  </div>
-                </td>
-
-                {/* KOLOM 4 */}
-                <td className="p-2">
-                  <div>{d.kontak || "-"}</div>
+            {filteredData.length === 0 ? (
+              <tr>
+                <td colSpan="5" className="text-center p-6 text-gray-500">
+                  Data tidak ditemukan
                 </td>
               </tr>
-            ))}
+            ) : (
+              paginatedData.map((d, i) => (
+                <tr
+                  key={d.id || i}
+                  className="border-t hover:bg-gray-50 align-top"
+                >
+                  {/* FOTO */}
+                  <td className="p-2">
+                    {d.foto_url ? (
+                      <img
+                        src={d.foto_url}
+                        alt="foto"
+                        className="w-12 h-12 object-cover rounded"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-xs">
+                        No Img
+                      </div>
+                    )}
+                  </td>
+
+                  {/* KOLOM 1 */}
+                  <td className="p-2">
+                    <div className="font-medium">{d.nama_guru}</div>
+                    <div className="text-gray-500 text-xs">{d.nig}</div>
+                  </td>
+
+                  {/* KOLOM 2 */}
+                  <td className="p-2">
+                    <div>
+                      {d.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"},{" "}
+                      {d.usia} Th
+                    </div>
+
+                    <div className="text-gray-500 text-xs">
+                      {d.tanggal_lahir}
+                    </div>
+                  </td>
+
+                  {/* KOLOM 3 */}
+                  <td className="p-2">
+                    <div>{d.pendidikan || "-"}</div>
+
+                    <div className="text-gray-500 text-xs">
+                      {d.pekerjaan || "-"}
+                    </div>
+                  </td>
+
+                  {/* KOLOM 4 */}
+                  <td className="p-2">
+                    <div>{d.kontak || "-"}</div>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
+
+      {/* ================= PAGINATION ================= */}
+      {filteredData.length > 0 && (
+        <div className="flex flex-col md:flex-row items-center justify-between gap-3 pt-2">
+          {/* INFO JUMLAH DATA */}
+          <div className="text-xs text-gray-500">
+            Menampilkan {startIndex + 1}–
+            {Math.min(startIndex + itemsPerPage, filteredData.length)} dari{" "}
+            {filteredData.length} data
+          </div>
+
+          {/* BUTTON PAGINATION */}
+          {totalPages > 1 && (
+            <div className="flex items-center gap-1">
+              {/* SEBELUMNYA */}
+              <button
+                type="button"
+                onClick={handlePreviousPage}
+                disabled={currentPage === 1}
+                className="px-3 py-1.5 text-xs rounded border bg-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50"
+              >
+                Sebelumnya
+              </button>
+
+              {/* NOMOR HALAMAN */}
+              {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+                (page) => (
+                  <button
+                    key={page}
+                    type="button"
+                    onClick={() => handlePageChange(page)}
+                    className={`px-3 py-1.5 text-xs rounded border ${
+                      currentPage === page
+                        ? "bg-blue-600 text-white border-blue-600"
+                        : "bg-white text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ),
+              )}
+
+              {/* BERIKUTNYA */}
+              <button
+                type="button"
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1.5 text-xs rounded border bg-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50"
+              >
+                Berikutnya
+              </button>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

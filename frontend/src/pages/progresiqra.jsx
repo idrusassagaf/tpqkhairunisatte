@@ -10,6 +10,11 @@ export default function ProgresIqra() {
   const [filterProgres, setFilterProgres] = useState("");
   const [filterPrestasi, setFilterPrestasi] = useState("");
 
+  // ================= PAGINATION =================
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const ITEMS_PER_PAGE = 15;
+
   const STORAGE_KEY = "tpq_progres_iqra";
 
   // ================= LOAD DATA =================
@@ -65,8 +70,24 @@ export default function ProgresIqra() {
     const cocokJilid = !filterJilid || jilidDipilih === filterJilid;
     const cocokProgres = !filterProgres || progresDipilih === filterProgres;
     const cocokPrestasi = !filterPrestasi || prestasi === filterPrestasi;
+
     return isIqra && cocokSearch && cocokJilid && cocokProgres && cocokPrestasi;
   });
+
+  // ================= RESET HALAMAN SAAT FILTER BERUBAH =================
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchIqra, filterJilid, filterProgres, filterPrestasi]);
+
+  // ================= PAGINATION =================
+  const totalPages = Math.ceil(santriIqra.length / ITEMS_PER_PAGE);
+
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  const currentSantri = santriIqra.slice(
+    startIndex,
+    startIndex + ITEMS_PER_PAGE,
+  );
 
   return (
     <div className="p-2 md:p-4 space-y-4">
@@ -123,63 +144,73 @@ export default function ProgresIqra() {
           </select>
         </div>
 
-        {/* MOBILE CARD */}
+        {/* ================= MOBILE CARD ================= */}
         <div className="md:hidden space-y-4">
-          {santriIqra.map((s, i) => {
-            const namaGuru = progresData[`guru_${s.nis}`] || "-";
-            const dataGuru = guru.find((g) => g.nama_guru === namaGuru);
-            const progres = progresData[s.nis] || "-";
-            const prestasi =
-              progres === "Lancar"
-                ? "Di-Lanjut"
-                : progres === "Belum"
-                  ? "Di-Ulang"
-                  : "-";
+          {currentSantri.length === 0 ? (
+            <div className="text-center p-4 text-gray-500">
+              Tidak ada data progres iqra
+            </div>
+          ) : (
+            currentSantri.map((s, i) => {
+              const namaGuru = progresData[`guru_${s.nis}`] || "-";
 
-            return (
-              <div
-                key={i}
-                className="bg-gray-200 border rounded-xl shadow overflow-hidden"
-              >
-                {/* HEADER */}
-                <div className="bg-purple-600 text-white text-center font-bold py-2 px-3 text-sm">
-                  {s.nama?.toUpperCase()}
-                  <br />
-                  NIS : {s.nis} | Kelas {s.kelas || "-"}
+              const dataGuru = guru.find((g) => g.nama_guru === namaGuru);
+
+              const progres = progresData[s.nis] || "-";
+
+              const prestasi =
+                progres === "Lancar"
+                  ? "Di-Lanjut"
+                  : progres === "Belum"
+                    ? "Di-Ulang"
+                    : "-";
+
+              return (
+                <div
+                  key={i}
+                  className="bg-gray-200 border rounded-xl shadow overflow-hidden"
+                >
+                  {/* HEADER */}
+                  <div className="bg-purple-600 text-white text-center font-bold py-2 px-3 text-sm">
+                    {s.nama?.toUpperCase()}
+                    <br />
+                    NIS : {s.nis} | Kelas {s.kelas || "-"}
+                  </div>
+
+                  {/* BODY */}
+                  <div className="p-2 mb-1 text-sm text-gray-700 space-y-1 text-center">
+                    <div>
+                      | Jilid {progresData[`jilid_${s.nis}`] || "-"} | Halaman{" "}
+                      {progresData[`hal_${s.nis}`] || "-"} |
+                    </div>
+
+                    <div>
+                      Guru : <b>{namaGuru}</b>
+                    </div>
+
+                    <div>| NIG : {dataGuru?.nig || "-"} |</div>
+
+                    <div>
+                      Progres <b>{progres.toUpperCase()}</b> maka prestasi
+                      belajar santri harus <b>{prestasi.toUpperCase()}</b>
+                    </div>
+
+                    <div className="text-xs text-purple-700 pt-1">
+                      Update tanggal{" "}
+                      {new Date().toLocaleDateString("id-ID", {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </div>
+                  </div>
                 </div>
-
-                {/* BODY */}
-                <div className="p-2 mb-1 text-sm text-gray-700 space-y-1 text-center">
-                  <div>
-                    | Jilid {progresData[`jilid_${s.nis}`] || "-"} | Halaman{" "}
-                    {progresData[`hal_${s.nis}`] || "-"} |
-                  </div>
-
-                  <div>
-                    Guru : <b>{namaGuru} </b>{" "}
-                  </div>
-                  <div>| NIG : {dataGuru?.nig || "-"} |</div>
-
-                  <div>
-                    Progres <b>{progres.toUpperCase()}</b> maka prestasi belajar
-                    santri harus <b>{prestasi.toUpperCase()} </b>
-                  </div>
-
-                  <div className="text-xs text-purple-700 pt-1">
-                    Update tanggal{" "}
-                    {new Date().toLocaleDateString("id-ID", {
-                      day: "2-digit",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-
-          {/* DESKTOP */}
+              );
+            })
+          )}
         </div>
+
+        {/* ================= DESKTOP TABLE ================= */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-xs border">
             <thead className="bg-gray-100 text-left">
@@ -198,17 +229,20 @@ export default function ProgresIqra() {
             </thead>
 
             <tbody>
-              {santriIqra.length === 0 ? (
+              {currentSantri.length === 0 ? (
                 <tr>
                   <td colSpan="10" className="text-center p-4">
                     Tidak ada data progres iqra
                   </td>
                 </tr>
               ) : (
-                santriIqra.map((s, i) => {
+                currentSantri.map((s, i) => {
                   const namaGuru = progresData[`guru_${s.nis}`] || "-";
+
                   const dataGuru = guru.find((g) => g.nama_guru === namaGuru);
+
                   const progres = progresData[s.nis] || "-";
+
                   const prestasi =
                     progres === "Lancar"
                       ? "Di-Lanjut"
@@ -219,18 +253,27 @@ export default function ProgresIqra() {
                   return (
                     <tr key={i} className="border-t">
                       <td className="p-2 font-semibold">{s.nama}</td>
+
                       <td className="p-2">{s.nis}</td>
+
                       <td className="p-2">{namaGuru}</td>
+
                       <td className="p-2">{dataGuru?.nig || "-"}</td>
+
                       <td className="p-2">{s.kelas || "-"}</td>
+
                       <td className="p-2">
                         {progresData[`jilid_${s.nis}`] || "-"}
                       </td>
+
                       <td className="p-2">
                         {progresData[`hal_${s.nis}`] || "-"}
                       </td>
+
                       <td className="p-2">{progres}</td>
+
                       <td className="p-2">{prestasi}</td>
+
                       <td className="p-2 text-xs text-gray-500">
                         {new Date().toLocaleDateString("id-ID", {
                           day: "2-digit",
@@ -245,6 +288,89 @@ export default function ProgresIqra() {
             </tbody>
           </table>
         </div>
+
+        {/* ================= PAGINATION ================= */}
+        {totalPages > 1 && (
+          <div className="flex flex-col md:flex-row items-center justify-between gap-3 mt-4 pt-4 border-t">
+            {/* INFO DATA */}
+            <div className="text-xs text-gray-500">
+              Menampilkan{" "}
+              <span className="font-semibold text-gray-700">
+                {startIndex + 1}
+              </span>{" "}
+              -{" "}
+              <span className="font-semibold text-gray-700">
+                {Math.min(startIndex + ITEMS_PER_PAGE, santriIqra.length)}
+              </span>{" "}
+              dari{" "}
+              <span className="font-semibold text-gray-700">
+                {santriIqra.length}
+              </span>{" "}
+              santri
+            </div>
+
+            {/* BUTTON PAGINATION */}
+            <div className="flex items-center gap-1">
+              {/* SEBELUMNYA */}
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="
+                  px-3 py-2
+                  border rounded-lg
+                  text-xs
+                  disabled:opacity-40
+                  disabled:cursor-not-allowed
+                  hover:bg-gray-100
+                "
+              >
+                Sebelumnya
+              </button>
+
+              {/* NOMOR HALAMAN */}
+              {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+                (page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`
+                    min-w-9
+                    px-3 py-2
+                    rounded-lg
+                    text-xs
+                    border
+                    ${
+                      currentPage === page
+                        ? "bg-purple-600 text-white border-purple-600"
+                        : "bg-white text-gray-700 hover:bg-gray-100"
+                    }
+                  `}
+                  >
+                    {page}
+                  </button>
+                ),
+              )}
+
+              {/* BERIKUTNYA */}
+              <button
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+                disabled={currentPage === totalPages}
+                className="
+                  px-3 py-2
+                  border rounded-lg
+                  text-xs
+                  disabled:opacity-40
+                  disabled:cursor-not-allowed
+                  hover:bg-gray-100
+                "
+              >
+                Berikutnya
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

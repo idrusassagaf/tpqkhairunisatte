@@ -10,6 +10,11 @@ export default function ProgresQuran() {
   const [filterProgres, setFilterProgres] = useState("");
   const [filterPrestasi, setFilterPrestasi] = useState("");
 
+  // ================= PAGINATION =================
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const ITEMS_PER_PAGE = 15;
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -83,6 +88,7 @@ export default function ProgresQuran() {
   useEffect(() => {
     const hasilFilter = dataQuran.filter((d) => {
       const keyword = search.toLowerCase();
+
       const cocokSearch = `
       ${d.nama || ""}
       ${d.nis || ""}
@@ -93,10 +99,13 @@ export default function ProgresQuran() {
         .includes(keyword);
 
       const cocokJuz = !filterJuz || String(d.juz) === String(filterJuz);
+
       const cocokSurah =
         !filterSurah ||
         (d.surah || "").toLowerCase().includes(filterSurah.toLowerCase());
+
       const cocokProgres = !filterProgres || d.progres === filterProgres;
+
       const cocokPrestasi = !filterPrestasi || d.prestasi === filterPrestasi;
 
       return (
@@ -113,6 +122,21 @@ export default function ProgresQuran() {
     filterProgres,
     filterPrestasi,
   ]);
+
+  // ================= RESET HALAMAN SAAT FILTER BERUBAH =================
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, filterJuz, filterSurah, filterProgres, filterPrestasi]);
+
+  // ================= PAGINATION =================
+  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  const currentData = filteredData.slice(
+    startIndex,
+    startIndex + ITEMS_PER_PAGE,
+  );
 
   return (
     <div className="p-4 space-y-4">
@@ -197,25 +221,35 @@ export default function ProgresQuran() {
           </thead>
 
           <tbody>
-            {filteredData.length === 0 ? (
+            {currentData.length === 0 ? (
               <tr>
                 <td colSpan="11" className="text-center p-4 text-gray-500">
                   Belum ada data progres Qur'an
                 </td>
               </tr>
             ) : (
-              filteredData.map((d, i) => (
+              currentData.map((d, i) => (
                 <tr key={i} className="border-t">
                   <td className="p-2 border font-semibold">{d.nama}</td>
+
                   <td className="p-2 border">{d.nis}</td>
+
                   <td className="p-2 border">{d.guru}</td>
+
                   <td className="p-2 border">{d.kelas}</td>
+
                   <td className="p-2 border">{d.juz}</td>
+
                   <td className="p-2 border">{d.surah}</td>
+
                   <td className="p-2 border">{d.ayat}</td>
+
                   <td className="p-2 border">{d.halaman}</td>
+
                   <td className="p-2 border">{d.progres}</td>
+
                   <td className="p-2 border">{d.prestasi}</td>
+
                   <td className="p-2 border text-xs text-gray-500">
                     {d.update}
                   </td>
@@ -228,12 +262,12 @@ export default function ProgresQuran() {
 
       {/* ================= MOBILE ================= */}
       <div className="md:hidden space-y-4">
-        {filteredData.length === 0 ? (
+        {currentData.length === 0 ? (
           <div className="text-center text-gray-500">
             Belum ada data progres Qur'an
           </div>
         ) : (
-          filteredData.map((d, i) => (
+          currentData.map((d, i) => (
             <div
               key={i}
               className="bg-gray-300 border rounded-2xl shadow overflow-hidden"
@@ -249,22 +283,25 @@ export default function ProgresQuran() {
               <div className="p-2 text-sm text-gray-700 space-y-1 text-center">
                 {/* BARIS 1 */}
                 <div>
-                  {" "}
                   <b>SURAH : {d.surah.toUpperCase()}</b>
                 </div>
+
                 {/* BARIS 2 */}
                 <div>
                   | Juz {d.juz} | Ayat {d.ayat || "-"} | Halaman {d.halaman} |
                 </div>
+
                 {/* BARIS 3 */}
                 <div>
                   Guru : <b>{d.guru || "-"}</b>
                 </div>
+
                 {/* BARIS 4 */}
                 <div>
                   Progres <b>{d.progres.toUpperCase()}</b> maka prestasi belajar
                   santri harus <b>{d.prestasi.toUpperCase()}</b>
                 </div>
+
                 {/* UPDATE */}
                 <div className="text-[11px] text-purple-700 border-t pt-3">
                   Update tanggal {d.update}
@@ -274,6 +311,89 @@ export default function ProgresQuran() {
           ))
         )}
       </div>
+
+      {/* ================= PAGINATION ================= */}
+      {totalPages > 1 && (
+        <div className="flex flex-col md:flex-row items-center justify-between gap-3 mt-4 pt-4 border-t">
+          {/* INFO DATA */}
+          <div className="text-xs text-gray-500">
+            Menampilkan{" "}
+            <span className="font-semibold text-gray-700">
+              {startIndex + 1}
+            </span>{" "}
+            -{" "}
+            <span className="font-semibold text-gray-700">
+              {Math.min(startIndex + ITEMS_PER_PAGE, filteredData.length)}
+            </span>{" "}
+            dari{" "}
+            <span className="font-semibold text-gray-700">
+              {filteredData.length}
+            </span>{" "}
+            santri
+          </div>
+
+          {/* BUTTON PAGINATION */}
+          <div className="flex items-center gap-1">
+            {/* SEBELUMNYA */}
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="
+                px-3 py-2
+                border rounded-lg
+                text-xs
+                disabled:opacity-40
+                disabled:cursor-not-allowed
+                hover:bg-gray-100
+              "
+            >
+              Sebelumnya
+            </button>
+
+            {/* NOMOR HALAMAN */}
+            {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+              (page) => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`
+                  min-w-9
+                  px-3 py-2
+                  rounded-lg
+                  text-xs
+                  border
+                  ${
+                    currentPage === page
+                      ? "bg-purple-600 text-white border-purple-600"
+                      : "bg-white text-gray-700 hover:bg-gray-100"
+                  }
+                `}
+                >
+                  {page}
+                </button>
+              ),
+            )}
+
+            {/* BERIKUTNYA */}
+            <button
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
+              disabled={currentPage === totalPages}
+              className="
+                px-3 py-2
+                border rounded-lg
+                text-xs
+                disabled:opacity-40
+                disabled:cursor-not-allowed
+                hover:bg-gray-100
+              "
+            >
+              Berikutnya
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

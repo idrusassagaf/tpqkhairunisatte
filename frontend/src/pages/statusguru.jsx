@@ -7,6 +7,10 @@ export default function StatusGuru() {
   const [filterPeriode, setFilterPeriode] = useState("");
   const [statusData, setStatusData] = useState({});
 
+  // ================= PAGINATION =================
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+
   // ================= FORMAT PERIODE =================
   const getCurrentPeriode = () => {
     const now = new Date();
@@ -153,6 +157,21 @@ export default function StatusGuru() {
       .includes(keyword);
   });
 
+  // ================= PAGINATION =================
+  const totalPages = Math.ceil(filteredGuru.length / itemsPerPage);
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+
+  const paginatedGuru = filteredGuru.slice(
+    startIndex,
+    startIndex + itemsPerPage,
+  );
+
+  // ================= RESET PAGINATION =================
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, itemsPerPage, filterPeriode]);
+
   // ================= TOTAL GAJI =================
   const totalGaji = filteredGuru.reduce((total, g) => {
     const dataPeriode = statusData[g.nig]?.[filterPeriode] || {};
@@ -182,12 +201,12 @@ export default function StatusGuru() {
           {/* TOTAL GAJI */}
           <div
             className="
-        text-left md:text-right
-        border border-gray-500
-        bg-gray-100
-        rounded-xl
-        px-4 py-2
-      "
+              text-left md:text-right
+              border border-gray-500
+              bg-gray-100
+              rounded-xl
+              px-4 py-2
+            "
           >
             <p className="text-xs text-gray-800 tracking-wide">
               Jumlah Total Gaji
@@ -283,7 +302,7 @@ export default function StatusGuru() {
                 </td>
               </tr>
             ) : (
-              filteredGuru.map((g, i) => {
+              paginatedGuru.map((g, i) => {
                 const dataPeriode = statusData[g.nig]?.[filterPeriode] || {};
 
                 const kehadiran = dataPeriode.kehadiran || "";
@@ -295,7 +314,9 @@ export default function StatusGuru() {
                 return (
                   <tr key={i} className="border-t hover:bg-gray-50">
                     {/* NO */}
-                    <td className="px-2 py-1 border text-center">{i + 1}</td>
+                    <td className="px-2 py-1 border text-center">
+                      {startIndex + i + 1}
+                    </td>
 
                     {/* NAMA */}
                     <td className="px-2 py-1 border font-medium">
@@ -410,7 +431,7 @@ export default function StatusGuru() {
 
       {/* ================= MOBILE CARD ================= */}
       <div className="md:hidden space-y-4">
-        {filteredGuru.map((g, i) => {
+        {paginatedGuru.map((g, i) => {
           const dataPeriode = statusData[g.nig]?.[filterPeriode] || {};
 
           const kehadiran = dataPeriode.kehadiran || "";
@@ -438,7 +459,7 @@ export default function StatusGuru() {
                   text-lg
                 "
               >
-                {i + 1}. {g.nama_guru}
+                {startIndex + i + 1}. {g.nama_guru}
               </div>
 
               {/* BODY */}
@@ -534,7 +555,7 @@ export default function StatusGuru() {
                 <button
                   onClick={handleSave}
                   className="
-                    w-full 
+                    w-full
                     bg-gray-200
                     hover:bg-purple-700
                     text-purple-600 hover:text-white
@@ -549,6 +570,118 @@ export default function StatusGuru() {
           );
         })}
       </div>
+
+      {/* ================= PAGINATION ================= */}
+      {filteredGuru.length > 0 && (
+        <div className="bg-white rounded-2xl shadow p-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            {/* INFO DATA */}
+            <div className="text-xs text-gray-500">
+              Menampilkan{" "}
+              <span className="font-semibold text-gray-700">
+                {startIndex + 1}
+              </span>{" "}
+              -{" "}
+              <span className="font-semibold text-gray-700">
+                {Math.min(startIndex + itemsPerPage, filteredGuru.length)}
+              </span>{" "}
+              dari{" "}
+              <span className="font-semibold text-gray-700">
+                {filteredGuru.length}
+              </span>{" "}
+              guru
+            </div>
+
+            {/* JUMLAH DATA */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-500">Tampilkan</span>
+
+              <select
+                value={itemsPerPage}
+                onChange={(e) => {
+                  setItemsPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="
+                  border rounded-lg
+                  px-2 py-1
+                  text-xs
+                  focus:outline-none
+                  focus:ring-2
+                  focus:ring-purple-300
+                "
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+              </select>
+
+              <span className="text-xs text-gray-500">data</span>
+            </div>
+
+            {/* NAVIGASI */}
+            <div className="flex items-center gap-1">
+              {/* PREVIOUS */}
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="
+                  px-3 py-1
+                  border rounded-lg
+                  text-xs
+                  disabled:opacity-40
+                  disabled:cursor-not-allowed
+                  hover:bg-gray-100
+                "
+              >
+                ‹
+              </button>
+
+              {/* NOMOR HALAMAN */}
+              {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+                (page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`
+                    px-3 py-1
+                    rounded-lg
+                    text-xs
+                    border
+                    ${
+                      currentPage === page
+                        ? "bg-purple-600 text-white border-purple-600"
+                        : "bg-white text-gray-700 hover:bg-gray-100"
+                    }
+                  `}
+                  >
+                    {page}
+                  </button>
+                ),
+              )}
+
+              {/* NEXT */}
+              <button
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+                disabled={currentPage === totalPages}
+                className="
+                  px-3 py-1
+                  border rounded-lg
+                  text-xs
+                  disabled:opacity-40
+                  disabled:cursor-not-allowed
+                  hover:bg-gray-100
+                "
+              >
+                ›
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
