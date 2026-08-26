@@ -6,6 +6,11 @@ import { useNavigate } from "react-router-dom";
 export default function ProgresHafalan() {
   const [santri, setSantri] = useState([]);
   const [search, setSearch] = useState("");
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const itemsPerPage = 10;
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -45,6 +50,14 @@ export default function ProgresHafalan() {
       .toLowerCase()
       .includes(keyword);
   });
+  const totalPages = Math.ceil(filteredSantri.length / itemsPerPage);
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+
+  const paginatedSantri = filteredSantri.slice(
+    startIndex,
+    startIndex + itemsPerPage,
+  );
 
   return (
     <div className="p-4">
@@ -60,7 +73,10 @@ export default function ProgresHafalan() {
             type="text"
             placeholder="Cari nama / NIS / kelas..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
             className="
       border rounded-lg px-3 py-2
       text-xs w-full md:w-72
@@ -92,7 +108,7 @@ export default function ProgresHafalan() {
                 </td>
               </tr>
             ) : (
-              filteredSantri.map((s, i) => (
+              paginatedSantri.map((s, i) => (
                 <tr key={i} className="border-t hover:bg-gray-50">
                   {/* NO */}
                   <td className="p-1 border text-center">{i + 1}</td>
@@ -137,7 +153,7 @@ export default function ProgresHafalan() {
         </table>
         {/* ================= MOBILE CARD ================= */}
         <div className="md:hidden space-y-3 mt-4">
-          {filteredSantri.map((s, i) => {
+          {paginatedSantri.map((s, i) => {
             const saved =
               JSON.parse(localStorage.getItem(`hafalan_${s.nis}`)) || {};
 
@@ -225,6 +241,61 @@ export default function ProgresHafalan() {
             );
           })}
         </div>
+
+        {/* ================= PAGINATION ================= */}
+        {filteredSantri.length > 0 && (
+          <div className="flex flex-col md:flex-row items-center justify-between gap-3 pt-4">
+            <div className="text-xs text-gray-500">
+              Menampilkan {startIndex + 1}–
+              {Math.min(startIndex + itemsPerPage, filteredSantri.length)} dari{" "}
+              {filteredSantri.length} santri
+            </div>
+
+            {totalPages > 1 && (
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(prev - 1, 1))
+                  }
+                  disabled={currentPage === 1}
+                  className="px-3 py-1.5 text-xs rounded border bg-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50"
+                >
+                  Sebelumnya
+                </button>
+
+                {Array.from(
+                  { length: totalPages },
+                  (_, index) => index + 1,
+                ).map((page) => (
+                  <button
+                    key={page}
+                    type="button"
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-3 py-1.5 text-xs rounded border ${
+                      currentPage === page
+                        ? "bg-blue-600 text-white border-blue-600"
+                        : "bg-white text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                  }
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1.5 text-xs rounded border bg-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50"
+                >
+                  Berikutnya
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
