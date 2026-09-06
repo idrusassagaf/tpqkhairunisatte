@@ -3,7 +3,9 @@
 <h3>STATUS SANTRI</h3>
 
 <p style="text-align:justify; line-height:1.8;">
-    {{ $setting->narasi['bab2'] }}
+
+    {{ $setting->narasi['bab2'] ?? '' }}
+
 </p>
 
 <table>
@@ -13,41 +15,56 @@
         <th width="25%">Jumlah</th>
     </tr>
 
+    @foreach($bab2['rekap'] as $item)
+
     <tr>
-        <td>Santunan OT</td>
+        <td>
+            {{ $item['nama'] }}
+        </td>
+
         <td align="center">
-            {{ $masterData['santri']->where('status_orangtua','keduanya_hidup')->count() }}
+            {{ $item['jumlah'] }}
         </td>
     </tr>
 
-    <tr>
-        <td>Anak Yatim</td>
-        <td align="center">
-            {{ $masterData['santri']->where('status_orangtua','ayah_wafat')->count() }}
-        </td>
-    </tr>
-
-    <tr>
-        <td>Anak Piatu</td>
-        <td align="center">
-            {{ $masterData['santri']->where('status_orangtua','ibu_wafat')->count() }}
-        </td>
-    </tr>
-
-    <tr>
-        <td>Yatim Piatu</td>
-        <td align="center">
-            {{ $masterData['santri']->where('status_orangtua','keduanya_wafat')->count() }}
-        </td>
-    </tr>
+    @endforeach
 
     <tr style="font-weight:bold;background:#f5f5f5;">
-        <td>Total Santri</td>
-        <td align="center">
-            {{ $masterData['santri']->count() }}
+
+        <td>
+            Total Santri
         </td>
+
+        <td align="center">
+            {{ $bab2['total'] }}
+        </td>
+
     </tr>
 
 </table>
+
+{{-- =========================================================
+     ANALISIS DATA
+     ========================================================= --}}
+
+<div style="margin-top:6px;">
+
+    <p style="text-align:justify; line-height:1.6; margin:0;">
+        {!! str_replace('<br><br>', '<br>', $bab2['analysis'] ?? '') !!}
+    </p>
+
+</div>
+
+{{-- =========================================================
+     KESIMPULAN
+     ========================================================= --}}
+
+<div style="margin-top:4px;">
+
+    <p style="text-align:justify; line-height:1.6; margin:0;">
+        {!! str_replace('<br><br>', '<br>', $bab2['conclusion'] ?? '') !!}
+    </p>
+
+</div>
 
 <div style="page-break-after:always;"></div>

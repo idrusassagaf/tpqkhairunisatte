@@ -46,6 +46,13 @@ class AuthController extends Controller
             ], 401);
         }
 
+        // CEK STATUS AKTIF USER
+        if (!$user->is_active) {
+            return response()->json([
+                'message' => 'Akun Anda sedang dinonaktifkan. Silakan hubungi administrator.'
+            ], 403);
+        }
+
         $token = $user->createToken('api-token')->plainTextToken;
 
         return response()->json([
@@ -69,5 +76,30 @@ class AuthController extends Controller
     public function user(Request $request)
     {
         return response()->json($request->user());
+    }
+
+    // CHANGE PASSWORD
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required|string',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        $user = $request->user();
+
+        if (!$user || !Hash::check($request->current_password, $user->password)) {
+            return response()->json([
+                'message' => 'Password lama tidak sesuai.',
+            ], 422);
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password berhasil diubah.',
+        ]);
     }
 }

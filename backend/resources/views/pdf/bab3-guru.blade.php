@@ -3,7 +3,9 @@
 <h3>DATA GURU</h3>
 
 <p style="text-align:justify; line-height:1.8;">
-    {{ $setting->narasi['bab3'] }}
+
+    {{ $setting->narasi['bab3'] ?? '' }}
+
 </p>
 
 <table>
@@ -45,5 +47,29 @@
     @endforeach
 
 </table>
+
+{{-- =========================================================
+     ANALISIS DATA
+     ========================================================= --}}
+
+<div style="margin-top:6px;">
+
+    <p style="text-align:justify; line-height:1.6; margin:0;">
+        {!! str_replace('<br><br>', '<br>', $bab3['analysis'] ?? '') !!}
+    </p>
+
+</div>
+
+{{-- =========================================================
+     KESIMPULAN
+     ========================================================= --}}
+
+<div style="margin-top:4px;">
+
+    <p style="text-align:justify; line-height:1.6; margin:0;">
+        {!! str_replace('<br><br>', '<br>', $bab3['conclusion'] ?? '') !!}
+    </p>
+
+</div>
 
 <div style="page-break-after:always;"></div>

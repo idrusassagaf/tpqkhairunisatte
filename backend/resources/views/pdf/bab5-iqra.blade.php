@@ -3,7 +3,9 @@
 <h3>PROGRES PEMBELAJARAN IQRA</h3>
 
 <p style="text-align:justify; line-height:1.8;">
-    {{ $setting->narasi['bab5'] }}
+
+    {{ $setting->narasi['bab5'] ?? '' }}
+
 </p>
 
 <table>
@@ -15,6 +17,7 @@
 
     <tr>
         <td>Total Santri Iqra</td>
+
         <td align="center">
             {{ $masterData['santri']->where('kelas','Iqra')->count() }}
         </td>
@@ -39,16 +42,28 @@
 
         <tr>
 
-        <td align="center">{{ $i }}</td>
-
-        <td>Iqra {{ $i }}</td>
-
         <td align="center">
-            {{ $progresIqra->where('jilid', "Iqra $i")->where('progres', 'Lancar')->count() }}
+            {{ $i }}
+        </td>
+
+        <td>
+            Iqra {{ $i }}
         </td>
 
         <td align="center">
-            {{ $progresIqra->where('jilid', "Iqra $i")->where('progres', 'Belum')->count() }}
+            {{ $progresIqra
+                    ->where('jilid', "Iqra $i")
+                    ->where('progres', 'Lancar')
+                    ->count()
+                }}
+        </td>
+
+        <td align="center">
+            {{ $progresIqra
+                    ->where('jilid', "Iqra $i")
+                    ->where('progres', 'Belum')
+                    ->count()
+                }}
         </td>
 
         </tr>
@@ -56,5 +71,31 @@
         @endfor
 
 </table>
+
+<br>
+
+{{-- =========================================================
+     ANALISIS DATA
+     ========================================================= --}}
+
+<div style="margin-top:6px;">
+
+    <p style="text-align:justify; line-height:1.6; margin:0;">
+        {!! str_replace('<br><br>', '<br>', $bab5['analysis'] ?? '') !!}
+    </p>
+
+</div>
+
+{{-- =========================================================
+     KESIMPULAN
+     ========================================================= --}}
+
+<div style="margin-top:4px;">
+
+    <p style="text-align:justify; line-height:1.6; margin:0;">
+        {!! str_replace('<br><br>', '<br>', $bab5['conclusion'] ?? '') !!}
+    </p>
+
+</div>
 
 <div style="page-break-after:always;"></div>

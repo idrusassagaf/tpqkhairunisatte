@@ -1,4 +1,13 @@
 import { useEffect, useState } from "react";
+
+import { Download, FileSpreadsheet, FileText } from "lucide-react";
+
+import * as XLSX from "xlsx";
+
+import jsPDF from "jspdf";
+
+import autoTable from "jspdf-autotable";
+
 import { api } from "../api";
 
 export default function StatusGuru() {
@@ -6,6 +15,7 @@ export default function StatusGuru() {
   const [search, setSearch] = useState("");
   const [filterPeriode, setFilterPeriode] = useState("");
   const [statusData, setStatusData] = useState({});
+  const [showDownload, setShowDownload] = useState(false);
 
   // ================= PAGINATION =================
   const [currentPage, setCurrentPage] = useState(1);
@@ -183,6 +193,323 @@ export default function StatusGuru() {
     return total + getGajiGuru(status);
   }, 0);
 
+  // =========================================================
+  // DOWNLOAD EXCEL STATUS GURU
+  // =========================================================
+  const downloadExcel = () => {
+    if (filteredGuru.length === 0) {
+      alert("Tidak ada data status guru untuk di-download.");
+      return;
+    }
+
+    const periodeAktif = filterPeriode || getCurrentPeriode();
+
+    const [tahun, bulan] = periodeAktif.split("-");
+
+    const excelData = filteredGuru.map((g, index) => {
+      const dataPeriode = statusData[g.nig]?.[periodeAktif] || {};
+
+      const kehadiran = dataPeriode.kehadiran || "";
+
+      const status = getStatusGuru(kehadiran);
+
+      const gaji = getGajiGuru(status);
+
+      return {
+        No: index + 1,
+
+        "Nama Guru": g.nama_guru || "-",
+
+        NIG: g.nig || "-",
+
+        "Total Santri": dataPeriode.totalSantri || "-",
+
+        "Kehadiran & Absensi": kehadiran || "-",
+
+        Status: status,
+
+        "Gaji Per-Guru": gaji,
+
+        Update: dataPeriode.update || "-",
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Status Guru");
+
+    // ================= LEBAR KOLOM =================
+    worksheet["!cols"] = [
+      { wch: 6 },
+      { wch: 28 },
+      { wch: 15 },
+      { wch: 16 },
+      { wch: 24 },
+      { wch: 18 },
+      { wch: 20 },
+      { wch: 18 },
+    ];
+
+    const namaFile = search.trim()
+      ? `status-guru-${tahun}-${bulan}-hasil-pencarian.xlsx`
+      : `status-guru-${tahun}-${bulan}.xlsx`;
+
+    XLSX.writeFile(workbook, namaFile);
+
+    setShowDownload(false);
+  };
+
+  // =========================================================
+  // DOWNLOAD PDF STATUS GURU
+  // =========================================================
+  const downloadPDF = () => {
+    if (filteredGuru.length === 0) {
+      alert("Tidak ada data status guru untuk di-download.");
+      return;
+    }
+
+    const periodeAktif = filterPeriode || getCurrentPeriode();
+
+    const [tahun, bulan] = periodeAktif.split("-");
+
+    const namaBulan = bulanList[Number(bulan) - 1] || bulan;
+
+    // =====================================================
+    // TANGGAL REALTIME SAAT PDF DI-DOWNLOAD
+    // =====================================================
+    const tanggalDownload = new Date().toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+
+    // =====================================================
+    // PDF A4 LANDSCAPE
+    // =====================================================
+    const doc = new jsPDF({
+      orientation: "landscape",
+      unit: "mm",
+      format: "a4",
+    });
+
+    // =====================================================
+    // UKURAN HALAMAN
+    // =====================================================
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    const pageHeight = doc.internal.pageSize.getHeight();
+
+    // =====================================================
+    // AREA KONTEN TENGAH
+    // =====================================================
+    const contentWidth = 270;
+
+    const contentLeft = (pageWidth - contentWidth) / 2;
+
+    const contentRight = pageWidth - contentLeft;
+
+    const contentCenter = pageWidth / 2;
+
+    // =====================================================
+    // JUDUL
+    // =====================================================
+    doc.setFontSize(16);
+
+    doc.setFont("helvetica", "bold");
+
+    doc.text("STATUS DAN GAJI GURU", contentCenter, 15, {
+      align: "center",
+    });
+
+    // =====================================================
+    // SUB JUDUL
+    // =====================================================
+    doc.setFontSize(10);
+
+    doc.setFont("helvetica", "normal");
+
+    doc.text("TPQ Khairunissa Ternate", contentCenter, 21, {
+      align: "center",
+    });
+
+    // =====================================================
+    // PERIODE
+    // =====================================================
+    doc.setFontSize(9);
+
+    doc.text(
+      `Periode: ${namaBulan.toUpperCase()} ${tahun}`,
+      contentCenter,
+      27,
+      {
+        align: "center",
+      },
+    );
+
+    // =====================================================
+    // INFO PENCARIAN
+    // =====================================================
+    let tableStartY = 33;
+
+    if (search.trim()) {
+      doc.setFontSize(8);
+
+      doc.text(`Hasil pencarian: "${search}"`, contentLeft, 32);
+
+      tableStartY = 38;
+    }
+
+    // =====================================================
+    // DATA TABEL
+    // =====================================================
+    const rows = filteredGuru.map((g, index) => {
+      const dataPeriode = statusData[g.nig]?.[periodeAktif] || {};
+
+      const kehadiran = dataPeriode.kehadiran || "";
+
+      const status = getStatusGuru(kehadiran);
+
+      const gaji = getGajiGuru(status);
+
+      return [
+        index + 1,
+
+        g.nama_guru || "-",
+
+        g.nig || "-",
+
+        dataPeriode.totalSantri || "-",
+
+        kehadiran || "-",
+
+        status,
+
+        formatRupiah(gaji),
+
+        dataPeriode.update || "-",
+      ];
+    });
+
+    // =====================================================
+    // TABEL
+    // =====================================================
+    const tableWidth = 230;
+
+    const tableLeft = (pageWidth - tableWidth) / 2;
+
+    autoTable(doc, {
+      startY: tableStartY,
+
+      head: [
+        [
+          "No",
+          "Nama Guru",
+          "NIG",
+          "Total Santri",
+          "Kehadiran",
+          "Status",
+          "Gaji Per-Guru",
+          "Update",
+        ],
+      ],
+
+      body: rows,
+
+      theme: "grid",
+
+      tableWidth: tableWidth,
+
+      margin: {
+        left: tableLeft,
+        right: tableLeft,
+      },
+
+      styles: {
+        fontSize: 8,
+
+        cellPadding: 2,
+
+        overflow: "linebreak",
+
+        valign: "middle",
+
+        halign: "center",
+      },
+
+      headStyles: {
+        fontStyle: "bold",
+      },
+
+      columnStyles: {
+        0: {
+          cellWidth: 10,
+        },
+
+        1: {
+          cellWidth: 45,
+
+          halign: "left",
+        },
+
+        2: {
+          cellWidth: 25,
+        },
+
+        3: {
+          cellWidth: 25,
+        },
+
+        4: {
+          cellWidth: 35,
+        },
+
+        5: {
+          cellWidth: 30,
+        },
+
+        6: {
+          cellWidth: 35,
+        },
+
+        7: {
+          cellWidth: 25,
+        },
+      },
+
+      // ===================================================
+      // FOOTER PDF
+      // SATU BARIS PENUH
+      // TANGGAL REALTIME SAAT DOWNLOAD
+      // ===================================================
+      didDrawPage: () => {
+        const nomorHalaman = doc.internal.getNumberOfPages();
+
+        const footerText = `TPQ Khairunissa • Progres Al'Quran • Update ${tanggalDownload} • Halaman ${nomorHalaman}`;
+
+        doc.setFont("helvetica", "normal");
+
+        doc.setFontSize(7);
+
+        doc.text(footerText, contentCenter, pageHeight - 7, {
+          align: "center",
+        });
+      },
+    });
+
+    // =====================================================
+    // NAMA FILE
+    // =====================================================
+    const namaFile = search.trim()
+      ? `status-guru-${tahun}-${bulan}-hasil-pencarian.pdf`
+      : `status-guru-${tahun}-${bulan}.pdf`;
+
+    doc.save(namaFile);
+
+    setShowDownload(false);
+  };
+
   return (
     <div className="p-4 space-y-4">
       {/* ================= TITLE ================= */}
@@ -266,12 +593,107 @@ export default function StatusGuru() {
               );
             })}
           </select>
+
+          {/* ================= DOWNLOAD ================= */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setShowDownload((prev) => !prev)}
+              className="
+                w-full md:w-auto
+                inline-flex
+                items-center
+                justify-center
+                gap-2
+                px-4 py-2
+                rounded-xl
+                bg-blue-600
+                text-white
+                text-sm
+                font-medium
+                hover:bg-blue-700
+                transition
+              "
+            >
+              <Download size={17} />
+              Download
+            </button>
+
+            {showDownload && (
+              <div
+                className="
+                  absolute
+                  right-0
+                  mt-2
+                  w-full md:w-52
+                  bg-white
+                  border
+                  border-gray-200
+                  rounded-xl
+                  shadow-lg
+                  z-50
+                  overflow-hidden
+                "
+              >
+                {/* ================= EXCEL ================= */}
+                <button
+                  type="button"
+                  onClick={downloadExcel}
+                  className="
+                    w-full
+                    flex
+                    items-center
+                    gap-3
+                    px-4 py-3
+                    text-sm
+                    text-gray-700
+                    hover:bg-gray-50
+                    transition
+                  "
+                >
+                  <FileSpreadsheet size={18} className="text-green-600" />
+
+                  <div className="text-left">
+                    <div className="font-medium">Excel</div>
+
+                    <div className="text-xs text-gray-400">.xlsx</div>
+                  </div>
+                </button>
+
+                {/* ================= PDF ================= */}
+                <button
+                  type="button"
+                  onClick={downloadPDF}
+                  className="
+                    w-full
+                    flex
+                    items-center
+                    gap-3
+                    px-4 py-3
+                    text-sm
+                    text-gray-700
+                    hover:bg-gray-50
+                    transition
+                    border-t
+                  "
+                >
+                  <FileText size={18} className="text-red-600" />
+
+                  <div className="text-left">
+                    <div className="font-medium">PDF</div>
+
+                    <div className="text-xs text-gray-400">.pdf</div>
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* ================= DESKTOP TABLE ================= */}
-      <div className="hidden md:block bg-white rounded shadow overflow-x-auto">
-        <table className="w-full border text-xs text-black">
+      <div className="hidden md:flex justify-center bg-white rounded shadow overflow-x-auto">
+        <table className="w-[95%] border text-xs text-black">
           <thead className="bg-gray-200 text-black">
             <tr>
               <th className="px-2 py-2 border w-14">No</th>
@@ -282,7 +704,7 @@ export default function StatusGuru() {
 
               <th className="px-2 py-2 border">Total Santri</th>
 
-              <th className="px-2 py-2 border">Kehadiran</th>
+              <th className="px-2 py-2 border">Kehadiran & Absensi</th>
 
               <th className="px-2 py-2 border">Status</th>
 
@@ -612,8 +1034,11 @@ export default function StatusGuru() {
                 "
               >
                 <option value={5}>5</option>
+
                 <option value={10}>10</option>
+
                 <option value={20}>20</option>
+
                 <option value={50}>50</option>
               </select>
 
@@ -639,12 +1064,16 @@ export default function StatusGuru() {
               </button>
 
               {/* NOMOR HALAMAN */}
-              {Array.from({ length: totalPages }, (_, index) => index + 1).map(
-                (page) => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`
+              {Array.from(
+                {
+                  length: totalPages,
+                },
+                (_, index) => index + 1,
+              ).map((page) => (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`
                     px-3 py-1
                     rounded-lg
                     text-xs
@@ -655,11 +1084,10 @@ export default function StatusGuru() {
                         : "bg-white text-gray-700 hover:bg-gray-100"
                     }
                   `}
-                  >
-                    {page}
-                  </button>
-                ),
-              )}
+                >
+                  {page}
+                </button>
+              ))}
 
               {/* NEXT */}
               <button

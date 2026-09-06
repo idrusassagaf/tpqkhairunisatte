@@ -1,19 +1,21 @@
-penutup<div class="page-break"></div>
-
 <h2 align="center">
     PENUTUP
 </h2>
 
 @if(!empty($setting->narasi['penutup']))
+
 <p style="text-align:justify; line-height:1.8;">
     {!! nl2br(e($setting->narasi['penutup'])) !!}
 </p>
+
 @endif
 
 @if(!empty($setting->penutup))
+
 <p style="text-align:justify; line-height:1.8;">
     {!! nl2br(e($setting->penutup)) !!}
 </p>
+
 @endif
 
 <br><br>

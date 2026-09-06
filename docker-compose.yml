@@ -1,0 +1,27 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+
+    container_name: tpq-backend
+
+    ports:
+      - "8080:80"
+
+    env_file:
+      - ./backend/.env
+
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8080
+
+      DB_CONNECTION: sqlite
+      DB_DATABASE: /var/www/html/database/database.sqlite
+
+    volumes:
+      - ./backend/database/database.sqlite:/var/www/html/database/database.sqlite
+      - ./backend/storage:/var/www/html/storage
+
+    restart: unless-stopped

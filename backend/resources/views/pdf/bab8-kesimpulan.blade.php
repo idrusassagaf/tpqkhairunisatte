@@ -1,83 +1,96 @@
-<div style="page-break-after:always;"></div>
+<h2>BAB VIII</h2>
 
-<h2 align="center">
-    BAB VIII
-    <br>
-    KESIMPULAN DAN STATISTIK TPQ
-</h2>
+<h3>KESIMPULAN</h3>
 
 <p style="text-align:justify; line-height:1.8;">
+
     {{ $setting->narasi['bab8'] }}
+
 </p>
 
-<table width="100%" border="1" cellspacing="0" cellpadding="5">
+<table>
 
-    <thead style="background:#e5e5e5;">
+    <tr>
+        <th>Keterangan</th>
+        <th width="25%">Jumlah</th>
+    </tr>
 
-        <tr>
-            <th width="5%">No</th>
-            <th align="left">Informasi</th>
-            <th width="25%">Hasil</th>
-        </tr>
+    <tr>
+        <td>Jumlah Santri</td>
 
-    </thead>
+        <td align="center">
+            {{ $bab8['totalSantri'] ?? $masterData['santri']->count() }}
+        </td>
+    </tr>
 
-    <tbody>
+    <tr>
+        <td>Jumlah Guru</td>
 
-        <tr>
-            <td align="center">1</td>
-            <td>Total Santri</td>
-            <td align="center">{{ $totalSantri }}</td>
-        </tr>
+        <td align="center">
+            {{ $bab8['totalGuru'] ?? $masterData['guru']->count() }}
+        </td>
+    </tr>
 
-        <tr>
-            <td align="center">2</td>
-            <td>Total Guru</td>
-            <td align="center">{{ $totalGuru }}</td>
-        </tr>
+    <tr>
+        <td>Rasio Santri / Guru</td>
 
-        <tr>
-            <td align="center">3</td>
-            <td>Rasio Guru : Santri</td>
-            <td align="center">{{ $rasioGuru }}</td>
-        </tr>
+        <td align="center">
+            {{ $bab8['rasioGuru'] ?? '-' }}
+        </td>
+    </tr>
 
-        <tr>
-            <td align="center">4</td>
-            <td>Persentase Santri Iqra</td>
-            <td align="center">{{ $persenIqra }} %</td>
-        </tr>
+    <tr>
+        <td>Data Progres Iqra</td>
 
-        <tr>
-            <td align="center">5</td>
-            <td>Persentase Santri Al-Qur'an</td>
-            <td align="center">{{ $persenQuran }} %</td>
-        </tr>
+        <td align="center">
+            {{ $bab8['totalIqra'] ?? 0 }}
+        </td>
+    </tr>
 
-        <tr>
-            <td align="center">6</td>
-            <td>Persentase Hafalan Lancar</td>
-            <td align="center">{{ $persenHafalanLancar }} %</td>
-        </tr>
+    <tr>
+        <td>Data Progres Al-Qur'an</td>
 
-        <tr>
-            <td align="center">7</td>
-            <td>Persentase Hafalan Belum</td>
-            <td align="center">{{ $persenHafalanBelum }} %</td>
-        </tr>
+        <td align="center">
+            {{ $bab8['totalQuran'] ?? 0 }}
+        </td>
+    </tr>
 
-        <tr>
-            <td align="center">8</td>
-            <td>Persentase Progres Al-Qur'an Lancar</td>
-            <td align="center">{{ $persenQuranLancar }} %</td>
-        </tr>
+    <tr>
+        <td>Data Progres Hafalan</td>
 
-        <tr>
-            <td align="center">9</td>
-            <td>Persentase Progres Iqra Lancar</td>
-            <td align="center">{{ $persenIqraLancar }} %</td>
-        </tr>
-
-    </tbody>
+        <td align="center">
+            {{ $bab8['totalHafalan'] ?? 0 }}
+        </td>
+    </tr>
 
 </table>
+
+<br>
+
+<h3>Analisis Keseluruhan Data</h3>
+
+{{-- =========================================================
+     ANALISIS DATA BAB VIII
+     ========================================================= --}}
+
+<div style="margin-top:6px;">
+
+    <p style="text-align:justify; line-height:1.6; margin:0;">
+        {!! str_replace('<br><br>', '<br>', $bab8['analysis'] ?? '') !!}
+    </p>
+
+</div>
+
+{{-- =========================================================
+     KESIMPULAN BAB VIII
+     ========================================================= --}}
+
+<div style="margin-top:4px;">
+
+    <p style="text-align:justify; line-height:1.6; margin:0;">
+        {!! str_replace('<br><br>', '<br>', $bab8['conclusion'] ?? '') !!}
+    </p>
+
+</div>
+
+<div style="page-break-after:always;"></div>

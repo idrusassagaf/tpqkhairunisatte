@@ -6,18 +6,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-// ✅ TAMBAHKAN INI
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    // ✅ TAMBAHKAN HasApiTokens DI SINI
     use HasApiTokens, HasFactory, Notifiable;
 
     protected $fillable = [
         'name',
         'email',
         'password',
+        'is_active',
+        'role',
     ];
 
     protected $hidden = [
@@ -30,6 +30,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
 }

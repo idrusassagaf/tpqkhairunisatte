@@ -6,68 +6,155 @@ class Bab2Report
 {
     public function generate($masterData)
     {
-        $aktif = collect($masterData['santri'])
-            ->where('status_santri', 'Aktif')
+        /*
+        |--------------------------------------------------------------------------
+        | DATA SANTRI
+        |--------------------------------------------------------------------------
+        */
+
+        $santri = collect($masterData['santri']);
+
+        /*
+        |--------------------------------------------------------------------------
+        | HITUNG DATA SESUAI TABEL BAB II
+        |--------------------------------------------------------------------------
+        */
+
+        // Santunan OT
+        $santunanOT = $santri
+            ->where('status_orangtua', 'keduanya_hidup')
             ->count();
 
-        $nonaktif = collect($masterData['santri'])
-            ->where('status_santri', 'Nonaktif')
+        // Anak Yatim
+        $anakYatim = $santri
+            ->where('status_orangtua', 'ayah_wafat')
             ->count();
 
-        $lulus = collect($masterData['santri'])
-            ->where('status_santri', 'Lulus')
+        // Anak Piatu
+        $anakPiatu = $santri
+            ->where('status_orangtua', 'ibu_wafat')
             ->count();
 
-        $total = $aktif + $nonaktif + $lulus;
+        // Yatim Piatu
+        $yatimPiatu = $santri
+            ->where('status_orangtua', 'keduanya_wafat')
+            ->count();
+
+        /*
+        |--------------------------------------------------------------------------
+        | TOTAL SANTRI
+        |--------------------------------------------------------------------------
+        */
+
+        $total = $santri->count();
+
+        /*
+        |--------------------------------------------------------------------------
+        | PERSENTASE
+        |--------------------------------------------------------------------------
+        */
+
+        $persenSantunanOT = $total
+            ? round(($santunanOT / $total) * 100, 2)
+            : 0;
+
+        $persenAnakYatim = $total
+            ? round(($anakYatim / $total) * 100, 2)
+            : 0;
+
+        $persenAnakPiatu = $total
+            ? round(($anakPiatu / $total) * 100, 2)
+            : 0;
+
+        $persenYatimPiatu = $total
+            ? round(($yatimPiatu / $total) * 100, 2)
+            : 0;
+
+        /*
+        |--------------------------------------------------------------------------
+        | REKAP TABEL
+        |--------------------------------------------------------------------------
+        */
 
         $rekap = [
 
             [
-                'nama' => 'Aktif',
-                'jumlah' => $aktif,
+                'nama' => 'Santunan OT',
+                'jumlah' => $santunanOT,
             ],
 
             [
-                'nama' => 'Nonaktif',
-                'jumlah' => $nonaktif,
+                'nama' => 'Anak Yatim',
+                'jumlah' => $anakYatim,
             ],
 
             [
-                'nama' => 'Lulus',
-                'jumlah' => $lulus,
+                'nama' => 'Anak Piatu',
+                'jumlah' => $anakPiatu,
+            ],
+
+            [
+                'nama' => 'Yatim Piatu',
+                'jumlah' => $yatimPiatu,
             ],
 
         ];
 
-        $persenAktif = $total ? round(($aktif / $total) * 100, 2) : 0;
-        $persenNonaktif = $total ? round(($nonaktif / $total) * 100, 2) : 0;
-        $persenLulus = $total ? round(($lulus / $total) * 100, 2) : 0;
+        /*
+        |--------------------------------------------------------------------------
+        | NARASI PEMBUKA
+        |--------------------------------------------------------------------------
+        */
 
         $intro = "
 
-Status santri berdasarkan data pada Sistem Informasi TPQ Khairunissa menunjukkan bahwa terdapat <b>{$aktif}</b> santri aktif, <b>{$nonaktif}</b> santri nonaktif, dan <b>{$lulus}</b> santri yang telah dinyatakan lulus.
+Berdasarkan data santri yang tercatat pada Sistem Informasi TPQ Khairunissa, terdapat <b>{$total} santri</b> yang tercatat berdasarkan status orang tua.
 
-Data status santri disajikan pada tabel berikut.
+Data tersebut terdiri dari <b>{$santunanOT}</b> santri dengan status <b>Santunan OT</b>, <b>{$anakYatim}</b> anak yatim, <b>{$anakPiatu}</b> anak piatu, dan <b>{$yatimPiatu}</b> anak yatim piatu.
+
+Data status santri berdasarkan kondisi orang tua disajikan pada tabel berikut.
 
 ";
+
+        /*
+        |--------------------------------------------------------------------------
+        | ANALISIS DATA
+        |--------------------------------------------------------------------------
+        | Analisis dibuat langsung berdasarkan angka pada tabel.
+        |--------------------------------------------------------------------------
+        */
 
         $analysis = "
 
 <b>Analisis Data</b><br><br>
 
-Berdasarkan hasil analisis, santri aktif mendominasi dengan persentase <b>{$persenAktif}%</b>, sedangkan santri nonaktif sebesar <b>{$persenNonaktif}%</b> dan santri lulus sebesar <b>{$persenLulus}%</b>.
+Berdasarkan data pada tabel, dari jumlah total sebanyak <b>{$total} santri</b> menunjukkan bahwa anak dengan status <b>Santunan OT</b> merupakan kelompok dengan jumlah terbanyak, yaitu <b>{$santunanOT} orang</b>. Sementara itu, terdapat <b>{$anakYatim} anak yatim</b>, <b>{$anakPiatu} anak piatu</b>, dan <b>{$yatimPiatu} anak yatim piatu</b>.
 
-Komposisi tersebut menunjukkan kondisi terkini administrasi santri yang tercatat dalam sistem.
+Adapun persentase masing-masing kategori adalah <b>Santunan OT sebesar {$persenSantunanOT}% ({$santunanOT} dari {$total} santri)</b>, <b>Anak Yatim sebesar {$persenAnakYatim}% ({$anakYatim} dari {$total} santri)</b>, <b>Anak Piatu sebesar {$persenAnakPiatu}% ({$anakPiatu} dari {$total} santri)</b>, dan <b>Yatim Piatu sebesar {$persenYatimPiatu}% ({$yatimPiatu} dari {$total} santri)</b>.
+
+Data tersebut memberikan gambaran mengenai kondisi orang tua santri yang tercatat dalam Sistem Informasi TPQ Khairunissa.
 
 ";
+
+        /*
+        |--------------------------------------------------------------------------
+        | KESIMPULAN
+        |--------------------------------------------------------------------------
+        */
 
         $conclusion = "
 
 <b>Kesimpulan</b><br><br>
 
-Status santri pada TPQ Khairunissa menunjukkan bahwa sebagian besar santri masih aktif mengikuti proses pembelajaran, sedangkan sebagian lainnya telah menyelesaikan pendidikan atau tidak lagi aktif.
+Berdasarkan data pada tabel, kategori <b>Santunan OT</b> merupakan kelompok dengan jumlah santri terbanyak, sedangkan kategori lainnya terdiri dari anak yatim, anak piatu, dan yatim piatu. Data tersebut menjadi gambaran kondisi sosial santri yang perlu diperhatikan dalam penyelenggaraan dan pengelolaan pendidikan di TPQ Khairunissa.
 
 ";
+
+        /*
+        |--------------------------------------------------------------------------
+        | RETURN
+        |--------------------------------------------------------------------------
+        */
 
         return [
 

@@ -80,8 +80,7 @@ export default function LaporanRingkas() {
           </h1>
 
           <p className="text-gray-500 mt-1">
-            Kelola judul, sub judul, dan narasi setiap bagian laporan ringkas
-            TPQ Khairunissa.
+            Kelola narasi umum setiap bagian laporan ringkas TPQ Khairunissa.
           </p>
         </div>
         <div className="p-8 space-y-6">

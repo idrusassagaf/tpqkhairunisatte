@@ -6,15 +6,29 @@ class Bab6Report
 {
     public function generate($masterData)
     {
-        $total = collect($masterData['progres_quran'])->count();
+        $data = collect($masterData['progres_quran']);
 
-        $lancar = collect($masterData['progres_quran'])
+        /*
+        |--------------------------------------------------------------------------
+        | DATA DASAR PROGRES AL-QUR'AN
+        |--------------------------------------------------------------------------
+        */
+
+        $total = $data->count();
+
+        $lancar = $data
             ->where('progres', 'Lancar')
             ->count();
 
-        $belum = collect($masterData['progres_quran'])
+        $belum = $data
             ->where('progres', 'Belum')
             ->count();
+
+        /*
+        |--------------------------------------------------------------------------
+        | REKAP
+        |--------------------------------------------------------------------------
+        */
 
         $rekap = [
 
@@ -30,6 +44,12 @@ class Bab6Report
 
         ];
 
+        /*
+        |--------------------------------------------------------------------------
+        | PERSENTASE
+        |--------------------------------------------------------------------------
+        */
+
         $persenLancar = $total
             ? round(($lancar / $total) * 100, 2)
             : 0;
@@ -38,33 +58,80 @@ class Bab6Report
             ? round(($belum / $total) * 100, 2)
             : 0;
 
+        /*
+        |--------------------------------------------------------------------------
+        | RASIO
+        |--------------------------------------------------------------------------
+        */
+
+        if ($belum > 0) {
+
+            $rasioLancarBelum =
+                round($lancar / $belum, 2) . " : 1";
+        } else {
+
+            $rasioLancarBelum = $lancar > 0
+                ? $lancar . " : 0"
+                : "-";
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | NARASI PEMBUKA
+        |--------------------------------------------------------------------------
+        */
+
         $intro = "
 
-Sebanyak <b>{$total}</b> santri mengikuti program pembelajaran Al-Qur'an.
+Sebanyak <b>{$total}</b> data progres santri tercatat dalam program pembelajaran Al-Qur'an.
 
-Perkembangan pembelajaran Al-Qur'an setiap santri dicatat melalui Sistem Informasi TPQ Khairunissa sehingga proses evaluasi pembelajaran dapat dilakukan secara berkelanjutan.
+Perkembangan pembelajaran Al-Qur'an setiap santri dicatat melalui Sistem Informasi TPQ Khairunissa sehingga perkembangan belajar dapat dipantau dan dievaluasi secara berkala.
+
+Berdasarkan data yang tersedia, terdapat <b>{$lancar}</b> santri dengan progres <b>Lancar</b> dan <b>{$belum}</b> santri yang masih berstatus <b>Belum Lancar</b>.
 
 Data progres pembelajaran Al-Qur'an disajikan pada tabel berikut.
 
 ";
 
+        /*
+        |--------------------------------------------------------------------------
+        | ANALISIS DATA
+        |--------------------------------------------------------------------------
+        */
+
         $analysis = "
 
 <b>Analisis Data</b><br><br>
 
-Hasil analisis menunjukkan bahwa santri dengan progres <b>Lancar</b> sebanyak <b>{$lancar}</b> orang atau <b>{$persenLancar}%</b>, sedangkan santri yang masih memerlukan pembinaan berjumlah <b>{$belum}</b> orang atau <b>{$persenBelum}%</b>.
+Berdasarkan data pada tabel, dari jumlah keseluruhan sebanyak <b>{$total}</b> data progres pembelajaran Al-Qur'an, terdapat <b>{$lancar}</b> santri atau sebesar <b>{$persenLancar}%</b> yang memiliki progres <b>Lancar</b>.
 
-Komposisi tersebut memberikan gambaran mengenai tingkat keberhasilan proses pembelajaran Al-Qur'an di TPQ Khairunissa.
+Sementara itu, terdapat <b>{$belum}</b> santri atau sebesar <b>{$persenBelum}%</b> yang masih berstatus <b>Belum Lancar</b> dan memerlukan pendampingan serta pembinaan dalam proses pembelajaran.
+
+Perbandingan antara santri dengan progres Lancar dan Belum Lancar adalah sebesar <b>{$rasioLancarBelum}</b>. Komposisi tersebut memberikan gambaran mengenai perkembangan pembelajaran Al-Qur'an yang tercatat dalam Sistem Informasi TPQ Khairunissa.
 
 ";
+
+        /*
+        |--------------------------------------------------------------------------
+        | KESIMPULAN
+        |--------------------------------------------------------------------------
+        */
 
         $conclusion = "
 
 <b>Kesimpulan</b><br><br>
 
-Secara umum perkembangan pembelajaran Al-Qur'an menunjukkan hasil yang baik. Data progres ini dapat menjadi dasar dalam penyusunan program pembinaan lanjutan bagi santri yang masih memerlukan pendampingan.
+Berdasarkan data progres pembelajaran Al-Qur'an, perkembangan santri dapat dipantau melalui pencatatan progres secara berkala. Santri yang telah mencapai status <b>Lancar</b> dapat terus mempertahankan dan meningkatkan kemampuan membaca Al-Qur'an, sedangkan santri yang masih berstatus <b>Belum Lancar</b> perlu mendapatkan pendampingan dan pembinaan secara berkelanjutan.
+
+Data progres ini dapat menjadi salah satu dasar bagi guru dan pengelola TPQ Khairunissa dalam melakukan evaluasi serta menentukan tindak lanjut pembelajaran pada periode berikutnya.
 
 ";
+
+        /*
+        |--------------------------------------------------------------------------
+        | RETURN
+        |--------------------------------------------------------------------------
+        */
 
         return [
 

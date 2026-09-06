@@ -3,7 +3,9 @@
 <h3>PROGRES HAFALAN SANTRI</h3>
 
 <p style="text-align:justify; line-height:1.8;">
+
     {{ $setting->narasi['bab7'] }}
+
 </p>
 
 <table>
@@ -15,6 +17,7 @@
 
     <tr>
         <td>Total Data Hafalan</td>
+
         <td align="center">
             {{ $progresHafalan->count() }}
         </td>
@@ -37,16 +40,19 @@
     </tr>
 
     @php
+
     $jenisHafalan = $progresHafalan
     ->pluck('jenis_hafalan')
     ->unique()
     ->sort()
     ->values();
+
     @endphp
 
     @foreach($jenisHafalan as $i => $jenis)
 
     @php
+
     $lancar = $progresHafalan
     ->where('jenis_hafalan', $jenis)
     ->where('progres', 'Lancar')
@@ -56,24 +62,62 @@
     ->where('jenis_hafalan', $jenis)
     ->where('progres', 'Belum')
     ->count();
+
     @endphp
 
     <tr>
 
-        <td align="center">{{ $i + 1 }}</td>
+        <td align="center">
+            {{ $i + 1 }}
+        </td>
 
-        <td>{{ $jenis }}</td>
+        <td>
+            {{ $jenis }}
+        </td>
 
-        <td align="center">{{ $lancar }}</td>
+        <td align="center">
+            {{ $lancar }}
+        </td>
 
-        <td align="center">{{ $belum }}</td>
+        <td align="center">
+            {{ $belum }}
+        </td>
 
-        <td align="center">{{ $lancar + $belum }}</td>
+        <td align="center">
+            {{ $lancar + $belum }}
+        </td>
 
     </tr>
 
     @endforeach
 
 </table>
+
+<br>
+
+{{-- =========================================================
+     ANALISIS DATA BAB VII
+     Menggunakan data dari Bab7Report.php
+     ========================================================= --}}
+
+<div style="margin-top:6px;">
+
+    <p style="text-align:justify; line-height:1.6; margin:0;">
+        {!! str_replace('<br><br>', '<br>', $bab7['analysis'] ?? '') !!}
+    </p>
+
+</div>
+
+{{-- =========================================================
+     KESIMPULAN BAB VII
+     ========================================================= --}}
+
+<div style="margin-top:4px;">
+
+    <p style="text-align:justify; line-height:1.6; margin:0;">
+        {!! str_replace('<br><br>', '<br>', $bab7['conclusion'] ?? '') !!}
+    </p>
+
+</div>
 
 <div style="page-break-after:always;"></div>

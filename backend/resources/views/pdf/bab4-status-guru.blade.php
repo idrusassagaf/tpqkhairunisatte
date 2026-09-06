@@ -3,7 +3,9 @@
 <h3>PROFIL GURU</h3>
 
 <p style="text-align:justify; line-height:1.8;">
-    {{ $setting->narasi['bab4'] }}
+
+    {{ $setting->narasi['bab4'] ?? '' }}
+
 </p>
 
 <table>
@@ -16,21 +18,21 @@
     <tr>
         <td>Total Guru</td>
         <td align="center">
-            {{ $masterData['guru']->count() }}
+            {{ $bab4['total'] }}
         </td>
     </tr>
 
     <tr>
         <td>Guru Laki-laki</td>
         <td align="center">
-            {{ $masterData['guru']->where('jenis_kelamin','L')->count() }}
+            {{ $bab4['guru_laki'] }}
         </td>
     </tr>
 
     <tr>
         <td>Guru Perempuan</td>
         <td align="center">
-            {{ $masterData['guru']->where('jenis_kelamin','P')->count() }}
+            {{ $bab4['guru_perempuan'] }}
         </td>
     </tr>
 
@@ -47,14 +49,33 @@
         <th width="25%">Jumlah</th>
     </tr>
 
-    @foreach($masterData['guru']->groupBy('pendidikan') as $pendidikan => $guru)
+    @foreach($bab4['rekap_pendidikan'] as $item)
 
     <tr>
-        <td>{{ $pendidikan ?: '-' }}</td>
-        <td align="center">{{ $guru->count() }}</td>
+
+        <td>
+            {{ $item['nama'] }}
+        </td>
+
+        <td align="center">
+            {{ $item['jumlah'] }}
+        </td>
+
     </tr>
 
     @endforeach
+
+    <tr style="font-weight:bold; background:#f5f5f5;">
+
+        <td>
+            Total Guru
+        </td>
+
+        <td align="center">
+            {{ $bab4['total'] }}
+        </td>
+
+    </tr>
 
 </table>
 
@@ -69,15 +90,58 @@
         <th width="25%">Jumlah</th>
     </tr>
 
-    @foreach($masterData['guru']->groupBy('pekerjaan') as $pekerjaan => $guru)
+    @foreach($bab4['rekap_pekerjaan'] as $item)
 
     <tr>
-        <td>{{ $pekerjaan ?: '-' }}</td>
-        <td align="center">{{ $guru->count() }}</td>
+
+        <td>
+            {{ $item['nama'] }}
+        </td>
+
+        <td align="center">
+            {{ $item['jumlah'] }}
+        </td>
+
     </tr>
 
     @endforeach
 
+    <tr style="font-weight:bold; background:#f5f5f5;">
+
+        <td>
+            Total Guru
+        </td>
+
+        <td align="center">
+            {{ $bab4['total'] }}
+        </td>
+
+    </tr>
+
 </table>
+
+{{-- =========================================================
+     ANALISIS DATA
+     ========================================================= --}}
+
+<div style="margin-top:6px;">
+
+    <p style="text-align:justify; line-height:1.6; margin:0;">
+        {!! str_replace('<br><br>', '<br>', $bab4['analysis'] ?? '') !!}
+    </p>
+
+</div>
+
+{{-- =========================================================
+     KESIMPULAN
+     ========================================================= --}}
+
+<div style="margin-top:4px;">
+
+    <p style="text-align:justify; line-height:1.6; margin:0;">
+        {!! str_replace('<br><br>', '<br>', $bab4['conclusion'] ?? '') !!}
+    </p>
+
+</div>
 
 <div style="page-break-after:always;"></div>

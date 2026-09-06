@@ -155,18 +155,21 @@ class LaporanPdfController extends Controller
 
     private function generatePdf()
     {
+        // =====================================================
+        // PENGATURAN LAPORAN
+        // =====================================================
 
         $setting = PengaturanLaporan::first();
-        if (is_string($setting->narasi)) {
-            $setting->narasi = json_decode($setting->narasi, true);
-        }
+
+        // Jika belum ada pengaturan laporan, gunakan default
         if (!$setting) {
 
             $setting = new PengaturanLaporan();
 
             $setting->judul = "Laporan Ringkas TPQ Khairunissa";
 
-            $setting->sub_judul = "Sistem Informasi Manajemen TPQ Khairunissa";
+            $setting->sub_judul =
+                "Sistem Informasi Manajemen TPQ Khairunissa";
 
             $setting->narasi = [];
 
@@ -174,11 +177,40 @@ class LaporanPdfController extends Controller
 
             $setting->status = "Aktif";
         }
+
+        // =====================================================
+        // NORMALISASI NARASI
+        // =====================================================
+
+        if (is_string($setting->narasi)) {
+
+            $decodedNarasi = json_decode(
+                $setting->narasi,
+                true
+            );
+
+            $setting->narasi = is_array($decodedNarasi)
+                ? $decodedNarasi
+                : [];
+        }
+
+        // =====================================================
+        // DATA MASTER LAPORAN
+        // =====================================================
+
         $masterData = $this->dataLaporan();
+
+        // =====================================================
+        // GENERATE ISI LAPORAN
+        // =====================================================
 
         $report = new ReportEngine($masterData);
 
         $laporan = $report->generate();
+
+        // =====================================================
+        // GENERATE PDF
+        // =====================================================
 
         $pdf = Pdf::loadView(
             'pdf.laporan-ringkas',
@@ -200,63 +232,69 @@ class LaporanPdfController extends Controller
                     'progresIqra' => ProgresIqra::all(),
                     'progresQuran' => ProgresQuran::all(),
                     'progresHafalan' => ProgresHafalan::all(),
-
                 ],
                 $this->statistik()
             )
         );
+
+        // =====================================================
+        // SETTING KERTAS
+        // =====================================================
 
         $pdf->setPaper(
             'A4',
             'portrait'
         );
 
+        // =====================================================
+        // FOOTER PDF
+        // =====================================================
 
         $dompdf = $pdf->getDomPDF();
 
         $dompdf->render();
 
-
         $canvas = $dompdf->get_canvas();
 
+        $canvas->page_script(
+            function (
+                $pageNumber,
+                $pageCount,
+                $canvas,
+                $fontMetrics
+            ) {
 
-        $font = $dompdf
-            ->getFontMetrics()
-            ->getFont(
-                'Helvetica',
-                'italic'
-            );
+                // Cover (halaman 1) tidak diberi footer
+                if ($pageNumber == 1) {
+                    return;
+                }
 
+                $font = $fontMetrics->getFont(
+                    'Helvetica',
+                    'italic'
+                );
 
-        $canvas->page_script(function ($pageNumber, $pageCount, $canvas, $fontMetrics) {
+                $canvas->text(
+                    35,
+                    808,
+                    "Laporan Ringkas TPQ Khairunissa - Update : "
+                        . date('d-m-Y'),
+                    $font,
+                    10
+                );
 
-            // Cover (halaman 1) tidak diberi footer
-            if ($pageNumber == 1) {
-                return;
+                $canvas->text(
+                    465,
+                    808,
+                    "Hal {$pageNumber} - {$pageCount}",
+                    $font,
+                    10
+                );
             }
-
-            $font = $fontMetrics->getFont('Helvetica', 'italic');
-
-            $canvas->text(
-                35,
-                808,
-                "Laporan Ringkas TPQ Khairunissa - Update : " . date('d-m-Y'),
-                $font,
-                10
-            );
-
-            $canvas->text(
-                465,
-                808,
-                "Hal {$pageNumber} - {$pageCount}",
-                $font,
-                10
-            );
-        });
+        );
 
         return $pdf;
     }
-
 
 
     // DOWNLOAD PDF

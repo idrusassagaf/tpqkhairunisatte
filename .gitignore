@@ -1,0 +1,28 @@
+# Environment files
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Temporary / accidental files
+frontend/npm
+
+# Laravel
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+# SQLite local database
+backend/database/database.sqlite
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Backup files
+backend/app/Http/Controllers/Api/AiController_backup.php

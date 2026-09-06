@@ -20,6 +20,11 @@ import Pengumuman from "./pages/Pengumuman";
 import KalenderPengajian from "./pages/KalenderPengajian";
 import Galeri from "./pages/Galeri";
 import LaporanRingkas from "./pages/LaporanRingkas";
+
+import ManagementUser from "./pages/ManagementUser";
+import ManagementPassword from "./pages/ManagementPassword";
+import PengaturanSistem from "./pages/PengaturanSistem";
+
 import PublicLayout from "./public/PublicLayout";
 
 import Home from "./public/Home";
@@ -37,6 +42,9 @@ import LoginAdmin from "./public/LoginAdmin";
 export default function App() {
   return (
     <Routes>
+      {/* =====================================================
+          WEBSITE PUBLIC
+      ====================================================== */}
       <Route path="/web" element={<PublicLayout />}>
         <Route index element={<Home />} />
         <Route path="profil" element={<ProfilTPQ />} />
@@ -51,12 +59,17 @@ export default function App() {
         <Route path="login" element={<LoginAdmin />} />
       </Route>
 
+      {/* =====================================================
+          ADMIN / VIEWER AREA
+      ====================================================== */}
       <Route path="/" element={<Layout />}>
         <Route index element={<Dashboard />} />
 
         <Route path="dashboard" element={<Dashboard />} />
+
         <Route path="master-data" element={<MasterData />} />
         <Route path="master-progres" element={<MasterProgres />} />
+        <Route path="master-hafalan" element={<MasterHafalan />} />
 
         <Route path="data-santri" element={<DataSantri />} />
         <Route path="data-guru" element={<DataGuru />} />
@@ -64,22 +77,46 @@ export default function App() {
         <Route path="progres-iqra" element={<ProgresIqra />} />
         <Route path="progres-quran" element={<ProgresQuran />} />
 
-        {/* ================= MASTER HAFALAN ================= */}
-        <Route path="master-hafalan" element={<MasterHafalan />} />
-
+        {/* ===================================================
+            MASTER HAFALAN
+        ==================================================== */}
         <Route path="master-hafalan/:nis" element={<ProgresHafalanSantri />} />
 
-        {/* ================= PROGRES HAFALAN ================= */}
+        {/* ===================================================
+            PROGRES HAFALAN
+        ==================================================== */}
         <Route path="progres-hafalan" element={<ProgresHafalan />} />
+
         <Route path="progres-hafalan/:nis" element={<ProgresHafalanSantri />} />
 
-        {/* ================= SUB INFORMASI DAN LAPORAN ================= */}
-        <Route path="/berita" element={<Berita />} />
-        <Route path="/pengumuman" element={<Pengumuman />} />
-        <Route path="/kalender-pengajian" element={<KalenderPengajian />} />
-        <Route path="/galeri" element={<Galeri />} />
-        <Route path="/laporan-ringkas" element={<LaporanRingkas />} />
+        {/* ===================================================
+            INFORMASI
+        ==================================================== */}
+        <Route path="berita" element={<Berita />} />
+        <Route path="pengumuman" element={<Pengumuman />} />
+        <Route path="kalender-pengajian" element={<KalenderPengajian />} />
+        <Route path="galeri" element={<Galeri />} />
+
+        {/* ===================================================
+            LAPORAN
+        ==================================================== */}
+        <Route path="laporan-ringkas" element={<LaporanRingkas />} />
+
+        {/* ===================================================
+            DATA GURU
+        ==================================================== */}
         <Route path="status-guru" element={<StatusGuru />} />
+
+        {/* ===================================================
+            MANAGEMENT DATA
+            Menu akan dibatasi berdasarkan Role di Sidebar.
+            Proteksi API tetap dilakukan oleh AdminOnly.
+        ==================================================== */}
+        <Route path="management-user" element={<ManagementUser />} />
+
+        <Route path="management-password" element={<ManagementPassword />} />
+
+        <Route path="pengaturan-sistem" element={<PengaturanSistem />} />
       </Route>
     </Routes>
   );
