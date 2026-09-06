@@ -118,51 +118,27 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* ================= HERO / HEADER ================= */}
+        {/* ================= HEADER ================= */}
 
-        <div className="relative overflow-hidden rounded-3xl bg-gray-200 backdrop-blur-xl border border-white/50 text-gray-800 shadow-xl">
-          {/* DEKORASI GLASS */}
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          {/* DASHBOARD */}
 
-          <div className="absolute -right-16 -top-16 w-48 h-48 rounded-full bg-purple-200/30 blur-2xl" />
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-800">
+              Dashboard
+            </h1>
+          </div>
 
-          <div className="absolute -right-8 -bottom-24 w-64 h-64 rounded-full bg-indigo-200/30 blur-3xl" />
+          {/* TANGGAL */}
 
-          <div className="relative py-2 px-4 md:py-3 md:px-7">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-              {/* INFORMASI TPQ */}
+          <div className="flex items-center gap-3 bg-white/50 backdrop-blur-md border border-white/60 rounded-2xl px-4 py-3 w-fit shadow-md">
+            <CalendarDays size={20} className="text-purple-700" />
 
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="p-2 rounded-xl bg-white/60 backdrop-blur-sm border border-white/70 shadow-sm">
-                    <Sparkles size={20} className="text-purple-700" />
-                  </div>
+            <div>
+              <div className="text-xs text-gray-500">Hari ini</div>
 
-                  <span className="text-sm font-medium text-gray-600">
-                    Sistem Informasi Manajemen
-                  </span>
-                </div>
-
-                <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-800">
-                  TPQ KHAIRUNISSA TERNATE
-                </h1>
-
-                <p className="mt-2 text-gray-600 text-sm md:text-base">
-                  Membentuk Generasi Qur'ani Berakhlaq
-                </p>
-              </div>
-
-              {/* TANGGAL */}
-
-              <div className="flex items-center gap-3 bg-white/50 backdrop-blur-md border border-white/60 rounded-2xl px-4 py-3 w-fit shadow-md">
-                <CalendarDays size={20} className="text-purple-700" />
-
-                <div>
-                  <div className="text-xs text-gray-500">Hari ini</div>
-
-                  <div className="text-sm font-semibold text-gray-800">
-                    {tanggalHariIni}
-                  </div>
-                </div>
+              <div className="text-sm font-semibold text-gray-800">
+                {tanggalHariIni}
               </div>
             </div>
           </div>
