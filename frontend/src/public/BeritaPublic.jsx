@@ -65,7 +65,7 @@ export default function BeritaPublic() {
               >
                 <div className="grid md:grid-cols-2">
                   <img
-                    src={`http://127.0.0.1:8000/storage/${berita[0].foto}`}
+                    src={`${api.defaults.baseURL.replace(/\/api\/?$/, "")}/storage/${berita[0].foto}`}
                     alt={berita[0].judul}
                     className="w-full h-52 md:h-80 object-cover"
                   />
@@ -138,7 +138,7 @@ export default function BeritaPublic() {
                   hover:-translate-y-1 transition "
                 >
                   <img
-                    src={`http://127.0.0.1:8000/storage/${item.foto}`}
+                    src={`${api.defaults.baseURL.replace(/\/api\/?$/, "")}/storage/${item.foto}`}
                     alt={item.judul}
                     className="w-full h-36 md:h-44 object-cover"
                   />

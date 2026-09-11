@@ -869,7 +869,7 @@ export default function MasterData() {
                     <div className="flex justify-center mb-3">
                       {d.foto ? (
                         <img
-                          src={`http://localhost:8000/storage/${d.foto}`}
+                          src={`${api.defaults.baseURL.replace(/\/api\/?$/, "")}/storage/${d.foto}`}
                           alt="foto"
                           className="w-24 h-24 object-cover rounded-full border-4 border-white shadow"
                         />
@@ -972,7 +972,7 @@ export default function MasterData() {
                       <td className="p-2">
                         {d.foto ? (
                           <img
-                            src={`http://localhost:8000/storage/${d.foto}`}
+                            src={`${api.defaults.baseURL.replace(/\/api\/?$/, "")}/storage/${d.foto}`}
                             alt="foto"
                             className="w-12 h-12 object-cover rounded"
                           />

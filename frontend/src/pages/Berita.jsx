@@ -148,7 +148,9 @@ export default function Berita() {
     });
 
     if (item.foto) {
-      setPreview(`http://127.0.0.1:8000/storage/${item.foto}`);
+      setPreview(
+        `${api.defaults.baseURL.replace(/\/api\/?$/, "")}/storage/${item.foto}`,
+      );
     } else {
       setPreview(null);
     }
@@ -256,7 +258,7 @@ export default function Berita() {
             >
               {item.foto && (
                 <img
-                  src={`http://127.0.0.1:8000/storage/${item.foto}`}
+                  src={`${api.defaults.baseURL.replace(/\/api\/?$/, "")}/storage/${item.foto}`}
                   alt=""
                   className="w-full h-40 object-cover rounded-lg mb-3"
                 />
@@ -329,7 +331,7 @@ export default function Berita() {
                     <td className="p-3">
                       {item.foto ? (
                         <img
-                          src={`http://127.0.0.1:8000/storage/${item.foto}`}
+                          src={`${api.defaults.baseURL.replace(/\/api\/?$/, "")}/storage/${item.foto}`}
                           alt=""
                           className="w-14 h-14 object-cover rounded"
                         />

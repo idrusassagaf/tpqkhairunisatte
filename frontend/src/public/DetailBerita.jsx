@@ -183,7 +183,10 @@ ${getBeritaUrl()}`;
               <div>
                 {berita.foto ? (
                   <img
-                    src={`http://127.0.0.1:8000/storage/${berita.foto}`}
+                    src={`${api.defaults.baseURL.replace(
+                      /\/api\/?$/,
+                      "",
+                    )}/storage/${berita.foto}`}
                     alt={berita.judul}
                     className="
                       w-full

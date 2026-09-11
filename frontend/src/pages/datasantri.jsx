@@ -12,8 +12,11 @@ import { api } from "../api";
 
 export default function DataSantri() {
   const [data, setData] = useState([]);
+
   const [search, setSearch] = useState("");
+
   const [currentPage, setCurrentPage] = useState(1);
+
   const [showDownload, setShowDownload] = useState(false);
 
   // ================= PAGINATION SETTING =================
@@ -82,6 +85,7 @@ export default function DataSantri() {
     setSearch(e.target.value);
 
     // Kembali ke halaman pertama ketika pencarian berubah
+
     setCurrentPage(1);
   };
 
@@ -203,7 +207,9 @@ export default function DataSantri() {
 
     const tanggalRealtime = new Date().toLocaleDateString("id-ID", {
       day: "2-digit",
+
       month: "long",
+
       year: "numeric",
     });
 
@@ -269,17 +275,29 @@ export default function DataSantri() {
       head: [
         [
           "No",
+
           "Nama",
+
           "NIS",
+
           "JK",
+
           "Usia",
+
           "Tgl Lahir",
+
           "Kelas",
+
           "Alamat",
+
           "Kontak",
+
           "Ayah",
+
           "Ibu",
+
           "Status Ortu",
+
           "Status Anak",
         ],
       ],
@@ -457,10 +475,7 @@ export default function DataSantri() {
               <div className="bg-purple-600 p-2 mb-1 flex flex-col items-center space-y-0.5 text-center">
                 {d.foto ? (
                   <img
-                    src={`${api.defaults.baseURL.replace(
-                      /\/api$/,
-                      "",
-                    )}/storage/${d.foto}`}
+                    src={`${api.defaults.baseURL.replace(/\/api\/?$/, "")}/storage/${d.foto}`}
                     alt="foto"
                     className="w-24 h-24 rounded-full object-cover border-4 border-white shadow"
                   />
@@ -548,10 +563,7 @@ export default function DataSantri() {
                   <td className="p-3">
                     {d.foto ? (
                       <img
-                        src={`${api.defaults.baseURL.replace(
-                          /\/api$/,
-                          "",
-                        )}/storage/${d.foto}`}
+                        src={`${api.defaults.baseURL.replace(/\/api\/?$/, "")}/storage/${d.foto}`}
                         alt="foto"
                         className="w-12 h-12 object-cover rounded"
                       />

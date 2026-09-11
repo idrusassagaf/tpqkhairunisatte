@@ -98,7 +98,7 @@ export default function Galeri() {
             className="bg-white rounded-2xl shadow overflow-hidden"
           >
             <img
-              src={`http://127.0.0.1:8000/storage/${item.foto}`}
+              src={`${api.defaults.baseURL.replace(/\/api\/?$/, "")}/storage/${item.foto}`}
               alt={item.judul}
               className="w-full h-56 object-cover"
             />
