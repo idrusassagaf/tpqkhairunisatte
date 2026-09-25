@@ -8,10 +8,15 @@ use App\Http\Controllers\Api\AiController;
 use App\Http\Controllers\Api\SantriController;
 use App\Http\Controllers\Api\ProgresIqraController;
 use App\Http\Controllers\Api\ProgresQuranController;
+use App\Http\Controllers\Api\AbsensiController;
 use App\Http\Controllers\Api\BeritaController;
+use App\Http\Controllers\Api\BeritaTranslationController;
+use App\Http\Controllers\Api\PengumumanTranslationController;
 use App\Http\Controllers\PengumumanController;
 use App\Http\Controllers\JadwalPengajianController;
 use App\Http\Controllers\Api\GaleriController;
+use App\Http\Controllers\Api\GaleriTranslationController;
+use App\Http\Controllers\Api\ProfilTranslationController;
 use App\Http\Controllers\Api\LaporanPdfController;
 use App\Http\Controllers\Api\ProgresHafalanController;
 use App\Http\Controllers\Api\LaporanSettingController;
@@ -74,8 +79,28 @@ Route::get(
     [MasterDataController::class, 'index']
 );
 
+// ====================================================
+// ABSENSI
+// ADMIN ONLY
+// ====================================================
+
+Route::get(
+    '/absensi',
+    [AbsensiController::class, 'index']
+);
+
+Route::post(
+    '/absensi',
+    [AbsensiController::class, 'store']
+);
+
+Route::post(
+    '/absensi/scan',
+    [AbsensiController::class, 'scan']
+);
+
 // ------------------------------------------------------------
-// BERITA
+// BERITA PUBLIC
 // ------------------------------------------------------------
 
 Route::get(
@@ -83,6 +108,15 @@ Route::get(
     [BeritaController::class, 'index']
 );
 
+Route::post(
+    '/berita/{id}/dibaca',
+    [BeritaController::class, 'dibaca']
+);
+
+Route::post(
+    '/berita/translate',
+    [BeritaTranslationController::class, 'translate']
+);
 
 // ------------------------------------------------------------
 // PENGUMUMAN
@@ -92,7 +126,10 @@ Route::get(
     '/pengumuman',
     [PengumumanController::class, 'index']
 );
-
+Route::post(
+    '/pengumuman/translate',
+    [PengumumanTranslationController::class, 'translate']
+);
 
 // ------------------------------------------------------------
 // GALERI
@@ -101,6 +138,20 @@ Route::get(
 Route::get(
     '/galeri',
     [GaleriController::class, 'index']
+);
+
+Route::post(
+    '/galeri/translate',
+    [GaleriTranslationController::class, 'translate']
+);
+
+// ------------------------------------------------------------
+// PROFIL TPQ
+// ------------------------------------------------------------
+
+Route::post(
+    '/profil/translate',
+    [ProfilTranslationController::class, 'translate']
 );
 
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useOutletContext } from "react-router-dom";
 import { api } from "../api";
 import heroImage from "../assets/hero-putih04.jpg";
 
@@ -9,12 +9,39 @@ import jsPDF from "jspdf";
 
 export default function DetailPengumuman() {
   const { id } = useParams();
+  const { language } = useOutletContext();
 
   const [pengumuman, setPengumuman] = useState(null);
 
+  const translations = {
+    id: {
+      back: "Kembali ke Pengumuman",
+      download: "Download PDF",
+      notFound: "Pengumuman tidak ditemukan",
+      validUntil: "Berlaku sampai:",
+      documentTitle: "PENGUMUMAN",
+    },
+    en: {
+      back: "Back to Announcements",
+      download: "Download PDF",
+      notFound: "Announcement not found",
+      validUntil: "Valid until:",
+      documentTitle: "ANNOUNCEMENT",
+    },
+    ar: {
+      back: "العودة إلى الإعلانات",
+      download: "تحميل PDF",
+      notFound: "الإعلان غير موجود",
+      validUntil: "ساري حتى:",
+      documentTitle: "إعلان",
+    },
+  };
+
+  const t = translations[language] || translations.id;
+
   useEffect(() => {
     loadData();
-  }, []);
+  }, [id, language]);
 
   // =========================================================
   // LOAD DATA PENGUMUMAN
@@ -28,27 +55,74 @@ export default function DetailPengumuman() {
 
       const item = data.find((p) => String(p.id) === String(id));
 
-      setPengumuman(item);
+      if (!item) {
+        setPengumuman(null);
+        return;
+      }
+
+      if (language === "id") {
+        setPengumuman(item);
+        return;
+      }
+
+      const cacheKey = `tpq_pengumuman_translation_${item.id}_${language}`;
+      const cached = sessionStorage.getItem(cacheKey);
+
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+
+          setPengumuman({
+            ...item,
+            judul: parsed.judul,
+            isi: parsed.isi,
+          });
+
+          return;
+        } catch {
+          sessionStorage.removeItem(cacheKey);
+        }
+      }
+
+      try {
+        const translationRes = await api.post("/pengumuman/translate", {
+          judul: item.judul,
+          isi: item.isi,
+          language,
+        });
+
+        const result = translationRes.data?.data;
+
+        if (result?.judul && result?.isi) {
+          sessionStorage.setItem(
+            cacheKey,
+            JSON.stringify({
+              judul: result.judul,
+              isi: result.isi,
+            }),
+          );
+
+          setPengumuman({
+            ...item,
+            judul: result.judul,
+            isi: result.isi,
+          });
+        } else {
+          setPengumuman(item);
+        }
+      } catch (err) {
+        console.error(`Gagal menerjemahkan pengumuman ${item.id}:`, err);
+
+        setPengumuman(item);
+      }
     } catch (err) {
       console.error("Gagal mengambil data pengumuman:", err);
+      setPengumuman(null);
     }
   };
 
   // =========================================================
   // FUNGSI JUSTIFY UNTUK PDF
-  // =========================================================
-  //
-  // jsPDF tidak mempunyai text-align: justify seperti CSS.
-  //
-  // Fungsi ini:
-  // 1. Membagi teks menjadi kata.
-  // 2. Menyusun kata menjadi baris.
-  // 3. Menghitung lebar setiap baris.
-  // 4. Menambah jarak antar kata.
-  // 5. Membuat baris penuh dari margin kiri sampai kanan.
-  //
-  // Baris terakhir setiap paragraf tetap rata kiri.
-  //
   // =========================================================
 
   const drawJustifiedText = (
@@ -102,55 +176,26 @@ export default function DetailPengumuman() {
         lines.push(currentLine);
       }
 
-      // =====================================================
-      // CETAK SETIAP BARIS
-      // =====================================================
-
       lines.forEach((lineWords, lineIndex) => {
-        // ===================================================
-        // CEK BATAS BAWAH HALAMAN
-        // ===================================================
-
         if (currentY > pageHeight - bottomMargin) {
           doc.addPage();
-
           currentY = 20;
         }
-
-        // ===================================================
-        // BARIS TERAKHIR
-        // ===================================================
-        //
-        // Baris terakhir paragraf tidak dipaksa justify.
-        //
-        // ===================================================
 
         const isLastLine = lineIndex === lines.length - 1;
 
         if (isLastLine || lineWords.length === 1) {
           doc.text(lineWords.join(" "), x, currentY);
         } else {
-          // =================================================
-          // HITUNG LEBAR KATA
-          // =================================================
-
           let totalWordWidth = 0;
 
           lineWords.forEach((word) => {
             totalWordWidth += doc.getTextWidth(word);
           });
 
-          // =================================================
-          // HITUNG JARAK ANTAR KATA
-          // =================================================
-
           const jumlahSpasi = lineWords.length - 1;
 
           const extraSpace = (maxWidth - totalWordWidth) / jumlahSpasi;
-
-          // =================================================
-          // CETAK KATA SATU PER SATU
-          // =================================================
 
           let posisiX = x;
 
@@ -167,10 +212,6 @@ export default function DetailPengumuman() {
 
         currentY += lineHeight;
       });
-
-      // =====================================================
-      // JARAK ANTAR PARAGRAF
-      // =====================================================
 
       if (paragraphIndex < paragraphs.length - 1) {
         currentY += 4;
@@ -191,10 +232,6 @@ export default function DetailPengumuman() {
         return;
       }
 
-      // =====================================================
-      // TANGGAL REALTIME SAAT DOWNLOAD
-      // =====================================================
-
       const sekarang = new Date();
 
       const tanggalUpdate = sekarang.toLocaleDateString("id-ID", {
@@ -203,10 +240,6 @@ export default function DetailPengumuman() {
         year: "numeric",
       });
 
-      // =====================================================
-      // BUAT PDF A4 PORTRAIT
-      // =====================================================
-
       const doc = new jsPDF({
         orientation: "portrait",
         unit: "mm",
@@ -214,9 +247,7 @@ export default function DetailPengumuman() {
       });
 
       const pageWidth = doc.internal.pageSize.getWidth();
-
       const pageHeight = doc.internal.pageSize.getHeight();
-
       const centerX = pageWidth / 2;
 
       // =====================================================
@@ -224,7 +255,6 @@ export default function DetailPengumuman() {
       // =====================================================
 
       doc.setFont("helvetica", "bold");
-
       doc.setFontSize(16);
 
       doc.text("TPQ KHAIRUNNISSA TERNATE", centerX, 15, {
@@ -232,7 +262,6 @@ export default function DetailPengumuman() {
       });
 
       doc.setFont("helvetica", "normal");
-
       doc.setFontSize(10);
 
       doc.text("Membentuk Generasi Quran'i Berakhlak", centerX, 21, {
@@ -240,7 +269,6 @@ export default function DetailPengumuman() {
       });
 
       doc.setDrawColor(180, 180, 180);
-
       doc.line(20, 26, pageWidth - 20, 26);
 
       // =====================================================
@@ -248,10 +276,9 @@ export default function DetailPengumuman() {
       // =====================================================
 
       doc.setFont("helvetica", "bold");
-
       doc.setFontSize(15);
 
-      doc.text("PENGUMUMAN", centerX, 40, {
+      doc.text(t.documentTitle, centerX, 40, {
         align: "center",
       });
 
@@ -260,7 +287,6 @@ export default function DetailPengumuman() {
       // =====================================================
 
       doc.setFont("helvetica", "bold");
-
       doc.setFontSize(9);
 
       doc.text(`Status: ${pengumuman.status || "-"}`, 20, 51);
@@ -270,7 +296,6 @@ export default function DetailPengumuman() {
       // =====================================================
 
       doc.setFont("helvetica", "bold");
-
       doc.setFontSize(13);
 
       const judulPengumuman = pengumuman.judul || "-";
@@ -288,11 +313,10 @@ export default function DetailPengumuman() {
       // =====================================================
 
       doc.setFont("helvetica", "normal");
-
       doc.setFontSize(9);
 
       doc.text(
-        `Berlaku sampai: ${pengumuman.tanggal_berakhir || "-"}`,
+        `${t.validUntil} ${pengumuman.tanggal_berakhir || "-"}`,
         20,
         posisiY,
       );
@@ -314,7 +338,6 @@ export default function DetailPengumuman() {
       // =====================================================
 
       doc.setFont("helvetica", "normal");
-
       doc.setFontSize(10);
 
       const isiPengumuman = pengumuman.isi || "-";
@@ -340,9 +363,7 @@ export default function DetailPengumuman() {
         doc.setPage(halaman);
 
         doc.setFont("helvetica", "normal");
-
         doc.setFontSize(7);
-
         doc.setTextColor(100, 100, 100);
 
         doc.text(
@@ -383,7 +404,7 @@ export default function DetailPengumuman() {
   // =========================================================
 
   if (!pengumuman) {
-    return <div className="p-10 text-center">Pengumuman tidak ditemukan</div>;
+    return <div className="p-10 text-center">{t.notFound}</div>;
   }
 
   // =========================================================
@@ -392,10 +413,6 @@ export default function DetailPengumuman() {
 
   return (
     <div className="bg-[#f8faf8] min-h-screen">
-      {/* ===================================================
-          HEADER
-      =================================================== */}
-
       <section
         className="
           relative
@@ -422,9 +439,7 @@ export default function DetailPengumuman() {
             md:px-6
           "
         >
-          {/* =================================================
-              TOMBOL
-          ================================================= */}
+          {/* TOMBOL */}
 
           <div
             className="
@@ -434,10 +449,6 @@ export default function DetailPengumuman() {
               flex-wrap
             "
           >
-            {/* =================================================
-                KEMBALI
-            ================================================= */}
-
             <Link
               to="/web/pengumuman"
               className="
@@ -459,12 +470,8 @@ export default function DetailPengumuman() {
               "
             >
               <ArrowLeft size={18} />
-              Kembali ke Pengumuman
+              {t.back}
             </Link>
-
-            {/* =================================================
-                DOWNLOAD PDF
-            ================================================= */}
 
             <button
               type="button"
@@ -488,14 +495,12 @@ export default function DetailPengumuman() {
               "
             >
               <Download size={18} />
-              Download PDF
+              {t.download}
               <FileText size={17} />
             </button>
           </div>
 
-          {/* =================================================
-              CARD PENGUMUMAN
-          ================================================= */}
+          {/* CARD PENGUMUMAN */}
 
           <div
             className="
@@ -509,10 +514,7 @@ export default function DetailPengumuman() {
               md:p-8
             "
           >
-            {/* =================================================
-                STATUS
-            ================================================= */}
-
+            {/* STATUS */}
             <div className="mb-6">
               <span
                 className="
@@ -530,11 +532,7 @@ export default function DetailPengumuman() {
                 {pengumuman.status}
               </span>
             </div>
-
-            {/* =================================================
-                JUDUL
-            ================================================= */}
-
+            {/* JUDUL */}
             <h1
               className="
                 text-2xl
@@ -546,11 +544,7 @@ export default function DetailPengumuman() {
             >
               {pengumuman.judul}
             </h1>
-
-            {/* =================================================
-                TANGGAL
-            ================================================= */}
-
+            {/* TANGGAL */}
             <div
               className="
                 flex
@@ -563,41 +557,48 @@ export default function DetailPengumuman() {
               "
             >
               <CalendarDays size={18} />
-              Berlaku sampai: {pengumuman.tanggal_berakhir}
+              {t.validUntil} {pengumuman.tanggal_berakhir}
             </div>
 
-            {/* =================================================
-                ISI PENGUMUMAN PUBLIC
-            ================================================= */}
-
+            {/* ISI PENGUMUMAN PUBLIC */}
             <div
               className="
                 text-gray-700
                 text-sm
                 md:text-base
-                leading-7
+                leading-6
+                md:leading-7
                 w-full
               "
               style={{
                 textAlign: "justify",
+                wordBreak: "normal",
+                overflowWrap: "break-word",
               }}
             >
               {(pengumuman.isi || "-")
+                .replace(/\r\n/g, "\n")
+                .replace(/\r/g, "\n")
                 .split(/\n\s*\n/)
                 .map((paragraf, index) => {
                   const teksParagraf = paragraf
-                    .trim()
-                    .replace(/\s*\n\s*/g, " ");
+                    .replace(/[ \t]+/g, " ")
+                    .replace(/\s*\n\s*/g, " ")
+                    .trim();
+
+                  if (!teksParagraf) {
+                    return null;
+                  }
 
                   return (
                     <p
                       key={index}
-                      className="
-                          mb-4
-                          w-full
-                        "
+                      className="mb-5 w-full"
                       style={{
                         textAlign: "justify",
+                        textAlignLast: "left",
+                        wordBreak: "normal",
+                        overflowWrap: "break-word",
                       }}
                     >
                       {teksParagraf}

@@ -1,6 +1,44 @@
-<h2>BAB III</h2>
+@php
+$pdfLanguage = $language ?? 'id';
 
-<h3>DATA GURU</h3>
+$labels = [
+'id' => [
+'bab' => 'BAB III',
+'title' => 'DATA GURU',
+'no' => 'No',
+'nama_guru' => 'Nama Guru',
+'nig' => 'NIG',
+'jenis_kelamin' => 'Jenis Kelamin',
+'pekerjaan' => 'Pekerjaan',
+],
+
+'en' => [
+'bab' => 'CHAPTER III',
+'title' => 'TEACHER DATA',
+'no' => 'No',
+'nama_guru' => 'Teacher Name',
+'nig' => 'NIG',
+'jenis_kelamin' => 'Gender',
+'pekerjaan' => 'Occupation',
+],
+
+'ar' => [
+'bab' => 'الفصل الثالث',
+'title' => 'بيانات المعلمين',
+'no' => 'الرقم',
+'nama_guru' => 'اسم المعلم',
+'nig' => 'NIG',
+'jenis_kelamin' => 'الجنس',
+'pekerjaan' => 'المهنة',
+],
+];
+
+$label = $labels[$pdfLanguage] ?? $labels['id'];
+@endphp
+
+<h2>{{ $label['bab'] }}</h2>
+
+<h3>{{ $label['title'] }}</h3>
 
 <p style="text-align:justify; line-height:1.8;">
 
@@ -11,11 +49,11 @@
 <table>
 
     <tr>
-        <th width="8%">No</th>
-        <th>Nama Guru</th>
-        <th width="18%">NIG</th>
-        <th width="18%">Jenis Kelamin</th>
-        <th width="22%">Pekerjaan</th>
+        <th width="8%">{{ $label['no'] }}</th>
+        <th>{{ $label['nama_guru'] }}</th>
+        <th width="18%">{{ $label['nig'] }}</th>
+        <th width="18%">{{ $label['jenis_kelamin'] }}</th>
+        <th width="22%">{{ $label['pekerjaan'] }}</th>
     </tr>
 
     @foreach($masterData['guru'] as $guru)

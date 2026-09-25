@@ -14,12 +14,12 @@ export default function Layout() {
       {/* CONTENT AREA */}
       <div
         className={`
-    flex-1 flex flex-col pt-14
+   flex-1 min-w-0 flex flex-col pt-14
     transition-all duration-300 ease-in-out
 
     ${open ? "md:ml-64" : "md:ml-16"}
 
-    pl-16 md:pl-0
+    pl-0 md:pl-0
   `}
       >
         {/* NAVBAR */}

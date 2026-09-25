@@ -19,7 +19,82 @@ import ChatAI from "./ChatAI";
 
 export default function PublicLayout() {
   const [mobileMenu, setMobileMenu] = useState(false);
+  const [language, setLanguage] = useState("id");
   const location = useLocation();
+
+  const translations = {
+    id: {
+      home: "Home",
+      profile: "Profil",
+      news: "Berita",
+      announcement: "Pengumuman",
+      calendar: "Kalender",
+      gallery: "Galeri",
+      reports: "Laporan",
+      contact: "Kontak",
+      login: "Login Admin",
+
+      footerTitle: "TPQ KHAIRUNNISA",
+      footerDescription:
+        "Terima kasih telah berkunjung ke website Taman Pendidikan Al-Qur'an Khairunissa Ternate yang berkomitmen membentuk generasi Qurani yang berilmu, berakhlak, dan berkarakter Islami.",
+      menu: "Menu",
+      information: "Informasi",
+
+      address: "Jl. MT. Habib Abubakar Al-Atas No.12",
+      location: "Gamalama, Ternate, Maluku Utara",
+      whatsapp: "WhatsApp: 0852-4020-4028",
+      operatingHours: "Jam Operasional",
+      contactUs: "Silakan hubungi kami",
+    },
+
+    en: {
+      home: "Home",
+      profile: "Profile",
+      news: "News",
+      announcement: "Announcements",
+      calendar: "Calendar",
+      gallery: "Gallery",
+      reports: "Reports",
+      contact: "Contact",
+      login: "Admin Login",
+
+      footerTitle: "TPQ KHAIRUNNISA",
+      footerDescription:
+        "Thank you for visiting the website of Taman Pendidikan Al-Qur'an Khairunissa Ternate, committed to nurturing a Qur'anic generation with knowledge, good character, and Islamic values.",
+      menu: "Navigation",
+      information: "Information",
+
+      address: "Jl. MT. Habib Abubakar Al-Atas No.12",
+      location: "Gamalama, Ternate, Maluku Utara",
+      whatsapp: "WhatsApp: 0852-4020-4028",
+      operatingHours: "Operating Hours",
+      contactUs: "Please contact us",
+    },
+
+    ar: {
+      home: "الرئيسية",
+      profile: "الملف الشخصي",
+      news: "الأخبار",
+      announcement: "الإعلانات",
+      calendar: "التقويم",
+      gallery: "المعرض",
+      reports: "التقارير",
+      contact: "اتصل بنا",
+      login: "دخول المسؤول",
+
+      footerTitle: "TPQ KHAIRUNNISA",
+      footerDescription:
+        "شكرًا لزيارتكم موقع Taman Pendidikan Al-Qur'an Khairunissa Ternate، الذي يلتزم بتكوين جيل قرآني متعلم، حسن الأخلاق، ومتصف بالقيم الإسلامية.",
+      menu: "القائمة",
+      information: "المعلومات",
+
+      address: "Jl. MT. Habib Abubakar Al-Atas No.12",
+      location: "Gamalama, Ternate, Maluku Utara",
+      whatsapp: "واتساب: 0852-4020-4028",
+      operatingHours: "ساعات العمل",
+      contactUs: "يرجى التواصل معنا",
+    },
+  };
 
   const isHome = location.pathname === "/web";
 
@@ -125,7 +200,7 @@ export default function PublicLayout() {
               </div>
 
               <span className="mt-1 text-[10px] text-gray-700 font-medium">
-                Home
+                {translations[language].home}
               </span>
             </Link>
 
@@ -170,7 +245,7 @@ export default function PublicLayout() {
               </div>
 
               <span className="mt-1 text-[10px] text-gray-700 font-medium">
-                Profil
+                {translations[language].profile}
               </span>
             </Link>
 
@@ -215,7 +290,7 @@ export default function PublicLayout() {
               </div>
 
               <span className="mt-1 text-[10px] text-gray-700 font-medium">
-                Berita
+                {translations[language].news}
               </span>
             </Link>
 
@@ -260,7 +335,7 @@ export default function PublicLayout() {
               </div>
 
               <span className="mt-1 text-[10px] text-gray-700 font-medium">
-                Pengumuman
+                {translations[language].announcement}
               </span>
             </Link>
 
@@ -305,7 +380,7 @@ export default function PublicLayout() {
               </div>
 
               <span className="mt-1 text-[10px] text-gray-700 font-medium">
-                Kalender
+                {translations[language].calendar}
               </span>
             </Link>
 
@@ -350,7 +425,7 @@ export default function PublicLayout() {
               </div>
 
               <span className="mt-1 text-[10px] text-gray-700 font-medium">
-                Galeri
+                {translations[language].gallery}
               </span>
             </Link>
 
@@ -395,7 +470,7 @@ export default function PublicLayout() {
               </div>
 
               <span className="mt-1 text-[10px] text-gray-700 font-medium">
-                Laporan
+                {translations[language].reports}
               </span>
             </Link>
 
@@ -440,9 +515,40 @@ export default function PublicLayout() {
               </div>
 
               <span className="mt-1 text-[10px] text-gray-700 font-medium">
-                Kontak
+                {translations[language].contact}
               </span>
             </Link>
+
+            {/* PILIHAN BAHASA */}
+            <div className="relative ml-1">
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                className="
+      h-10
+      rounded-full
+      bg-white/60
+      backdrop-blur-xl
+      border
+      border-white/80
+      text-gray-700
+      text-xs
+      font-semibold
+      px-3
+      pr-8
+      shadow-[0_5px_15px_rgba(0,0,0,0.12)]
+      outline-none
+      cursor-pointer
+      hover:bg-white/80
+      transition-all
+    "
+                aria-label="Pilih bahasa"
+              >
+                <option value="id">🇮🇩 ID</option>
+                <option value="en">🇬🇧 EN</option>
+                <option value="ar">🇸🇦 AR</option>
+              </select>
+            </div>
 
             {/* LOGIN ADMIN */}
             <Link
@@ -484,7 +590,7 @@ export default function PublicLayout() {
               </div>
 
               <span className="mt-1 text-[10px] text-green-700 font-semibold">
-                Login Admin
+                {translations[language].login}
               </span>
             </Link>
           </nav>
@@ -532,6 +638,34 @@ export default function PublicLayout() {
             "
           >
             <div className="px-5 py-6">
+              {/* PILIHAN BAHASA MOBILE */}
+              <div className="flex justify-center mb-6">
+                <select
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                  className="
+      h-10
+      rounded-full
+      bg-white/70
+      backdrop-blur-xl
+      border
+      border-white/80
+      text-gray-700
+      text-xs
+      font-semibold
+      px-4
+      shadow-md
+      outline-none
+      cursor-pointer
+    "
+                  aria-label="Pilih bahasa"
+                >
+                  <option value="id">🇮🇩 Indonesia</option>
+                  <option value="en">🇬🇧 English</option>
+                  <option value="ar">🇸🇦 العربية</option>
+                </select>
+              </div>
+
               {/* GRID 4 × 2 */}
               <div className="grid grid-cols-4 gap-x-3 gap-y-6">
                 {/* HOME */}
@@ -564,7 +698,7 @@ export default function PublicLayout() {
                   </div>
 
                   <span className="text-xs font-medium text-gray-700">
-                    Home
+                    {translations[language].home}
                   </span>
                 </Link>
 
@@ -598,7 +732,7 @@ export default function PublicLayout() {
                   </div>
 
                   <span className="text-xs font-medium text-gray-700">
-                    Profil
+                    {translations[language].profile}
                   </span>
                 </Link>
 
@@ -632,7 +766,7 @@ export default function PublicLayout() {
                   </div>
 
                   <span className="text-xs font-medium text-gray-700">
-                    Berita
+                    {translations[language].news}
                   </span>
                 </Link>
 
@@ -666,7 +800,7 @@ export default function PublicLayout() {
                   </div>
 
                   <span className="text-xs font-medium text-gray-700">
-                    Pengumuman
+                    {translations[language].announcement}
                   </span>
                 </Link>
 
@@ -700,7 +834,7 @@ export default function PublicLayout() {
                   </div>
 
                   <span className="text-xs font-medium text-gray-700">
-                    Kalender
+                    {translations[language].calendar}
                   </span>
                 </Link>
 
@@ -734,7 +868,7 @@ export default function PublicLayout() {
                   </div>
 
                   <span className="text-xs font-medium text-gray-700">
-                    Galeri
+                    {translations[language].gallery}
                   </span>
                 </Link>
 
@@ -768,7 +902,7 @@ export default function PublicLayout() {
                   </div>
 
                   <span className="text-xs font-medium text-gray-700">
-                    Laporan
+                    {translations[language].reports}
                   </span>
                 </Link>
 
@@ -802,7 +936,7 @@ export default function PublicLayout() {
                   </div>
 
                   <span className="text-xs font-medium text-gray-700">
-                    Kontak
+                    {translations[language].contact}
                   </span>
                 </Link>
               </div>
@@ -831,7 +965,7 @@ export default function PublicLayout() {
                 "
               >
                 <LogIn size={21} />
-                Login Admin
+                {translations[language].login}
               </Link>
             </div>
           </div>
@@ -842,8 +976,9 @@ export default function PublicLayout() {
           CONTENT
       ====================================================== */}
       <main className="pt-16 md:pt-16">
-        <Outlet />
+        <Outlet context={{ language }} />
       </main>
+
       <ChatAI />
 
       {/* =====================================================
@@ -852,41 +987,138 @@ export default function PublicLayout() {
       <footer className="bg-gray-900 text-white mt-0">
         <div className="max-w-7xl mx-auto px-6 py-12">
           <div className="grid md:grid-cols-3 gap-10">
-            {/* KOLOM 1 */}
+            {/* =================================================
+          KOLOM 1 — DESKRIPSI
+      ================================================== */}
             <div>
-              <h3 className="text-2xl font-bold mb-3">TPQ KHAIRUNNISA</h3>
+              <h3 className="text-2xl font-bold mb-3">
+                {translations[language].footerTitle}
+              </h3>
 
-              <p className="text-gray-300">
-                Taman Pendidikan Al-Qur'an yang berkomitmen membentuk generasi
-                Qurani yang berilmu, berakhlak, dan berkarakter Islami.
+              <p className="text-yellow-300 text-justify leading-relaxed font-light">
+                {translations[language].footerDescription}
               </p>
             </div>
 
-            {/* KOLOM 2 */}
+            {/* =================================================
+          KOLOM 2 — MENU FOOTER
+      ================================================== */}
             <div>
-              <h3 className="text-lg font-semibold mb-4">Menu</h3>
+              <h3 className="text-lg font-semibold mb-4">
+                {translations[language].menu}
+              </h3>
 
               <ul className="space-y-2 text-gray-300">
-                <li>Home</li>
-                <li>Profil TPQ</li>
-                <li>Berita</li>
-                <li>Pengumuman</li>
-                <li>Kalender</li>
-                <li>Galeri</li>
-                <li>Laporan</li>
-                <li>Kontak</li>
+                <li>
+                  <Link
+                    to="/web"
+                    className="hover:text-white hover:translate-x-1 inline-block transition-all"
+                  >
+                    o {translations[language].home}
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
+                    to="/web/profil"
+                    className="hover:text-white hover:translate-x-1 inline-block transition-all"
+                  >
+                    o {translations[language].profile}
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
+                    to="/web/berita"
+                    className="hover:text-white hover:translate-x-1 inline-block transition-all"
+                  >
+                    o {translations[language].news}
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
+                    to="/web/pengumuman"
+                    className="hover:text-white hover:translate-x-1 inline-block transition-all"
+                  >
+                    o {translations[language].announcement}
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
+                    to="/web/kalender"
+                    className="hover:text-white hover:translate-x-1 inline-block transition-all"
+                  >
+                    o {translations[language].calendar}
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
+                    to="/web/galeri"
+                    className="hover:text-white hover:translate-x-1 inline-block transition-all"
+                  >
+                    o {translations[language].gallery}
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
+                    to="/web/laporan"
+                    className="hover:text-white hover:translate-x-1 inline-block transition-all"
+                  >
+                    o {translations[language].reports}
+                  </Link>
+                </li>
+
+                <li>
+                  <Link
+                    to="/web/kontak"
+                    className="hover:text-white hover:translate-x-1 inline-block transition-all"
+                  >
+                    o {translations[language].contact}
+                  </Link>
+                </li>
               </ul>
             </div>
 
-            {/* KOLOM 3 */}
+            {/* =================================================
+          KOLOM 3 — INFORMASI
+      ================================================== */}
             <div>
-              <h3 className="text-lg font-semibold mb-4">Informasi</h3>
+              <h3 className="text-lg font-semibold mb-4">
+                {translations[language].information}
+              </h3>
 
-              <p className="text-gray-300 mb-2">📍 TPQ Khairunnisa</p>
+              {/* ALAMAT */}
+              <a
+                href="https://www.google.com/maps/search/?api=1&query=Jl.+MT.+Habib+Abubakar+Al-Atas+No.12,+Gamalama,+Ternate,+Maluku+Utara"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-gray-300 mb-3 hover:text-white transition-colors"
+              >
+                📍 {translations[language].address}
+                <br />
+                <span className="ml-5">{translations[language].location}</span>
+              </a>
 
-              <p className="text-gray-300 mb-2">📞 Nomor WhatsApp</p>
+              {/* WHATSAPP */}
+              <a
+                href="https://wa.me/6285240204028"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-gray-300 mb-3 hover:text-white transition-colors"
+              >
+                📞 {translations[language].whatsapp}
+              </a>
 
-              <p className="text-gray-300">🕓 Jam Operasional</p>
+              {/* JAM OPERASIONAL */}
+              <div className="text-gray-300">
+                🕓 {translations[language].operatingHours}
+                <br />
+                <span className="ml-5">{translations[language].contactUs}</span>
+              </div>
             </div>
           </div>
 

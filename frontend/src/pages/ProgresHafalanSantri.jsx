@@ -320,19 +320,11 @@ export default function ProgresHafalanSantri() {
 
       const namaSantri = santri.nama || "-";
 
-      // =====================================================
-      // TANGGAL REALTIME SAAT PDF DI-DOWNLOAD
-      // =====================================================
-
       const tanggalDownload = new Date().toLocaleDateString("id-ID", {
         day: "2-digit",
         month: "long",
         year: "numeric",
       });
-
-      // =====================================================
-      // BUAT PDF
-      // =====================================================
 
       const doc = new jsPDF({
         orientation: "landscape",
@@ -494,8 +486,6 @@ export default function ProgresHafalanSantri() {
 
           doc.setFontSize(7);
 
-          // Satu baris penuh dari kiri sampai kanan
-
           doc.text(
             `TPQ Khairunissa • Progres Hafalan Santri • Update ${tanggalDownload} • Halaman ${nomorHalaman}`,
             centerX,
@@ -514,10 +504,6 @@ export default function ProgresHafalanSantri() {
       const fileName = `progres-hafalan-${nis}.pdf`;
 
       doc.save(fileName);
-
-      // =====================================================
-      // TUTUP MENU
-      // =====================================================
 
       setShowDownload(false);
     } catch (error) {
@@ -601,7 +587,7 @@ export default function ProgresHafalanSantri() {
           <div className="flex items-center gap-2">
             {/* DOWNLOAD */}
 
-            <div className="relative">
+            <div className="relative hidden md:block">
               <button
                 type="button"
                 onClick={() => setShowDownload((prev) => !prev)}
@@ -973,7 +959,7 @@ export default function ProgresHafalanSantri() {
 
       {/* ================= MOBILE CARD ================= */}
 
-      <div className="md:hidden space-y-4">
+      <div className="md:hidden space-y-3">
         {jenisHafalan.map((item, i) => {
           const progres = dataHafalan[i]?.progres || "";
 
@@ -988,44 +974,124 @@ export default function ProgresHafalanSantri() {
             <div
               key={i}
               className="
+                w-full
+                max-w-full
                 bg-white
-                rounded-2xl
+                rounded-xl
                 shadow
                 border
                 overflow-hidden
               "
             >
-              {/* HEADER */}
+              {/* NAMA DOA */}
 
               <div
                 className="
-                  bg-purple-600
-                  text-white
-                  px-4 py-3
+                  bg-gray-300
+                  text-black
+                  px-3
+                  py-2.5
                   font-semibold
                   text-sm
+                  leading-5
                 "
               >
                 {i + 1}. {item}
               </div>
 
-              {/* BODY */}
+              {/* DETAIL */}
 
-              <div className="p-4 space-y-4 text-sm text-black">
+              <div
+                className="
+                  px-3
+                  py-3
+                  text-sm
+                  text-black
+                  space-y-2
+                "
+              >
+                {/* PROGRES */}
+
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="w-16 shrink-0 font-medium">Progres</span>
+
+                  <span className="text-gray-400 shrink-0">|</span>
+
+                  <select
+                    disabled={isReadonly}
+                    value={progres}
+                    onChange={(e) => handleChange(i, "progres", e.target.value)}
+                    className="
+                      flex-1
+                      min-w-0
+                      border-0
+                      border-b
+                      border-gray-300
+                      rounded-none
+                      px-1
+                      py-1
+                      text-xs
+                      bg-transparent
+                      focus:ring-0
+                    "
+                  >
+                    <option value="">Pilih</option>
+
+                    <option value="Belum">Belum</option>
+
+                    <option value="Lancar">Lancar</option>
+                  </select>
+
+                  <span className="text-gray-400 shrink-0">|</span>
+                </div>
+
+                {/* PRESTASI */}
+
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="w-16 shrink-0 font-medium">Prestasi</span>
+
+                  <span className="text-gray-400 shrink-0">|</span>
+
+                  <span
+                    className="
+                      flex-1
+                      min-w-0
+                      border-b
+                      border-gray-300
+                      px-1
+                      py-1
+                      text-xs
+                    "
+                  >
+                    {prestasi}
+                  </span>
+
+                  <span className="text-gray-400 shrink-0">|</span>
+                </div>
+
                 {/* GURU */}
 
-                <div>
-                  <div className="mb-1 font-medium">Guru</div>
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="w-16 shrink-0 font-medium">Guru</span>
+
+                  <span className="text-gray-400 shrink-0">|</span>
 
                   <select
                     disabled={isReadonly}
                     value={dataHafalan[i]?.guru || ""}
                     onChange={(e) => handleChange(i, "guru", e.target.value)}
                     className="
-                      border rounded-lg
-                      px-3 py-2
-                      w-full
+                      flex-1
+                      min-w-0
+                      border-0
+                      border-b
+                      border-gray-300
+                      rounded-none
+                      px-1
+                      py-1
                       text-xs
+                      bg-transparent
+                      focus:ring-0
                     "
                   >
                     <option value="">Pilih Guru</option>
@@ -1041,45 +1107,24 @@ export default function ProgresHafalanSantri() {
                       );
                     })}
                   </select>
-                </div>
 
-                {/* PROGRES */}
-
-                <div>
-                  <div className="mb-1 font-medium">Progres</div>
-
-                  <select
-                    disabled={isReadonly}
-                    value={progres}
-                    onChange={(e) => handleChange(i, "progres", e.target.value)}
-                    className="
-                      border rounded-lg
-                      px-3 py-2
-                      w-full
-                      text-xs
-                    "
-                  >
-                    <option value="">Pilih</option>
-
-                    <option value="Belum">Belum</option>
-
-                    <option value="Lancar">Lancar</option>
-                  </select>
-                </div>
-
-                {/* PRESTASI */}
-
-                <div className="text-sm">
-                  <span className="font-medium">Prestasi :</span> {prestasi}
+                  <span className="text-gray-400 shrink-0">|</span>
                 </div>
               </div>
 
-              {/* FOOTER */}
+              {/* HASIL UPDATE */}
 
-              <div className="bg-gray-100 px-4 py-2 border-t">
-                <div className="text-xs text-gray-600">
-                  Update : {dataHafalan[i]?.update || "-"}
-                </div>
+              <div
+                className="
+                  bg-gray-100
+                  px-3
+                  py-2
+                  border-t
+                  text-xs
+                  text-gray-600
+                "
+              >
+                Hasil update {dataHafalan[i]?.update || "-"}
               </div>
             </div>
           );

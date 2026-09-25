@@ -1,9 +1,44 @@
+@php
+    $pdfLanguage = $language ?? 'id';
+
+    $labels = [
+        'id' => [
+            'bab' => 'BAB I',
+            'title' => 'DATA SANTRI',
+            'jenis_data' => 'Jenis Data',
+            'laki' => 'Laki-laki',
+            'perempuan' => 'Perempuan',
+            'jumlah' => 'Jumlah',
+        ],
+
+        'en' => [
+            'bab' => 'CHAPTER I',
+            'title' => 'STUDENT DATA',
+            'jenis_data' => 'Data Type',
+            'laki' => 'Male',
+            'perempuan' => 'Female',
+            'jumlah' => 'Total',
+        ],
+
+        'ar' => [
+            'bab' => 'الفصل الأول',
+            'title' => 'بيانات الطلاب',
+            'jenis_data' => 'نوع البيانات',
+            'laki' => 'ذكور',
+            'perempuan' => 'إناث',
+            'jumlah' => 'المجموع',
+        ],
+    ];
+
+    $label = $labels[$pdfLanguage] ?? $labels['id'];
+@endphp
+
 <h2 style="text-align:left;">
-    BAB I
+    {{ $label['bab'] }}
 </h2>
 
 <h3 style="text-align:left;">
-    DATA SANTRI
+    {{ $label['title'] }}
 </h3>
 
 {{-- ========================= --}}
@@ -19,7 +54,7 @@
 {{-- ========================= --}}
 
 <p style="text-align:justify; line-height:1.8;">
-    {!! $bab1['intro'] !!}
+    {!! $bab1['intro'] ?? '' !!}
 </p>
 
 {{-- ========================= --}}
@@ -30,10 +65,10 @@
 
     <thead>
         <tr style="background:#1e3a8a;color:white;">
-            <th>Jenis Data</th>
-            <th width="18%">Laki-laki</th>
-            <th width="18%">Perempuan</th>
-            <th width="18%">Jumlah</th>
+            <th>{{ $label['jenis_data'] }}</th>
+            <th width="18%">{{ $label['laki'] }}</th>
+            <th width="18%">{{ $label['perempuan'] }}</th>
+            <th width="18%">{{ $label['jumlah'] }}</th>
         </tr>
     </thead>
 
@@ -62,7 +97,7 @@
         <tr style="font-weight:bold;background:#f3f4f6;">
 
             <td>
-                Jumlah
+                {{ $label['jumlah'] }}
             </td>
 
             <td align="center">

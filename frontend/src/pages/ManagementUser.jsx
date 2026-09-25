@@ -278,7 +278,7 @@ export default function ManagementUser() {
   // =========================================================
 
   return (
-    <div className="min-h-screen bg-gray-50 p-3 sm:p-4 md:p-6">
+    <div className="min-h-screen bg-gray-50 -mx-2 px-2 py-3 sm:mx-0 sm:p-4 md:p-6">
       <div className="max-w-7xl mx-auto space-y-5 md:space-y-6">
         {/* HEADER */}
         <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-4 sm:p-5 md:p-7">

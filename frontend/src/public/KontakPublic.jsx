@@ -1,16 +1,86 @@
 import { useEffect, useState } from "react";
+import { useOutletContext } from "react-router-dom";
+
 import heroImage from "../assets/hero-putih04.jpg";
 import { MapPin, Phone, Mail, Clock, Loader2, AlertCircle } from "lucide-react";
+
 import { api } from "../api";
 
 export default function KontakPublic() {
+  const { language } = useOutletContext();
+
   const [setting, setSetting] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const translations = {
+    id: {
+      loading: "Memuat informasi kontak...",
+      address: "Alamat",
+      whatsapp: "WhatsApp",
+      email: "Email",
+      operatingHours: "Jam Operasional",
+      days: "Senin - Sabtu",
+      contactInfo: "Informasi Kontak",
+      contactAdmin: "Hubungi Admin",
+      serviceDescription: "Layanan informasi dan komunikasi",
+      contactDescription: "Silakan hubungi Admin",
+      contactDescriptionMiddle:
+        "untuk berbicara langsung atau melalui pesan apabila anda membutuhkan informasi ataupun layanan lainnya tentang",
+      contactWhatsApp: "Hubungi via WhatsApp",
+      whatsappNotSet: "WhatsApp Belum Diatur",
+      notSet: "Belum diatur",
+      kelurahan: "Kelurahan",
+      kecamatan: "Kecamatan",
+    },
+
+    en: {
+      loading: "Loading contact information...",
+      address: "Address",
+      whatsapp: "WhatsApp",
+      email: "Email",
+      operatingHours: "Operating Hours",
+      days: "Monday - Saturday",
+      contactInfo: "Contact Information",
+      contactAdmin: "Contact Admin",
+      serviceDescription: "Information and communication services",
+      contactDescription: "Please contact the Admin of",
+      contactDescriptionMiddle:
+        "to speak directly or send a message if you need information or other services regarding",
+      contactWhatsApp: "Contact via WhatsApp",
+      whatsappNotSet: "WhatsApp Not Configured",
+      notSet: "Not configured",
+      kelurahan: "Village",
+      kecamatan: "District",
+    },
+
+    ar: {
+      loading: "جارٍ تحميل معلومات الاتصال...",
+      address: "العنوان",
+      whatsapp: "واتساب",
+      email: "البريد الإلكتروني",
+      operatingHours: "ساعات العمل",
+      days: "الاثنين - السبت",
+      contactInfo: "معلومات الاتصال",
+      contactAdmin: "التواصل مع الإدارة",
+      serviceDescription: "خدمات المعلومات والتواصل",
+      contactDescription: "يرجى التواصل مع مسؤول",
+      contactDescriptionMiddle:
+        "للتحدث مباشرة أو إرسال رسالة إذا كنتم بحاجة إلى معلومات أو خدمات أخرى تتعلق بـ",
+      contactWhatsApp: "التواصل عبر واتساب",
+      whatsappNotSet: "لم يتم إعداد واتساب",
+      notSet: "لم يتم الإعداد",
+      kelurahan: "القرية",
+      kecamatan: "المنطقة",
+    },
+  };
+
+  const t = translations[language] || translations.id;
+
   // ============================================================
   // LOAD PENGATURAN SISTEM
   // ============================================================
+
   useEffect(() => {
     loadPengaturan();
   }, []);
@@ -45,6 +115,7 @@ export default function KontakPublic() {
   // ============================================================
   // FORMAT NOMOR WHATSAPP
   // ============================================================
+
   const getWhatsAppNumber = (phone) => {
     if (!phone) return "";
 
@@ -62,13 +133,14 @@ export default function KontakPublic() {
   // ============================================================
   // ALAMAT LENGKAP
   // ============================================================
+
   const getAlamatLengkap = () => {
     if (!setting) return "";
 
     const bagianAlamat = [
       setting.alamat,
-      setting.kelurahan ? `Kelurahan ${setting.kelurahan}` : "",
-      setting.kecamatan ? `Kecamatan ${setting.kecamatan}` : "",
+      setting.kelurahan ? `${t.kelurahan} ${setting.kelurahan}` : "",
+      setting.kecamatan ? `${t.kecamatan} ${setting.kecamatan}` : "",
       setting.kota || "",
       setting.provinsi || "",
     ].filter(Boolean);
@@ -79,9 +151,13 @@ export default function KontakPublic() {
   // ============================================================
   // LOADING
   // ============================================================
+
   if (loading) {
     return (
-      <div className="bg-[#f8faf8] min-h-screen">
+      <div
+        className="bg-[#f8faf8] min-h-screen"
+        dir={language === "ar" ? "rtl" : "ltr"}
+      >
         <section
           className="relative overflow-hidden pt-16 md:pt-20 pb-12 min-h-[500px]"
           style={{
@@ -96,7 +172,7 @@ export default function KontakPublic() {
             <div className="flex flex-col items-center gap-3 text-gray-600">
               <Loader2 size={32} className="animate-spin text-green-600" />
 
-              <span className="text-sm">Memuat informasi kontak...</span>
+              <span className="text-sm">{t.loading}</span>
             </div>
           </div>
         </section>
@@ -107,9 +183,13 @@ export default function KontakPublic() {
   // ============================================================
   // ERROR
   // ============================================================
+
   if (error) {
     return (
-      <div className="bg-[#f8faf8] min-h-screen">
+      <div
+        className="bg-[#f8faf8] min-h-screen"
+        dir={language === "ar" ? "rtl" : "ltr"}
+      >
         <section
           className="relative overflow-hidden pt-16 md:pt-20 pb-12 min-h-[500px]"
           style={{
@@ -134,8 +214,13 @@ export default function KontakPublic() {
 
   const whatsappNumber = getWhatsAppNumber(setting?.no_hp);
 
+  const namaTPQ = setting?.nama_tpq || "TPQ Khairunnisa";
+
   return (
-    <div className="bg-[#f8faf8] min-h-screen">
+    <div
+      className="bg-[#f8faf8] min-h-screen"
+      dir={language === "ar" ? "rtl" : "ltr"}
+    >
       {/* HEADER */}
 
       <section
@@ -163,7 +248,9 @@ export default function KontakPublic() {
                 mt-2
               "
             >
-              Kontak {setting?.nama_tpq || "TPQ Khairunissa"}
+              {language === "ar"
+                ? `${t.contactAdmin} ${namaTPQ}`
+                : `${t.contactAdmin} ${namaTPQ}`}
             </h1>
 
             <p
@@ -178,8 +265,7 @@ export default function KontakPublic() {
                 font-base
               "
             >
-              Layanan informasi dan komunikasi{" "}
-              {setting?.nama_tpq || "TPQ Khairunissa"}
+              {t.serviceDescription} {namaTPQ}
             </p>
           </div>
 
@@ -213,7 +299,7 @@ export default function KontakPublic() {
               "
             >
               <h2 className="text-2xl md:text-2xl font-bold text-green-700 mb-4">
-                Informasi Kontak
+                {t.contactInfo}
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -226,10 +312,10 @@ export default function KontakPublic() {
                   />
 
                   <div>
-                    <h3 className="font-bold text-base">Alamat</h3>
+                    <h3 className="font-bold text-base">{t.address}</h3>
 
-                    <p className="text-gray-600 text-sm">
-                      {getAlamatLengkap() || "Belum diatur"}
+                    <p className="text-gray-600 text-sm text-justify">
+                      {getAlamatLengkap() || t.notSet}
                     </p>
                   </div>
                 </div>
@@ -243,10 +329,10 @@ export default function KontakPublic() {
                   />
 
                   <div>
-                    <h3 className="font-bold text-base">WhatsApp</h3>
+                    <h3 className="font-bold text-base">{t.whatsapp}</h3>
 
                     <p className="text-gray-600 text-sm">
-                      {setting?.no_hp || "Belum diatur"}
+                      {setting?.no_hp || t.notSet}
                     </p>
                   </div>
                 </div>
@@ -260,10 +346,10 @@ export default function KontakPublic() {
                   />
 
                   <div>
-                    <h3 className="font-bold text-base">Email</h3>
+                    <h3 className="font-bold text-base">{t.email}</h3>
 
                     <p className="text-gray-600 text-sm break-all">
-                      {setting?.email || "Belum diatur"}
+                      {setting?.email || t.notSet}
                     </p>
                   </div>
                 </div>
@@ -277,9 +363,9 @@ export default function KontakPublic() {
                   />
 
                   <div>
-                    <h3 className="font-bold text-base">Jam Operasional</h3>
+                    <h3 className="font-bold text-base">{t.operatingHours}</h3>
 
-                    <p className="text-gray-600 text-sm">Senin - Sabtu</p>
+                    <p className="text-gray-600 text-sm">{t.days}</p>
 
                     <p className="text-gray-600 text-sm">18.00 - 20.30 WIT</p>
                   </div>
@@ -304,14 +390,12 @@ export default function KontakPublic() {
               "
             >
               <h2 className="text-2xl md:text-2xl font-bold text-green-700 mb-6">
-                Hubungi Admin {setting?.nama_tpq || "TPQ"}
+                {t.contactAdmin} {namaTPQ}
               </h2>
 
-              <p className="text-gray-600 text-sm md:text-base leading-6 mb-5 text-justify">
-                Silakan hubungi Admin {setting?.nama_tpq || "TPQ Khairunissa"}{" "}
-                untuk berbicara langsung atau melalui pesan apabila anda
-                membutuhkan informasi ataupun layanan lainnya tentang{" "}
-                {setting?.nama_tpq || "TPQ Khairunissa"}.
+              <p className="text-gray-600 text-sm md:text-base leading-5 md:leading-6 mb-5 text-justify">
+                {t.contactDescription} {namaTPQ} {t.contactDescriptionMiddle}{" "}
+                {namaTPQ}.
               </p>
 
               {whatsappNumber ? (
@@ -335,7 +419,7 @@ export default function KontakPublic() {
                     md:w-auto
                   "
                 >
-                  Hubungi via WhatsApp
+                  {t.contactWhatsApp}
                 </a>
               ) : (
                 <button
@@ -356,7 +440,7 @@ export default function KontakPublic() {
                     md:w-auto
                   "
                 >
-                  WhatsApp Belum Diatur
+                  {t.whatsappNotSet}
                 </button>
               )}
             </div>

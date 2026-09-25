@@ -852,7 +852,7 @@ export default function StatusGuru() {
       </div>
 
       {/* ================= MOBILE CARD ================= */}
-      <div className="md:hidden space-y-4">
+      <div className="md:hidden space-y-3">
         {paginatedGuru.map((g, i) => {
           const dataPeriode = statusData[g.nig]?.[filterPeriode] || {};
 
@@ -864,37 +864,36 @@ export default function StatusGuru() {
             <div
               key={i}
               className="
-                bg-white
-                rounded-2xl
-                shadow
-                border
-                overflow-hidden
-              "
+          w-full
+          max-w-full
+          bg-white
+          border
+          rounded-xl
+          shadow-sm
+          overflow-hidden
+        "
             >
-              {/* HEADER */}
+              {/* DATA GURU */}
               <div
                 className="
-                  bg-purple-600
-                  text-white
-                  px-4 py-3
-                  font-semibold
-                  text-lg
-                "
+            px-3
+            py-3
+            text-sm
+            text-black
+            leading-5
+            space-y-1
+          "
               >
-                {startIndex + i + 1}. {g.nama_guru}
-              </div>
-
-              {/* BODY */}
-              <div className="p-4 space-y-3 text-xs">
-                {/* NIG */}
-                <div>
-                  <span className="font-medium">NIG :</span> {g.nig || "-"}
+                {/* NAMA */}
+                <div className="bg-gray-300 -mx-3 -mt-3 px-3 py-2 font-semibold text-black">
+                  {startIndex + i + 1}. {g.nama_guru}
                 </div>
 
-                {/* TOTAL SANTRI */}
-                <div>
-                  <span className="font-medium">Total Santri :</span>
-
+                {/* NIG + TOTAL SANTRI */}
+                <div className="text-xs text-gray-700">
+                  <span className="font-medium">NIG :</span> {g.nig || "-"}
+                  <span className="mx-1">|</span>
+                  <span className="font-medium">Total Santri :</span>{" "}
                   <input
                     type="number"
                     value={dataPeriode.totalSantri || ""}
@@ -902,16 +901,25 @@ export default function StatusGuru() {
                       handleChange(g.nig, "totalSantri", e.target.value)
                     }
                     className="
-                      border rounded
-                      px-3 py-2
-                      w-full mt-2
-                    "
+                inline-block
+                w-12
+                border-0
+                border-b
+                border-gray-300
+                rounded-none
+                px-1
+                py-0
+                text-xs
+                text-center
+                focus:outline-none
+                focus:ring-0
+              "
                   />
                 </div>
 
                 {/* KEHADIRAN */}
-                <div>
-                  <span className="font-medium">Kehadiran :</span>
+                <div className="flex items-center gap-1 text-xs min-w-0">
+                  <span className="font-medium shrink-0">Kehadiran :</span>
 
                   <select
                     value={kehadiran}
@@ -919,51 +927,54 @@ export default function StatusGuru() {
                       handleChange(g.nig, "kehadiran", e.target.value)
                     }
                     className="
-                      border rounded
-                      px-3 py-2
-                      w-full mt-2
-                    "
+                flex-1
+                min-w-0
+                border-0
+                bg-transparent
+                px-1
+                py-0
+                text-xs
+                font-medium
+                text-black
+                focus:outline-none
+                focus:ring-0
+              "
                   >
                     <option value="">Pilih</option>
-
                     <option value="Hadir Penuh">Hadir Penuh</option>
-
                     <option value="Kurang 5 Hr">Kurang 5 Hr</option>
-
                     <option value="Kurang 10 Hr">Kurang 10 Hr</option>
-
                     <option value="Diatas 10 Hr">Diatas 10 Hr</option>
                   </select>
                 </div>
 
                 {/* STATUS */}
-                <div>
+                <div className="text-xs">
                   <span className="font-medium">Status :</span>{" "}
                   <span
                     className={`
-                      px-3 py-1 rounded-full
-                      text-xs font-medium
-                      ${
-                        status === "Sangat Aktif"
-                          ? "bg-green-100 text-green-700"
-                          : status === "Aktif"
-                            ? "bg-blue-100 text-blue-700"
-                            : status === "Kurang Aktif"
-                              ? "bg-yellow-100 text-yellow-700"
-                              : status === "Tidak Aktif"
-                                ? "bg-red-100 text-red-700"
-                                : "bg-gray-100 text-gray-600"
-                      }
-                    `}
+                font-medium
+                ${
+                  status === "Sangat Aktif"
+                    ? "text-green-700"
+                    : status === "Aktif"
+                      ? "text-blue-700"
+                      : status === "Kurang Aktif"
+                        ? "text-yellow-700"
+                        : status === "Tidak Aktif"
+                          ? "text-red-700"
+                          : "text-gray-600"
+                }
+              `}
                   >
                     {status}
                   </span>
                 </div>
 
                 {/* GAJI */}
-                <div>
+                <div className="text-xs">
                   <span className="font-medium">Gaji :</span>{" "}
-                  <span className="font-semibold text-green-700">
+                  <span className="font-bold text-green-700">
                     {formatRupiah(getGajiGuru(status))}
                   </span>
                 </div>
@@ -972,18 +983,20 @@ export default function StatusGuru() {
                 <div className="text-xs text-gray-500">
                   Update : {dataPeriode.update || "-"}
                 </div>
+              </div>
 
-                {/* BUTTON */}
+              {/* SIMPAN STATUS */}
+              <div className="border-t border-b bg-gray-200 px-3 py-2">
                 <button
                   onClick={handleSave}
                   className="
-                    w-full
-                    bg-gray-200
-                    hover:bg-purple-700
-                    text-purple-600 hover:text-white
-                    py-1 rounded-xl
-                    text-sm
-                  "
+              w-full
+              text-center
+              text-xs
+              font-medium
+              text-purple-600
+              hover:text-purple-700
+            "
                 >
                   Simpan Status
                 </button>

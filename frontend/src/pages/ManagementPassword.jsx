@@ -162,7 +162,7 @@ export default function ManagementPassword() {
   // =========================================================
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
+    <div className="min-h-screen bg-gray-50 -mx-2 px-2 py-4 md:mx-0 md:p-6">
       <div className="max-w-5xl mx-auto space-y-6">
         {/* =====================================================
             HEADER

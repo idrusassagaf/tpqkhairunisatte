@@ -1,6 +1,38 @@
-<h2>BAB II</h2>
+@php
+$pdfLanguage = $language ?? 'id';
 
-<h3>STATUS SANTRI</h3>
+$labels = [
+'id' => [
+'bab' => 'BAB II',
+'title' => 'STATUS SANTRI',
+'status' => 'Status',
+'jumlah' => 'Jumlah',
+'total_santri' => 'Total Santri',
+],
+
+'en' => [
+'bab' => 'CHAPTER II',
+'title' => 'STUDENT STATUS',
+'status' => 'Status',
+'jumlah' => 'Total',
+'total_santri' => 'Total Students',
+],
+
+'ar' => [
+'bab' => 'الفصل الثاني',
+'title' => 'حالة الطلاب',
+'status' => 'الحالة',
+'jumlah' => 'العدد',
+'total_santri' => 'إجمالي الطلاب',
+],
+];
+
+$label = $labels[$pdfLanguage] ?? $labels['id'];
+@endphp
+
+<h2>{{ $label['bab'] }}</h2>
+
+<h3>{{ $label['title'] }}</h3>
 
 <p style="text-align:justify; line-height:1.8;">
 
@@ -11,8 +43,8 @@
 <table>
 
     <tr>
-        <th>Status</th>
-        <th width="25%">Jumlah</th>
+        <th>{{ $label['status'] }}</th>
+        <th width="25%">{{ $label['jumlah'] }}</th>
     </tr>
 
     @foreach($bab2['rekap'] as $item)
@@ -32,7 +64,7 @@
     <tr style="font-weight:bold;background:#f5f5f5;">
 
         <td>
-            Total Santri
+            {{ $label['total_santri'] }}
         </td>
 
         <td align="center">

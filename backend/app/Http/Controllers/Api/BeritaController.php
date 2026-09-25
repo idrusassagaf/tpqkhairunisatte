@@ -75,6 +75,19 @@ class BeritaController extends Controller
         ]);
     }
 
+    // CATAT BERITA DIBACA
+    public function dibaca($id)
+    {
+        $berita = Berita::findOrFail($id);
+
+        $berita->increment('views');
+
+        return response()->json([
+            'message' => 'Jumlah pembaca berhasil diperbarui',
+            'views' => $berita->views,
+        ]);
+    }
+
     // HAPUS BERITA
     public function destroy($id)
     {

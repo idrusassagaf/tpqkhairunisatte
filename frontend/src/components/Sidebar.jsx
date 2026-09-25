@@ -12,6 +12,7 @@ import {
   BarChart3,
   BookOpen,
   BookMarked,
+  FileText,
   ChevronDown,
   ChevronRight,
   CircleUser,
@@ -19,12 +20,15 @@ import {
   KeyRound,
   Settings,
   User,
+  ClipboardCheck,
+  QrCode,
 } from "lucide-react";
 
 import { useEffect, useState } from "react";
+
 import { api } from "../api";
 
-export default function Sidebar({ open }) {
+export default function Sidebar({ open, setOpen }) {
   // =========================================================
   // ROLE USER LOGIN
   // =========================================================
@@ -87,6 +91,11 @@ export default function Sidebar({ open }) {
           to: "/data-santri",
         },
         {
+          name: "Raport Santri",
+          icon: FileText,
+          to: "/raport-santri",
+        },
+        {
           name: "Progres Iqra",
           icon: BookOpen,
           to: "/progres-iqra",
@@ -126,6 +135,7 @@ export default function Sidebar({ open }) {
   // =========================================================
   const [openSantri, setOpenSantri] = useState(true);
   const [openGuru, setOpenGuru] = useState(true);
+  const [openAbsensi, setOpenAbsensi] = useState(true);
   const [openInformasi, setOpenInformasi] = useState(true);
   const [openLaporan, setOpenLaporan] = useState(true);
   const [openManagement, setOpenManagement] = useState(true);
@@ -197,6 +207,12 @@ export default function Sidebar({ open }) {
 
   const userPhoto = getUserPhoto();
 
+  const handleMenuClick = (e) => {
+    if (window.innerWidth < 768 && e.target.closest("a")) {
+      setOpen(false);
+    }
+  };
+
   // =========================================================
   // TOOLTIP
   // =========================================================
@@ -238,8 +254,8 @@ export default function Sidebar({ open }) {
     <div
       className={`
         fixed top-0 left-0 h-screen border-r z-50
-        transition-all duration-300
-        ${open ? "w-64" : "w-16"}
+        transition-all duration-300 overflow-hidden
+        ${open ? "w-64" : "w-0 md:w-16"}
       `}
       style={{
         backgroundImage: "url('/bg-islamic.png')",
@@ -255,7 +271,12 @@ export default function Sidebar({ open }) {
       {/* =====================================================
           ISI SIDEBAR
       ====================================================== */}
-      <div className="relative z-10 h-full overflow-y-auto">
+      <div
+        className={`
+          relative z-10 h-full overflow-y-auto
+          ${!open ? "hidden md:block" : ""}
+        `}
+      >
         {/* ===================================================
             HEADER
         ==================================================== */}
@@ -270,16 +291,16 @@ export default function Sidebar({ open }) {
           <div className="px-4 pt-3 pb-2">
             <div
               className="
-    relative
-    overflow-hidden
-    rounded-2xl
-    px-3
-    py-3
-    border border-white/400
-    bg-white/30
-    backdrop-blur-1xl
-    shadow-xl
-  "
+                relative
+                overflow-hidden
+                rounded-2xl
+                px-3
+                py-3
+                border border-white/400
+                bg-white/30
+                backdrop-blur-1xl
+                shadow-xl
+              "
             >
               <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-white/10 to-transparent pointer-events-none" />
 
@@ -297,7 +318,8 @@ export default function Sidebar({ open }) {
                     shrink-0
                     bg-white/10
                     border-2
-                    border-gray-300                    shadow-sm
+                    border-gray-300
+                    shadow-sm
                   "
                 >
                   {userPhoto ? (
@@ -349,7 +371,7 @@ export default function Sidebar({ open }) {
         {/* ===================================================
             MENU
         ==================================================== */}
-        <nav className="flex flex-col gap-1 p-4">
+        <nav className="flex flex-col gap-1 p-4" onClick={handleMenuClick}>
           {/* =================================================
               DASHBOARD + MASTER
           ================================================== */}
@@ -492,6 +514,80 @@ export default function Sidebar({ open }) {
                 </NavLink>
               );
             })}
+
+          {/* =================================================
+              ABSENSI
+              HANYA UNTUK ADMIN
+          ================================================== */}
+          {isAdmin && (
+            <>
+              <button
+                type="button"
+                onClick={() => setOpenAbsensi(!openAbsensi)}
+                className={sectionBtnClass(open)}
+              >
+                {open ? (
+                  <>
+                    <span>ABSENSI</span>
+
+                    {openAbsensi ? (
+                      <ChevronDown size={16} />
+                    ) : (
+                      <ChevronRight size={16} />
+                    )}
+                  </>
+                ) : (
+                  <ChevronRight size={16} />
+                )}
+
+                {!open && <span className={tooltipClass}>ABSENSI</span>}
+              </button>
+
+              {openAbsensi && (
+                <>
+                  <NavLink
+                    to="/kehadiran-santri"
+                    className={(props) => navItemClass(props, open)}
+                  >
+                    <ClipboardCheck size={16} />
+
+                    {open ? (
+                      <span>Kehadiran Santri</span>
+                    ) : (
+                      <span className={tooltipClass}>Kehadiran Santri</span>
+                    )}
+                  </NavLink>
+
+                  <NavLink
+                    to="/kehadiran-guru"
+                    className={(props) => navItemClass(props, open)}
+                  >
+                    <ClipboardCheck size={16} />
+
+                    {open ? (
+                      <span>Kehadiran Guru</span>
+                    ) : (
+                      <span className={tooltipClass}>Kehadiran Guru</span>
+                    )}
+                  </NavLink>
+
+                  {/* SCAN QR */}
+                  <NavLink
+                    to="/scan-absensi"
+                    className={(props) => navItemClass(props, open)}
+                  >
+                    <QrCode size={16} />
+
+                    {open ? (
+                      <span>Scan QR</span>
+                    ) : (
+                      <span className={tooltipClass}>Scan QR</span>
+                    )}
+                  </NavLink>
+                </>
+              )}
+            </>
+          )}
 
           {/* =================================================
               INFORMASI

@@ -1,26 +1,89 @@
 import { useEffect, useState } from "react";
+import { useOutletContext } from "react-router-dom";
 import { api } from "../api";
 import videoTPQ from "../assets/video/clip2tpq.mp4";
 import heroImage from "../assets/hero-putih04.jpg";
 
+const TRANSLATION_CACHE_KEY = "tpq_profil_translation_v1";
+
 export default function ProfilTPQ() {
+  const { language } = useOutletContext();
+
+  const profilText = {
+    id: {
+      loading: "Memuat profil TPQ...",
+      errorTitle: "Profil TPQ belum dapat ditampilkan",
+      errorDescription: "Data pengaturan sistem gagal dimuat.",
+      retry: "Coba Lagi",
+      profile: "Profil",
+      teachingTeam: "Tim Pengajar",
+      teachersDescription: "Ustadz dan Ustadzah",
+      visionMission: "Visi & Misi",
+      vision: "VISI",
+      mission: "MISI",
+      noMission: "Belum ada data misi.",
+      ourValues: "Nilai-Nilai Kami",
+      akhlak: "Akhlak",
+      qurani: "Qurani",
+      discipline: "Disiplin",
+      achievement: "Prestasi",
+      nig: "NIG",
+      education: "Pendidikan",
+    },
+
+    en: {
+      loading: "Loading TPQ profile...",
+      errorTitle: "TPQ profile cannot be displayed",
+      errorDescription: "System settings data failed to load.",
+      retry: "Try Again",
+      profile: "Profile",
+      teachingTeam: "Teaching Team",
+      teachersDescription: "Ustadz and Ustadzah",
+      visionMission: "Vision & Mission",
+      vision: "VISION",
+      mission: "MISSION",
+      noMission: "No mission data available.",
+      ourValues: "Our Values",
+      akhlak: "Character",
+      qurani: "Qur'anic",
+      discipline: "Discipline",
+      achievement: "Achievement",
+      nig: "NIG",
+      education: "Education",
+    },
+
+    ar: {
+      loading: "جارٍ تحميل ملف TPQ...",
+      errorTitle: "تعذر عرض ملف TPQ",
+      errorDescription: "تعذر تحميل بيانات إعدادات النظام.",
+      retry: "حاول مرة أخرى",
+      profile: "نبذة عن",
+      teachingTeam: "فريق التدريس",
+      teachersDescription: "الأساتذة والأستاذات",
+      visionMission: "الرؤية والرسالة",
+      vision: "الرؤية",
+      mission: "الرسالة",
+      noMission: "لا توجد بيانات للرسالة.",
+      ourValues: "قيمنا",
+      akhlak: "الأخلاق",
+      qurani: "القرآنية",
+      discipline: "الانضباط",
+      achievement: "الإنجاز",
+      nig: "NIG",
+      education: "التعليم",
+    },
+  };
+
+  const t = profilText[language] || profilText.id;
+  const isArabic = language === "ar";
+
   const [guru, setGuru] = useState([]);
   const [pengaturan, setPengaturan] = useState(null);
-
-  // ============================================================
-  // LOADING STATE
-  // ============================================================
+  const [translatedContent, setTranslatedContent] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  // ============================================================
-  // LOAD DATA
-  // ============================================================
+  const [translationLoading, setTranslationLoading] = useState(false);
 
   const loadData = async () => {
     try {
@@ -37,6 +100,7 @@ export default function ProfilTPQ() {
       const dataPengaturan = pengaturanResponse.data?.data || null;
 
       setPengaturan(dataPengaturan);
+      setTranslatedContent(null);
     } catch (err) {
       console.error("Gagal mengambil data Profil TPQ:", err);
 
@@ -48,9 +112,128 @@ export default function ProfilTPQ() {
     }
   };
 
-  // ============================================================
-  // LOADING
-  // ============================================================
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  useEffect(() => {
+    if (!pengaturan || language === "id") {
+      setTranslatedContent(null);
+      setTranslationLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const translateContent = async () => {
+      const sourceContent = {
+        profil: pengaturan.profil || "",
+        visi: pengaturan.visi || "",
+        misi: pengaturan.misi || "",
+        nilaiAkhlak: pengaturan.nilai_akhlak || "",
+        nilaiQuran: pengaturan.nilai_quran || "",
+        nilaiDisiplin: pengaturan.nilai_disiplin || "",
+        nilaiPrestasi: pengaturan.nilai_prestasi || "",
+      };
+
+      const sourceKey = JSON.stringify(sourceContent);
+
+      try {
+        setTranslationLoading(true);
+
+        const cachedRaw = sessionStorage.getItem(TRANSLATION_CACHE_KEY);
+
+        if (cachedRaw) {
+          try {
+            const cached = JSON.parse(cachedRaw);
+
+            if (
+              cached?.language === language &&
+              cached?.sourceKey === sourceKey &&
+              cached?.data
+            ) {
+              if (!cancelled) {
+                setTranslatedContent(cached.data);
+                setTranslationLoading(false);
+              }
+
+              return;
+            }
+          } catch (cacheError) {
+            console.warn(
+              "Cache terjemahan Profil TPQ tidak valid:",
+              cacheError,
+            );
+
+            sessionStorage.removeItem(TRANSLATION_CACHE_KEY);
+          }
+        }
+
+        const response = await api.post("/profil/translate", {
+          ...sourceContent,
+          language,
+        });
+
+        if (!response.data?.success) {
+          throw new Error(
+            response.data?.message || "Terjemahan Profil TPQ gagal.",
+          );
+        }
+
+        const result = response.data?.data;
+
+        if (!result) {
+          throw new Error("Data hasil terjemahan Profil TPQ kosong.");
+        }
+
+        const translated = {
+          profil: result.profil ?? sourceContent.profil,
+          visi: result.visi ?? sourceContent.visi,
+          misi: result.misi ?? sourceContent.misi,
+          nilaiAkhlak: result.nilaiAkhlak ?? sourceContent.nilaiAkhlak,
+          nilaiQuran: result.nilaiQuran ?? sourceContent.nilaiQuran,
+          nilaiDisiplin: result.nilaiDisiplin ?? sourceContent.nilaiDisiplin,
+          nilaiPrestasi: result.nilaiPrestasi ?? sourceContent.nilaiPrestasi,
+        };
+
+        if (!cancelled) {
+          setTranslatedContent(translated);
+
+          try {
+            sessionStorage.setItem(
+              TRANSLATION_CACHE_KEY,
+              JSON.stringify({
+                language,
+                sourceKey,
+                data: translated,
+              }),
+            );
+          } catch (cacheError) {
+            console.warn(
+              "Gagal menyimpan cache terjemahan Profil TPQ:",
+              cacheError,
+            );
+          }
+        }
+      } catch (err) {
+        console.error("Gagal menerjemahkan Profil TPQ:", err);
+
+        if (!cancelled) {
+          setTranslatedContent(sourceContent);
+        }
+      } finally {
+        if (!cancelled) {
+          setTranslationLoading(false);
+        }
+      }
+    };
+
+    translateContent();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [language, pengaturan]);
 
   if (loading) {
     return (
@@ -58,26 +241,30 @@ export default function ProfilTPQ() {
         <div className="text-center">
           <div className="w-10 h-10 mx-auto mb-4 border-4 border-green-200 border-t-green-600 rounded-full animate-spin"></div>
 
-          <p className="text-gray-500 text-sm">Memuat profil TPQ...</p>
+          <p className="text-gray-500 text-sm" dir={isArabic ? "rtl" : "ltr"}>
+            {t.loading}
+          </p>
         </div>
       </div>
     );
   }
 
-  // ============================================================
-  // ERROR
-  // ============================================================
-
   if (error || !pengaturan) {
     return (
       <div className="min-h-screen bg-[#f6faf7] flex items-center justify-center px-6">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-700">
-            Profil TPQ belum dapat ditampilkan
+          <h2
+            className="text-xl font-semibold text-gray-700"
+            dir={isArabic ? "rtl" : "ltr"}
+          >
+            {t.errorTitle}
           </h2>
 
-          <p className="text-gray-500 text-sm mt-2">
-            Data pengaturan sistem gagal dimuat.
+          <p
+            className="text-gray-500 text-sm mt-2"
+            dir={isArabic ? "rtl" : "ltr"}
+          >
+            {t.errorDescription}
           </p>
 
           <button
@@ -95,16 +282,12 @@ export default function ProfilTPQ() {
               transition
             "
           >
-            Coba Lagi
+            {t.retry}
           </button>
         </div>
       </div>
     );
   }
-
-  // ============================================================
-  // DATA
-  // ============================================================
 
   const namaTPQ = pengaturan.nama_tpq || "";
 
@@ -117,21 +300,42 @@ export default function ProfilTPQ() {
   const nilaiDisiplin = pengaturan.nilai_disiplin || "";
   const nilaiPrestasi = pengaturan.nilai_prestasi || "";
 
-  // ============================================================
-  // FORMAT MISI
-  // ============================================================
+  const displayedProfil =
+    language === "id" ? profil : translatedContent?.profil || profil;
 
-  const daftarMisi = misi
+  const displayedVisi =
+    language === "id" ? visi : translatedContent?.visi || visi;
+
+  const displayedMisi =
+    language === "id" ? misi : translatedContent?.misi || misi;
+
+  const displayedNilaiAkhlak =
+    language === "id"
+      ? nilaiAkhlak
+      : translatedContent?.nilaiAkhlak || nilaiAkhlak;
+
+  const displayedNilaiQuran =
+    language === "id"
+      ? nilaiQuran
+      : translatedContent?.nilaiQuran || nilaiQuran;
+
+  const displayedNilaiDisiplin =
+    language === "id"
+      ? nilaiDisiplin
+      : translatedContent?.nilaiDisiplin || nilaiDisiplin;
+
+  const displayedNilaiPrestasi =
+    language === "id"
+      ? nilaiPrestasi
+      : translatedContent?.nilaiPrestasi || nilaiPrestasi;
+
+  const daftarMisi = displayedMisi
     .split(/\r?\n/)
     .map((item) => item.trim())
     .filter((item) => item !== "");
 
   return (
     <div>
-      {/* ======================================================
-          HEADER + TENTANG KAMI
-      ====================================================== */}
-
       <section
         className="relative overflow-hidden flex items-start pt-16 md:pt-24"
         style={{
@@ -140,16 +344,10 @@ export default function ProfilTPQ() {
           backgroundPosition: "center",
         }}
       >
-        {/* Overlay */}
-
         <div className="absolute inset-0 bg-white/5 backdrop-blur-[0px]"></div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-10 w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
-            {/* ==================================================
-                VIDEO
-            ================================================== */}
-
             <div className="flex justify-center order-1 lg:-mt-16">
               <div className="w-full max-w-xl overflow-hidden rounded-3xl shadow-2xl bg-white p-3">
                 <video
@@ -170,10 +368,6 @@ export default function ProfilTPQ() {
               </div>
             </div>
 
-            {/* ==================================================
-                PROFIL TPQ
-            ================================================== */}
-
             <div
               className="
                 flex
@@ -185,6 +379,7 @@ export default function ProfilTPQ() {
               "
             >
               <span
+                dir={isArabic ? "rtl" : "ltr"}
                 className="
                   uppercase
                   tracking-[3px]
@@ -195,7 +390,7 @@ export default function ProfilTPQ() {
                   font-extralight
                 "
               >
-                Profil {namaTPQ}
+                {t.profile} {namaTPQ}
               </span>
 
               <div
@@ -204,30 +399,36 @@ export default function ProfilTPQ() {
                   space-y-4
                   text-gray-700
                   font-extralight
-                  leading-7
+                  leading-5 md:leading-7
                   text-justify
                   text-sm
                   md:text-base
                 "
               >
-                <p>{profil}</p>
+                <p dir={isArabic ? "rtl" : "ltr"}>
+                  {translationLoading ? "..." : displayedProfil}
+                </p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ======================================================
-          TIM PENGAJAR
-      ====================================================== */}
-
       <section className="py-12 md:py-16 bg-[#f6faf7]">
         <div className="max-w-5xl mx-auto px-4 md:px-6">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold">Tim Pengajar</h2>
+            <h2
+              className="text-3xl md:text-4xl font-bold"
+              dir={isArabic ? "rtl" : "ltr"}
+            >
+              {t.teachingTeam}
+            </h2>
 
-            <p className="text-gray-500 text-lg mt-3">
-              Ustadz dan Ustadzah {namaTPQ}
+            <p
+              className="text-green-500 text-lg mt-3"
+              dir={isArabic ? "rtl" : "ltr"}
+            >
+              {t.teachersDescription} <br /> {namaTPQ} Ternate
             </p>
           </div>
 
@@ -249,8 +450,6 @@ export default function ProfilTPQ() {
                   text-center
                 "
               >
-                {/* FOTO */}
-
                 <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-4">
                   {item.foto_url ? (
                     <img
@@ -270,16 +469,15 @@ export default function ProfilTPQ() {
                   )}
                 </div>
 
-                {/* NAMA */}
-
                 <h3 className="font-extralight text-lg md:text-xl text-green-600">
                   {item.nama_guru}
                 </h3>
 
-                {/* NIG + PENDIDIKAN */}
-
-                <p className="text-black text-xs md:text-sm mt-2">
-                  NIG : {item.nig} | Pendidikan {item.pendidikan}
+                <p
+                  className="text-black text-xs md:text-sm mt-2"
+                  dir={isArabic ? "rtl" : "ltr"}
+                >
+                  {t.nig} : {item.nig} | {t.education} {item.pendidikan}
                 </p>
               </div>
             ))}
@@ -287,17 +485,9 @@ export default function ProfilTPQ() {
         </div>
       </section>
 
-      {/* ======================================================
-          VISI MISI NILAI
-      ====================================================== */}
-
       <section className="py-16 -mt-8 bg-[#f8faf8]">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid lg:grid-cols-2 gap-8 lg:-mt-8">
-            {/* ==================================================
-                KIRI - VISI & MISI
-            ================================================== */}
-
             <div className="bg-white rounded-3xl shadow-lg p-6 md:p-8">
               <div
                 className="rounded-2xl p-5 mb-6 overflow-hidden relative"
@@ -309,19 +499,21 @@ export default function ProfilTPQ() {
               >
                 <div className="absolute inset-0 bg-white/20"></div>
 
-                <h3 className="relative text-2xl md:text-3xl font-bold text-green-800 text-center">
-                  Visi & Misi
+                <h3
+                  className="relative text-2xl md:text-3xl font-bold text-green-800 text-center"
+                  dir={isArabic ? "rtl" : "ltr"}
+                >
+                  {t.visionMission}
                 </h3>
               </div>
 
               <div className="space-y-6">
-                {/* ==================================================
-                    VISI
-                ================================================== */}
-
                 <div>
-                  <h4 className="text-2xl font-bold text-green-700 mb-2">
-                    VISI
+                  <h4
+                    className="text-2xl font-bold text-green-700 mb-2"
+                    dir={isArabic ? "rtl" : "ltr"}
+                  >
+                    {t.vision}
                   </h4>
 
                   <p
@@ -332,46 +524,60 @@ export default function ProfilTPQ() {
                       leading-6
                       text-justify
                     "
+                    dir={isArabic ? "rtl" : "ltr"}
                   >
-                    {visi}
+                    {translationLoading ? "..." : displayedVisi}
                   </p>
                 </div>
 
-                {/* ==================================================
-                    MISI
-                ================================================== */}
-
                 <div>
-                  <h4 className="text-2xl font-bold text-green-700 mb-2">
-                    MISI
+                  <h4
+                    className="text-2xl font-bold text-green-700 mb-2"
+                    dir={isArabic ? "rtl" : "ltr"}
+                  >
+                    {t.mission}
                   </h4>
 
-                  <div className="space-y-1">
+                  <div className="space-y-1" dir={isArabic ? "rtl" : "ltr"}>
                     {daftarMisi.length > 0 ? (
                       daftarMisi.map((item, index) => (
-                        <div key={index} className="flex items-start gap-2">
+                        <div
+                          key={index}
+                          className={`flex items-start gap-2 ${
+                            isArabic ? "flex-row-reverse" : ""
+                          }`}
+                        >
                           <span className="font-semibold text-green-700 min-w-5">
                             {index + 1}.
                           </span>
 
-                          <p className="text-gray-700 text-sm md:text-[15px] leading-5 text-justify">
+                          <p
+                            className="
+                              text-gray-700
+                              text-sm
+                              md:text-[15px]
+                              leading-5
+                              text-justify
+                              flex-1
+                            "
+                            dir={isArabic ? "rtl" : "ltr"}
+                          >
                             {item}
                           </p>
                         </div>
                       ))
                     ) : (
-                      <p className="text-gray-500 text-sm md:text-[15px]">
-                        Belum ada data misi.
+                      <p
+                        className="text-gray-500 text-sm md:text-[15px]"
+                        dir={isArabic ? "rtl" : "ltr"}
+                      >
+                        {t.noMission}
                       </p>
                     )}
                   </div>
                 </div>
               </div>
             </div>
-
-            {/* ==================================================
-                KANAN - NILAI-NILAI
-            ================================================== */}
 
             <div className="bg-white rounded-3xl shadow-lg p-6 md:p-8">
               <div
@@ -384,57 +590,104 @@ export default function ProfilTPQ() {
               >
                 <div className="absolute inset-0 bg-white/20"></div>
 
-                <h3 className="relative text-2xl md:text-3xl font-bold text-green-800 text-center">
-                  Nilai-Nilai Kami
+                <h3
+                  className="relative text-2xl md:text-3xl font-bold text-green-800 text-center"
+                  dir={isArabic ? "rtl" : "ltr"}
+                >
+                  {t.ourValues}
                 </h3>
               </div>
 
               <div className="space-y-4">
-                {/* AKHLAK */}
-
                 <div>
-                  <h4 className="font-bold text-xl text-green-700">
-                    1. Akhlak
+                  <h4
+                    className="font-bold text-xl text-green-700"
+                    dir={isArabic ? "rtl" : "ltr"}
+                  >
+                    1. {t.akhlak}
                   </h4>
 
-                  <p className="text-gray-700 text-sm md:text-[15px] leading-5 text-justify mt-1">
-                    {nilaiAkhlak}
+                  <p
+                    className="
+                      text-gray-700
+                      text-sm
+                      md:text-[15px]
+                      leading-5
+                      text-justify
+                      mt-1
+                    "
+                    dir={isArabic ? "rtl" : "ltr"}
+                  >
+                    {translationLoading ? "..." : displayedNilaiAkhlak}
                   </p>
                 </div>
 
-                {/* QURANI */}
-
                 <div>
-                  <h4 className="font-bold text-xl text-green-700">
-                    2. Qurani
+                  <h4
+                    className="font-bold text-xl text-green-700"
+                    dir={isArabic ? "rtl" : "ltr"}
+                  >
+                    2. {t.qurani}
                   </h4>
 
-                  <p className="text-gray-700 text-sm md:text-[15px] leading-5 text-justify mt-1">
-                    {nilaiQuran}
+                  <p
+                    className="
+                      text-gray-700
+                      text-sm
+                      md:text-[15px]
+                      leading-5
+                      text-justify
+                      mt-1
+                    "
+                    dir={isArabic ? "rtl" : "ltr"}
+                  >
+                    {translationLoading ? "..." : displayedNilaiQuran}
                   </p>
                 </div>
 
-                {/* DISIPLIN */}
-
                 <div>
-                  <h4 className="font-bold text-xl text-green-700">
-                    3. Disiplin
+                  <h4
+                    className="font-bold text-xl text-green-700"
+                    dir={isArabic ? "rtl" : "ltr"}
+                  >
+                    3. {t.discipline}
                   </h4>
 
-                  <p className="text-gray-700 text-sm md:text-[15px] leading-5 text-justify mt-1">
-                    {nilaiDisiplin}
+                  <p
+                    className="
+                      text-gray-700
+                      text-sm
+                      md:text-[15px]
+                      leading-5
+                      text-justify
+                      mt-1
+                    "
+                    dir={isArabic ? "rtl" : "ltr"}
+                  >
+                    {translationLoading ? "..." : displayedNilaiDisiplin}
                   </p>
                 </div>
 
-                {/* PRESTASI */}
-
                 <div>
-                  <h4 className="font-bold text-xl text-green-700">
-                    4. Prestasi
+                  <h4
+                    className="font-bold text-xl text-green-700"
+                    dir={isArabic ? "rtl" : "ltr"}
+                  >
+                    4. {t.achievement}
                   </h4>
 
-                  <p className="text-gray-700 text-sm md:text-[15px] leading-5 text-justify mt-1">
-                    {nilaiPrestasi}
+                  <p
+                    className="
+                      text-gray-700
+                      text-sm
+                      md:text-[15px]
+                      leading-5
+                      text-justify
+                      mt-1
+                    "
+                    dir={isArabic ? "rtl" : "ltr"}
+                  >
+                    {translationLoading ? "..." : displayedNilaiPrestasi}
                   </p>
                 </div>
               </div>

@@ -14,5 +14,6 @@ class Berita extends Model
         'penulis',
         'foto',
         'status',
+        'views',
     ];
 }

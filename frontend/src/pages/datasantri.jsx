@@ -472,7 +472,7 @@ export default function DataSantri() {
             >
               {/* HEADER CARD */}
 
-              <div className="bg-purple-600 p-2 mb-1 flex flex-col items-center space-y-0.5 text-center">
+              <div className="bg-gray-300 p-2 mb-1 flex flex-col items-center space-y-0.5 text-center">
                 {d.foto ? (
                   <img
                     src={`${api.defaults.baseURL.replace(/\/api\/?$/, "")}/storage/${d.foto}`}
@@ -485,18 +485,18 @@ export default function DataSantri() {
                   </div>
                 )}
 
-                <h2 className="mt-1 text-white font-bold text-lg uppercase">
+                <h2 className="mt-1 text-black font-bold text-lg uppercase">
                   {d.nama}
                 </h2>
 
-                <p className="text-white font-extralight text-sm">
+                <p className="text-black font-extralight text-sm">
                   {d.nis} | Kelas {d.kelas || "-"}
                 </p>
               </div>
 
               {/* NARASI */}
 
-              <div className="bg-gray-300 font-light p-4 text-sm text-gray-800 space-y-0 text-justify">
+              <div className="bg-gray-0 font-light p-4 text-sm text-gray-800 space-y-0 text-justify">
                 <p>
                   Adalah santri TPQ Khairunisa Ternate dengan jenis kelamin{" "}
                   {d.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"} berusia{" "}

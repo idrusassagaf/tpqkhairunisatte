@@ -189,7 +189,8 @@ export default function Pengumuman() {
         className="
             text-gray-600
             text-sm
-            leading-7
+            leading-5
+            md:leading-7
             mb-3
             w-full
           "

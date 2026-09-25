@@ -239,7 +239,7 @@ export default function MasterHafalan() {
 
                     {/* KANAN */}
                     <button
-                      onClick={() => navigate(`/progres-hafalan/${s.nis}`)}
+                      onClick={() => navigate(`/master-hafalan/${s.nis}`)}
                       className="
               w-9 h-9
               rounded-full

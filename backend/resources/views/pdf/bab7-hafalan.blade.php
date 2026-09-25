@@ -1,22 +1,69 @@
-<h2>BAB VII</h2>
+@php
+$pdfLanguage = $language ?? 'id';
 
-<h3>PROGRES HAFALAN SANTRI</h3>
+$labels = [
+'id' => [
+'bab' => 'BAB VII',
+'title' => 'PROGRES HAFALAN SANTRI',
+'keterangan' => 'Keterangan',
+'jumlah' => 'Jumlah',
+'total_data_hafalan' => 'Total Data Hafalan',
+'rekap_progres' => 'Rekapitulasi Progres Hafalan Santri',
+'no' => 'No',
+'jenis_hafalan' => 'Jenis Hafalan',
+'lancar' => 'Lancar',
+'belum' => 'Belum',
+],
+
+'en' => [
+'bab' => 'CHAPTER VII',
+'title' => 'STUDENT MEMORIZATION PROGRESS',
+'keterangan' => 'Description',
+'jumlah' => 'Total',
+'total_data_hafalan' => 'Total Memorization Records',
+'rekap_progres' => 'Student Memorization Progress Summary',
+'no' => 'No',
+'jenis_hafalan' => 'Memorization Type',
+'lancar' => 'Fluent',
+'belum' => 'Not Yet',
+],
+
+'ar' => [
+'bab' => 'الفصل السابع',
+'title' => 'تقدم حفظ الطلاب',
+'keterangan' => 'البيان',
+'jumlah' => 'العدد',
+'total_data_hafalan' => 'إجمالي بيانات الحفظ',
+'rekap_progres' => 'ملخص تقدم حفظ الطلاب',
+'no' => 'الرقم',
+'jenis_hafalan' => 'نوع الحفظ',
+'lancar' => 'متقن',
+'belum' => 'لم يتقن بعد',
+],
+];
+
+$label = $labels[$pdfLanguage] ?? $labels['id'];
+@endphp
+
+<h2>{{ $label['bab'] }}</h2>
+
+<h3>{{ $label['title'] }}</h3>
 
 <p style="text-align:justify; line-height:1.8;">
 
-    {{ $setting->narasi['bab7'] }}
+    {{ $setting->narasi['bab7'] ?? '' }}
 
 </p>
 
 <table>
 
     <tr>
-        <th>Keterangan</th>
-        <th width="25%">Jumlah</th>
+        <th>{{ $label['keterangan'] }}</th>
+        <th width="25%">{{ $label['jumlah'] }}</th>
     </tr>
 
     <tr>
-        <td>Total Data Hafalan</td>
+        <td>{{ $label['total_data_hafalan'] }}</td>
 
         <td align="center">
             {{ $progresHafalan->count() }}
@@ -27,16 +74,16 @@
 
 <br>
 
-<h3>Rekapitulasi Progres Hafalan Santri</h3>
+<h3>{{ $label['rekap_progres'] }}</h3>
 
 <table>
 
     <tr>
-        <th width="8%">No</th>
-        <th>Jenis Hafalan</th>
-        <th width="15%">Lancar</th>
-        <th width="15%">Belum</th>
-        <th width="15%">Jumlah</th>
+        <th width="8%">{{ $label['no'] }}</th>
+        <th>{{ $label['jenis_hafalan'] }}</th>
+        <th width="15%">{{ $label['lancar'] }}</th>
+        <th width="15%">{{ $label['belum'] }}</th>
+        <th width="15%">{{ $label['jumlah'] }}</th>
     </tr>
 
     @php

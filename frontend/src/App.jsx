@@ -1,7 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-
 import Layout from "./components/Layout";
-
 import Dashboard from "./pages/Dashboard";
 import MasterData from "./pages/MasterData";
 import DataSantri from "./pages/datasantri";
@@ -14,6 +12,10 @@ import MasterProgres from "./pages/MasterProgres";
 import ProgresHafalan from "./pages/ProgresHafalan";
 import ProgresHafalanSantri from "./pages/ProgresHafalanSantri";
 import MasterHafalan from "./pages/MasterHafalan";
+import RaportSantri from "./pages/RaportSantri";
+import KehadiranSantri from "./pages/KehadiranSantri";
+import KehadiranGuru from "./pages/KehadiranGuru";
+import ScanAbsensi from "./pages/ScanAbsensi";
 
 import Berita from "./pages/Berita";
 import Pengumuman from "./pages/Pengumuman";
@@ -72,7 +74,16 @@ export default function App() {
         <Route path="master-hafalan" element={<MasterHafalan />} />
 
         <Route path="data-santri" element={<DataSantri />} />
+
+        {/* ===================================================
+            RAPORT SANTRI
+        ==================================================== */}
+        <Route path="raport-santri" element={<RaportSantri />} />
+
         <Route path="data-guru" element={<DataGuru />} />
+        <Route path="kehadiran-santri" element={<KehadiranSantri />} />
+        <Route path="kehadiran-guru" element={<KehadiranGuru />} />
+        <Route path="scan-absensi" element={<ScanAbsensi />} />
 
         <Route path="progres-iqra" element={<ProgresIqra />} />
         <Route path="progres-quran" element={<ProgresQuran />} />

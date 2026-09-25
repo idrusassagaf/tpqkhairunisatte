@@ -482,7 +482,7 @@ export default function ProgresIqra() {
           FILTER
       ===================================================== */}
 
-      <div className="bg-white rounded-xl shadow p-4 overflow-x-auto">
+      <div className="p-0 md:bg-white md:rounded-xl md:shadow md:p-4 md:overflow-x-auto">
         <div className="mb-4 flex flex-wrap gap-2">
           {/* SEARCH */}
 
@@ -537,7 +537,7 @@ export default function ProgresIqra() {
 
         {/* ================= MOBILE CARD ================= */}
 
-        <div className="md:hidden space-y-4">
+        <div className="md:hidden w-full max-w-full space-y-4">
           {currentSantri.length === 0 ? (
             <div className="text-center p-4 text-gray-500">
               Tidak ada data progres iqra
@@ -560,11 +560,11 @@ export default function ProgresIqra() {
               return (
                 <div
                   key={i}
-                  className="bg-gray-200 border rounded-xl shadow overflow-hidden"
+                  className="w-full max-w-full bg-gray-0 border rounded-xl shadow overflow-hidden"
                 >
                   {/* HEADER */}
 
-                  <div className="bg-purple-600 text-white text-center font-bold py-2 px-3 text-sm">
+                  <div className="bg-gray-300 text-black text-center font-bold py-2 px-3 text-sm">
                     {s.nama?.toUpperCase()}
                     <br />
                     NIS : {s.nis} | Kelas {s.kelas || "-"}

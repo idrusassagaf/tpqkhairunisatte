@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom";
 import { api } from "../api";
 
 import heroImage from "../assets/hero-putih04.jpg";
@@ -18,7 +18,176 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 export default function Home() {
+  const { language } = useOutletContext();
+  const homeText = {
+    id: {
+      ahlan: "Ahlan wa sahlan",
+      tagline: "Membentuk Generasi Qurani Berakhlak",
+      register: "Pendaftaran Santri",
+      contact: "Hubungi Kami",
+
+      students: "Santri",
+      iqraStudents: "Santri Iqra",
+      quranStudents: "Santri Qur'an",
+      teachers: "Guru",
+
+      programTitle: "Program Belajar",
+      programDescription: "Program unggulan",
+      iqraProgram: "Program Iqra",
+      quranProgram: "Program Al-Qur'an",
+      tahfidzProgram: "Program Tahfidz",
+
+      whyChoose: "Mengapa Memilih",
+      whyChooseDescription:
+        "Pendidikan Islami dengan pembelajaran gratis yang terarah dan menyenangkan",
+      learningIqra: "Belajar Iqra & Al-Qur'an",
+      worshipPractice: "Praktik Ibadah",
+      characterDevelopment: "Pembinaan Akhlak",
+      experiencedTeachers: "Guru Berpengalaman",
+
+      registrationTitle: "Persyaratan Pendaftaran",
+      registrationDescription:
+        "Persiapkan dokumen berikut saat melakukan pendaftaran santri baru",
+      freeRegistration: "Pendaftaran Gratis",
+      registrationForm: "Mengisi Form Pendaftaran",
+      familyCard: "Fotocopy Kartu Keluarga",
+      parentIdCard: "Fotocopy KTP Orang Tua",
+    },
+
+    en: {
+      ahlan: "Welcome",
+      tagline: "Forming a Qur'anic Generation with Good Character",
+      register: "Student Registration",
+      contact: "Contact Us",
+
+      students: "Students",
+      iqraStudents: "Iqra Students",
+      quranStudents: "Qur'an Students",
+      teachers: "Teachers",
+
+      programTitle: "Learning Programs",
+      programDescription: "Featured programs of",
+      iqraProgram: "Iqra Program",
+      quranProgram: "Qur'an Program",
+      tahfidzProgram: "Tahfidz Program",
+
+      whyChoose: "Why Choose",
+      whyChooseDescription:
+        "Islamic education with free, structured, and enjoyable learning",
+      learningIqra: "Learning Iqra & Qur'an",
+      worshipPractice: "Worship Practice",
+      characterDevelopment: "Character Development",
+      experiencedTeachers: "Experienced Teachers",
+
+      registrationTitle: "Registration Requirements",
+      registrationDescription:
+        "Prepare the following documents when registering a new student",
+      freeRegistration: "Free Registration",
+      registrationForm: "Complete the Registration Form",
+      familyCard: "Copy of Family Card",
+      parentIdCard: "Copy of Parent's ID Card",
+    },
+
+    ar: {
+      ahlan: "أهلاً وسهلاً",
+      tagline: "تكوين جيل قرآني حسن الأخلاق",
+      register: "تسجيل الطلاب",
+      contact: "اتصل بنا",
+
+      students: "الطلاب",
+      iqraStudents: "طلاب الإقراء",
+      quranStudents: "طلاب القرآن",
+      teachers: "المعلمون",
+
+      programTitle: "برامج التعلم",
+      programDescription: "البرامج المتميزة في",
+      iqraProgram: "برنامج الإقراء",
+      quranProgram: "برنامج القرآن الكريم",
+      tahfidzProgram: "برنامج التحفيظ",
+
+      whyChoose: "لماذا تختار",
+      whyChooseDescription: "تعليم إسلامي بتعلّم مجاني ومنظم وممتع",
+      learningIqra: "تعلم الإقراء والقرآن الكريم",
+      worshipPractice: "تطبيق العبادات",
+      characterDevelopment: "بناء الأخلاق",
+      experiencedTeachers: "معلمون ذوو خبرة",
+
+      registrationTitle: "متطلبات التسجيل",
+      registrationDescription:
+        "يرجى تجهيز المستندات التالية عند تسجيل طالب جديد",
+      freeRegistration: "التسجيل مجاني",
+      registrationForm: "تعبئة استمارة التسجيل",
+      familyCard: "نسخة من بطاقة العائلة",
+      parentIdCard: "نسخة من بطاقة هوية الوالدين",
+    },
+  };
+
+  const t = homeText[language] || homeText.id;
+
+  const programNarrative = {
+    iqra: {
+      en: "Basic learning to read Hijaiyah letters using the Iqra method progressively, starting from letter recognition and harakat, until students are able to read fluently and correctly.",
+      ar: "تعليم أساسي لقراءة الحروف الهجائية باستخدام طريقة الإقراء بشكل تدريجي، بدءًا من التعرف على الحروف والحركات، حتى يتمكن الطلاب من القراءة بطلاقة وصحة.",
+    },
+
+    quran: {
+      en: "Learning to read the Qur'an with attention to the rules of Tajwid and the correct pronunciation of Makharijul Huruf, enabling students to read the Qur'an fluently and with proper Tartil.",
+      ar: "تعليم قراءة القرآن الكريم مع مراعاة أحكام التجويد ومخارج الحروف الصحيحة، حتى يتمكن الطلاب من قراءة القرآن الكريم بفصاحة وترتيل.",
+    },
+
+    tahfidz: {
+      en: "A memorization program covering short surahs, daily prayers, and gradual Qur'an memorization development according to each student's ability.",
+      ar: "برنامج لحفظ السور القصيرة والأدعية اليومية، بالإضافة إلى تنمية حفظ القرآن الكريم تدريجيًا وفقًا لقدرات كل طالب.",
+    },
+  };
+
+  const keunggulanNarrative = {
+    iqraQuran: {
+      en: "Students are guided progressively from learning to read Iqra to the Qur'an, with attention to the correct rules of Tajwid and Makharijul Huruf.",
+      ar: "يتم توجيه الطلاب تدريجيًا بدءًا من قراءة الإقراء حتى قراءة القرآن الكريم، مع مراعاة أحكام التجويد ومخارج الحروف الصحيحة.",
+    },
+
+    ibadah: {
+      en: "Learning is not limited to theory, but also includes practical worship such as prayer, daily supplications, ablution, and developing Islamic manners in everyday life.",
+      ar: "لا يقتصر التعليم على الجانب النظري، بل يشمل أيضًا تطبيق العبادات مثل الصلاة والأدعية اليومية والوضوء، بالإضافة إلى تعويد الطلاب على الآداب الإسلامية في الحياة اليومية.",
+    },
+
+    akhlak: {
+      en: "Character development is an important part of the learning process, helping students grow into respectful, disciplined, responsible individuals with good Islamic character.",
+      ar: "يُعد بناء الشخصية جزءًا مهمًا من عملية التعلم، حيث يُرجى أن ينشأ الطلاب بأخلاق حسنة، وأن يكونوا مهذبين ومنضبطين ومسؤولين وذوي أخلاق إسلامية كريمة.",
+    },
+
+    guru: {
+      en: "The learning process is guided by experienced male and female Islamic teachers who are committed to educating and guiding the Qur'anic generation.",
+      ar: "تتم عملية التعلم بإشراف معلمين ومعلمات ذوي خبرة، ملتزمين بتعليم وتوجيه الجيل القرآني.",
+    },
+  };
+
+  // TAMBAHKAN DI SINI
+  const syaratNarrative = {
+    gratis: {
+      en: "Registration is free of charge, and there are no fees throughout the student's learning period at TPQ.",
+      ar: "التسجيل مجاني ولا تُفرض أي رسوم طوال فترة تعلم الطالب في المركز.",
+    },
+
+    form: {
+      en: "The registration form is completed by the TPQ Admin based on the information provided by the student's parent or guardian.",
+      ar: "يتم تعبئة استمارة التسجيل من قبل مسؤول الإدارة في المركز بناءً على البيانات التي يقدمها والد الطالب أو ولي أمره.",
+    },
+
+    kk: {
+      en: "Bring a photocopy of the Family Card as supporting documentation for the registration administration.",
+      ar: "إحضار نسخة من بطاقة العائلة كوثيقة داعمة لإجراءات التسجيل الإداري.",
+    },
+
+    ktp: {
+      en: "Bring a photocopy of the parent's or student's guardian's ID card as supporting documentation for the registration administration.",
+      ar: "إحضار نسخة من بطاقة هوية والد الطالب أو ولي أمره كوثيقة داعمة لإجراءات التسجيل الإداري.",
+    },
+  };
+
   const [santri, setSantri] = useState([]);
+
   const [guru, setGuru] = useState([]);
 
   // =========================================================
@@ -792,7 +961,7 @@ export default function Home() {
         <div className="relative max-w-7xl mx-auto px-6 pt-20 pb-16 md:py-40 w-full min-h-screen flex flex-col justify-center -translate-y-4 md:translate-y-0">
           <div className="max-w-3xl">
             <p className="uppercase tracking-[3px] text-xs md:text-base text-gray-800 mb-4">
-              Ahlan wa sahlan
+              {t.ahlan}
             </p>
 
             <h1 className="text-4xl md:text-5xl font-extralight leading-tight">
@@ -800,22 +969,22 @@ export default function Home() {
             </h1>
 
             <p className="mt-4 text-lg md:text-2xl font-extralight text-green-700">
-              Membentuk Generasi Qurani Berakhlak
+              {t.tagline}
             </p>
 
-            <div className="flex flex-wrap gap-4 mt-28 justify-center md:justify-start">
+            <div className="flex flex-wrap gap-4 mt-12 md:mt-28 justify-center md:justify-start">
               <Link
                 to="/web/login"
                 className="bg-green-600 hover:bg-green-700 px-5 md:px-8 py-3 md:py-4 rounded-xl font-extralight inline-flex items-center"
               >
-                Pendaftaran Santri
+                {t.register}
               </Link>
 
               <Link
                 to="/web/kontak"
                 className="bg-green-600 hover:bg-green-700 px-5 md:px-8 py-3 md:py-4 rounded-xl font-extralight inline-flex items-center"
               >
-                Hubungi Kami
+                {t.contact}
               </Link>
             </div>
           </div>
@@ -844,8 +1013,8 @@ export default function Home() {
 
               <div className="w-12 h-[2px] bg-green-500 mx-auto my-3 rounded-full"></div>
 
-              <p className="text-sm md:text-base text-gray-600 font-medium">
-                Jumlah Santri
+              <p className="text-xs md:text-base text-gray-600 font-medium">
+                {t.students}
               </p>
             </div>
 
@@ -864,8 +1033,8 @@ export default function Home() {
 
               <div className="w-12 h-[2px] bg-green-500 mx-auto my-3 rounded-full"></div>
 
-              <p className="text-sm md:text-base text-gray-600 font-medium">
-                Santri Iqra
+              <p className="text-xs md:text-base text-gray-600 font-medium">
+                {t.iqraStudents}
               </p>
             </div>
 
@@ -884,8 +1053,8 @@ export default function Home() {
 
               <div className="w-12 h-[2px] bg-green-500 mx-auto my-3 rounded-full"></div>
 
-              <p className="text-sm md:text-base text-gray-600 font-medium">
-                Santri Al-Qur'an
+              <p className="text-xs md:text-base text-gray-600 font-medium">
+                {t.quranStudents}
               </p>
             </div>
 
@@ -904,8 +1073,8 @@ export default function Home() {
 
               <div className="w-12 h-[2px] bg-green-500 mx-auto my-3 rounded-full"></div>
 
-              <p className="text-sm md:text-base text-gray-600 font-medium">
-                Jumlah Guru
+              <p className="text-xs md:text-base text-gray-600 font-medium">
+                {t.teachers}
               </p>
             </div>
           </div>
@@ -919,13 +1088,17 @@ export default function Home() {
       <section className="bg-gray-200 py-12">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-extralight text-gray-800">
-              Program Pembelajaran
+            <h2 className="text-2xl font-extralight text-gray-800">
+              {t.programTitle}
             </h2>
 
-            <p className="text-green-600 text-lg mt-3">
-              Program unggulan {pengaturan.nama_tpq} dalam membentuk Generasi
-              Qurani
+            <p className="text-green-600 text-sm mt-3">
+              {t.programDescription} {pengaturan.nama_tpq}{" "}
+              {language === "id"
+                ? "dalam membentuk Generasi Qurani"
+                : language === "en"
+                  ? "in nurturing a Qur'anic generation"
+                  : "لتكوين جيل قرآني"}
             </p>
           </div>
 
@@ -934,11 +1107,16 @@ export default function Home() {
 
             <div className="bg-white rounded-3xl p-6 border border-green-100 shadow-md hover:shadow-xl transition-all duration-300">
               <h3 className="font-bold text-xl text-green-700 mb-4">
-                Program Iqra
+                {t.iqraProgram}
               </h3>
 
-              <p className="text-gray-600 text-justify leading-6">
-                {pengaturan.program_iqra}
+              <p
+                className="text-gray-600 text-justify leading-4 md:leading-6"
+                dir={language === "ar" ? "rtl" : "ltr"}
+              >
+                {language === "id"
+                  ? pengaturan.program_iqra
+                  : programNarrative.iqra[language]}
               </p>
             </div>
 
@@ -946,11 +1124,16 @@ export default function Home() {
 
             <div className="bg-white rounded-3xl p-6 border border-green-100 shadow-md hover:shadow-xl transition-all duration-300">
               <h3 className="font-bold text-xl text-green-700 mb-4">
-                Program Al-Qur'an
+                {t.quranProgram}
               </h3>
 
-              <p className="text-gray-600 text-justify leading-6">
-                {pengaturan.program_quran}
+              <p
+                className="text-gray-600 text-justify leading-4 md:leading-6"
+                dir={language === "ar" ? "rtl" : "ltr"}
+              >
+                {language === "id"
+                  ? pengaturan.program_quran
+                  : programNarrative.quran[language]}
               </p>
             </div>
 
@@ -958,11 +1141,16 @@ export default function Home() {
 
             <div className="bg-white rounded-3xl p-6 border border-green-100 shadow-md hover:shadow-xl transition-all duration-300">
               <h3 className="font-bold text-xl text-green-700 mb-4">
-                Program Tahfidz
+                {t.tahfidzProgram}
               </h3>
 
-              <p className="text-gray-600 text-justify leading-6">
-                {pengaturan.program_tahfidz}
+              <p
+                className="text-gray-600 text-justify leading-4 md:leading-6"
+                dir={language === "ar" ? "rtl" : "ltr"}
+              >
+                {language === "id"
+                  ? pengaturan.program_tahfidz
+                  : programNarrative.tahfidz[language]}
               </p>
             </div>
           </div>
@@ -976,14 +1164,11 @@ export default function Home() {
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-extralight text-gray-800">
-              Mengapa Memilih {pengaturan.nama_tpq}?
+            <h2 className="text-2xl font-extralight text-gray-800">
+              {t.whyChoose} {pengaturan.nama_tpq}?
             </h2>
 
-            <p className="text-gray-500 mt-3">
-              Pendidikan Islami dengan pembelajaran yang terarah dan
-              menyenangkan
-            </p>
+            <p className="text-green-600 mt-1">{t.whyChooseDescription}</p>
           </div>
 
           <div className="grid md:grid-cols-4 gap-6">
@@ -991,11 +1176,16 @@ export default function Home() {
 
             <div className="bg-white rounded-3xl p-6 border border-green-100 shadow-md hover:shadow-xl transition-all duration-300">
               <h3 className="font-bold text-lg text-green-700 mb-4">
-                Belajar Iqra & Al-Qur'an
+                {t.learningIqra}
               </h3>
 
-              <p className="text-gray-600 text-justify leading-6">
-                {pengaturan.keunggulan_iqra_quran}
+              <p
+                className="text-gray-600 text-justify leading-4 md:leading-6"
+                dir={language === "ar" ? "rtl" : "ltr"}
+              >
+                {language === "id"
+                  ? pengaturan.keunggulan_iqra_quran
+                  : keunggulanNarrative.iqraQuran[language]}
               </p>
             </div>
 
@@ -1003,11 +1193,16 @@ export default function Home() {
 
             <div className="bg-white rounded-3xl p-6 border border-green-100 shadow-md hover:shadow-xl transition-all duration-300">
               <h3 className="font-bold text-lg text-green-700 mb-4">
-                Praktik Ibadah
+                {t.worshipPractice}
               </h3>
 
-              <p className="text-gray-600 text-justify leading-6">
-                {pengaturan.keunggulan_ibadah}
+              <p
+                className="text-gray-600 text-justify leading-4 md:leading-6"
+                dir={language === "ar" ? "rtl" : "ltr"}
+              >
+                {language === "id"
+                  ? pengaturan.keunggulan_ibadah
+                  : keunggulanNarrative.ibadah[language]}
               </p>
             </div>
 
@@ -1015,11 +1210,16 @@ export default function Home() {
 
             <div className="bg-white rounded-3xl p-6 border border-green-100 shadow-md hover:shadow-xl transition-all duration-300">
               <h3 className="font-bold text-lg text-green-700 mb-4">
-                Pembinaan Akhlak
+                {t.characterDevelopment}
               </h3>
 
-              <p className="text-gray-600 text-justify leading-6">
-                {pengaturan.keunggulan_akhlak}
+              <p
+                className="text-gray-600 text-justify leading-4 md:leading-6"
+                dir={language === "ar" ? "rtl" : "ltr"}
+              >
+                {language === "id"
+                  ? pengaturan.keunggulan_akhlak
+                  : keunggulanNarrative.akhlak[language]}
               </p>
             </div>
 
@@ -1027,11 +1227,15 @@ export default function Home() {
 
             <div className="bg-white rounded-3xl p-6 border border-green-100 shadow-md hover:shadow-xl transition-all duration-300">
               <h3 className="font-bold text-lg text-green-700 mb-4">
-                Guru Berpengalaman
+                {t.experiencedTeachers}
               </h3>
-
-              <p className="text-gray-600 text-justify leading-6">
-                {pengaturan.keunggulan_guru}
+              <p
+                className="text-gray-600 text-justify leading-4 md:leading-6"
+                dir={language === "ar" ? "rtl" : "ltr"}
+              >
+                {language === "id"
+                  ? pengaturan.keunggulan_guru
+                  : keunggulanNarrative.guru[language]}
               </p>
             </div>
           </div>
@@ -1045,13 +1249,11 @@ export default function Home() {
       <section className="py-16 bg-[#f6faf7]">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-extralight text-gray-800">
-              Persyaratan Pendaftaran Santri
+            <h2 className="text-2xl font-extralight text-gray-800">
+              {t.registrationTitle}
             </h2>
 
-            <p className="text-green-600 mt-3">
-              Persiapkan dokumen berikut saat melakukan pendaftaran santri baru
-            </p>
+            <p className="text-green-600 mt-3">{t.registrationDescription}</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -1059,11 +1261,18 @@ export default function Home() {
 
             <div className="bg-white rounded-3xl p-6 border border-green-100 shadow-md hover:shadow-xl transition-all duration-300 text-center">
               <h3 className="font-bold text-lg text-green-700">
-                Pendaftaran Gratis
+                {t.freeRegistration}
               </h3>
 
-              <p className="text-gray-600 mt-3 text-justify leading-6">
-                {pengaturan.syarat_gratis}
+              <p
+                className="text-gray-600 mt-3 text-justify leading-4 md:leading-6"
+                dir={language === "ar" ? "rtl" : "ltr"}
+              >
+                {language === "id"
+                  ? pengaturan.syarat_gratis
+                  : language === "en"
+                    ? syaratNarrative.gratis.en
+                    : syaratNarrative.gratis.ar}
               </p>
             </div>
 
@@ -1071,11 +1280,18 @@ export default function Home() {
 
             <div className="bg-white rounded-3xl p-6 border border-green-100 shadow-md hover:shadow-xl transition-all duration-300 text-center">
               <h3 className="font-bold text-lg text-green-700">
-                Mengisi Form Pendaftaran
+                {t.registrationForm}
               </h3>
 
-              <p className="text-gray-600 mt-3 text-justify leading-6">
-                {pengaturan.syarat_form}
+              <p
+                className="text-gray-600 mt-3 text-justify leading-4 md:leading-6"
+                dir={language === "ar" ? "rtl" : "ltr"}
+              >
+                {language === "id"
+                  ? pengaturan.syarat_form
+                  : language === "en"
+                    ? syaratNarrative.form.en
+                    : syaratNarrative.form.ar}
               </p>
             </div>
 
@@ -1083,11 +1299,18 @@ export default function Home() {
 
             <div className="bg-white rounded-3xl p-6 border border-green-100 shadow-md hover:shadow-xl transition-all duration-300 text-center">
               <h3 className="font-bold text-lg text-green-700">
-                Fotocopy Kartu Keluarga
+                {t.familyCard}
               </h3>
 
-              <p className="text-gray-600 mt-3 text-justify leading-6">
-                {pengaturan.syarat_kk}
+              <p
+                className="text-gray-600 mt-3 text-justify leading-4 md:leading-6"
+                dir={language === "ar" ? "rtl" : "ltr"}
+              >
+                {language === "id"
+                  ? pengaturan.syarat_kk
+                  : language === "en"
+                    ? syaratNarrative.kk.en
+                    : syaratNarrative.kk.ar}
               </p>
             </div>
 
@@ -1095,11 +1318,17 @@ export default function Home() {
 
             <div className="bg-white rounded-3xl p-6 border border-green-100 shadow-md hover:shadow-xl transition-all duration-300 text-center">
               <h3 className="font-bold text-lg text-green-700">
-                Fotocopy KTP Orang Tua
+                {t.parentIdCard}
               </h3>
-
-              <p className="text-gray-600 mt-3 text-justify leading-6">
-                {pengaturan.syarat_ktp}
+              <p
+                className="text-gray-600 mt-3 text-justify leading-4 md:leading-6"
+                dir={language === "ar" ? "rtl" : "ltr"}
+              >
+                {language === "id"
+                  ? pengaturan.syarat_ktp
+                  : language === "en"
+                    ? syaratNarrative.ktp.en
+                    : syaratNarrative.ktp.ar}
               </p>
             </div>
           </div>

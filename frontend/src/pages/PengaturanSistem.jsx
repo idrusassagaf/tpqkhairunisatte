@@ -362,7 +362,7 @@ export default function PengaturanSistem() {
 
   if (loading) {
     return (
-      <div className="p-4 md:p-6">
+      <div className="-mx-2 px-2 py-4 md:mx-0 md:p-6">
         <div className="rounded-2xl border border-gray-100 bg-white p-10 shadow-sm">
           <div className="flex min-h-[300px] items-center justify-center">
             <div className="flex flex-col items-center gap-3 text-gray-500">
@@ -381,7 +381,7 @@ export default function PengaturanSistem() {
   // ============================================================
 
   return (
-    <div className="p-4 md:p-6">
+    <div className="-mx-2 px-2 py-4 md:mx-0 md:p-6">
       <div className="mx-auto max-w-6xl">
         {/* ======================================================
             HEADER
@@ -461,7 +461,7 @@ export default function PengaturanSistem() {
                 type="text"
                 value={form.nama_tpq}
                 onChange={handleChange}
-                className={inputClass}
+                className={`${inputClass} text-justify`}
                 placeholder="Masukkan nama TPQ"
                 required
               />
@@ -499,7 +499,7 @@ export default function PengaturanSistem() {
                   value={form.alamat}
                   onChange={handleChange}
                   rows={3}
-                  className={inputClass}
+                  className={`${inputClass} text-justify`}
                   placeholder="Masukkan alamat lengkap TPQ"
                   required
                 />
@@ -516,7 +516,7 @@ export default function PengaturanSistem() {
                   type="text"
                   value={form.kelurahan}
                   onChange={handleChange}
-                  className={inputClass}
+                  className={`${inputClass} text-justify`}
                   placeholder="Kelurahan"
                   required
                 />
@@ -533,7 +533,7 @@ export default function PengaturanSistem() {
                   type="text"
                   value={form.kecamatan}
                   onChange={handleChange}
-                  className={inputClass}
+                  className={`${inputClass} text-justify`}
                   placeholder="Kecamatan"
                   required
                 />
@@ -550,7 +550,7 @@ export default function PengaturanSistem() {
                   type="text"
                   value={form.kota}
                   onChange={handleChange}
-                  className={inputClass}
+                  className={`${inputClass} text-justify`}
                   placeholder="Kota"
                   required
                 />
@@ -567,7 +567,7 @@ export default function PengaturanSistem() {
                   type="text"
                   value={form.provinsi}
                   onChange={handleChange}
-                  className={inputClass}
+                  className={`${inputClass} text-justify`}
                   placeholder="Provinsi"
                   required
                 />
@@ -753,7 +753,7 @@ export default function PengaturanSistem() {
                   value={form.profil}
                   onChange={handleChange}
                   rows={6}
-                  className={inputClass}
+                  className={`${inputClass} text-justify`}
                   placeholder="Tuliskan profil lengkap TPQ..."
                 />
               </div>
@@ -769,7 +769,7 @@ export default function PengaturanSistem() {
                   value={form.visi}
                   onChange={handleChange}
                   rows={4}
-                  className={inputClass}
+                  className={`${inputClass} text-justify`}
                   placeholder="Tuliskan visi TPQ..."
                 />
               </div>
@@ -785,7 +785,7 @@ export default function PengaturanSistem() {
                   value={form.misi}
                   onChange={handleChange}
                   rows={4}
-                  className={inputClass}
+                  className={`${inputClass} text-justify`}
                   placeholder="Tuliskan misi TPQ..."
                 />
               </div>
@@ -823,7 +823,7 @@ export default function PengaturanSistem() {
                   value={form.nilai_akhlak}
                   onChange={handleChange}
                   rows={5}
-                  className={inputClass}
+                  className={`${inputClass} text-justify`}
                   placeholder="Nilai akhlak..."
                 />
               </div>
@@ -839,7 +839,7 @@ export default function PengaturanSistem() {
                   value={form.nilai_quran}
                   onChange={handleChange}
                   rows={5}
-                  className={inputClass}
+                  className={`${inputClass} text-justify`}
                   placeholder="Nilai Al-Qur'an..."
                 />
               </div>
@@ -855,7 +855,7 @@ export default function PengaturanSistem() {
                   value={form.nilai_disiplin}
                   onChange={handleChange}
                   rows={5}
-                  className={inputClass}
+                  className={`${inputClass} text-justify`}
                   placeholder="Nilai disiplin..."
                 />
               </div>
@@ -871,7 +871,7 @@ export default function PengaturanSistem() {
                   value={form.nilai_prestasi}
                   onChange={handleChange}
                   rows={5}
-                  className={inputClass}
+                  className={`${inputClass} text-justify`}
                   placeholder="Nilai prestasi..."
                 />
               </div>
@@ -909,7 +909,7 @@ export default function PengaturanSistem() {
                   value={form.program_iqra}
                   onChange={handleChange}
                   rows={4}
-                  className={inputClass}
+                  className={`${inputClass} text-justify`}
                   placeholder="Deskripsi program Iqra..."
                 />
               </div>
@@ -925,7 +925,7 @@ export default function PengaturanSistem() {
                   value={form.program_quran}
                   onChange={handleChange}
                   rows={4}
-                  className={inputClass}
+                  className={`${inputClass} text-justify`}
                   placeholder="Deskripsi program Al-Qur'an..."
                 />
               </div>
@@ -941,7 +941,7 @@ export default function PengaturanSistem() {
                   value={form.program_tahfidz}
                   onChange={handleChange}
                   rows={4}
-                  className={inputClass}
+                  className={`${inputClass} text-justify`}
                   placeholder="Deskripsi program tahfidz..."
                 />
               </div>
@@ -979,7 +979,7 @@ export default function PengaturanSistem() {
                   value={form.keunggulan_iqra_quran}
                   onChange={handleChange}
                   rows={5}
-                  className={inputClass}
+                  className={`${inputClass} text-justify`}
                   placeholder="Keunggulan pembelajaran Iqra dan Al-Qur'an..."
                 />
               </div>
@@ -995,7 +995,7 @@ export default function PengaturanSistem() {
                   value={form.keunggulan_ibadah}
                   onChange={handleChange}
                   rows={5}
-                  className={inputClass}
+                  className={`${inputClass} text-justify`}
                   placeholder="Keunggulan praktik ibadah..."
                 />
               </div>
@@ -1011,7 +1011,7 @@ export default function PengaturanSistem() {
                   value={form.keunggulan_akhlak}
                   onChange={handleChange}
                   rows={5}
-                  className={inputClass}
+                  className={`${inputClass} text-justify`}
                   placeholder="Keunggulan pembinaan akhlak..."
                 />
               </div>
@@ -1027,7 +1027,7 @@ export default function PengaturanSistem() {
                   value={form.keunggulan_guru}
                   onChange={handleChange}
                   rows={5}
-                  className={inputClass}
+                  className={`${inputClass} text-justify`}
                   placeholder="Keunggulan guru..."
                 />
               </div>
@@ -1067,7 +1067,7 @@ export default function PengaturanSistem() {
                   value={form.syarat_gratis}
                   onChange={handleChange}
                   rows={4}
-                  className={inputClass}
+                  className={`${inputClass} text-justify`}
                   placeholder="Informasi biaya pendaftaran..."
                 />
               </div>
@@ -1083,7 +1083,7 @@ export default function PengaturanSistem() {
                   value={form.syarat_form}
                   onChange={handleChange}
                   rows={4}
-                  className={inputClass}
+                  className={`${inputClass} text-justify`}
                   placeholder="Informasi formulir pendaftaran..."
                 />
               </div>
@@ -1099,7 +1099,7 @@ export default function PengaturanSistem() {
                   value={form.syarat_kk}
                   onChange={handleChange}
                   rows={4}
-                  className={inputClass}
+                  className={`${inputClass} text-justify`}
                   placeholder="Persyaratan Kartu Keluarga..."
                 />
               </div>
@@ -1115,7 +1115,7 @@ export default function PengaturanSistem() {
                   value={form.syarat_ktp}
                   onChange={handleChange}
                   rows={4}
-                  className={inputClass}
+                  className={`${inputClass} text-justify`}
                   placeholder="Persyaratan KTP..."
                 />
               </div>

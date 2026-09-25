@@ -1,10 +1,21 @@
-import { Newspaper, Plus, Search, FileText, CalendarDays } from "lucide-react";
-import { useState, useEffect } from "react";
+import {
+  Newspaper,
+  Plus,
+  Search,
+  FileText,
+  CalendarDays,
+  Eye,
+} from "lucide-react";
+
+import { useState, useEffect, useCallback } from "react";
+
 import { api } from "../api";
 
 export default function Berita() {
   // const dataBerita = [];
+
   const [showModal, setShowModal] = useState(false);
+
   const [form, setForm] = useState({
     judul: "",
     isi: "",
@@ -16,6 +27,7 @@ export default function Berita() {
   const [preview, setPreview] = useState(null);
   const [dataBerita, setDataBerita] = useState([]);
   const [search, setSearch] = useState("");
+
   const totalBerita = dataBerita.length;
 
   const bulanIni = dataBerita.filter((item) => {
@@ -44,18 +56,34 @@ export default function Berita() {
   );
 
   const [editId, setEditId] = useState(null);
-  useEffect(() => {
-    loadBerita();
-  }, []);
 
-  const loadBerita = async () => {
+  const loadBerita = useCallback(async () => {
     try {
       const res = await api.get("/berita");
       setDataBerita(res.data.data);
     } catch (err) {
       console.error(err);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+
+    api
+      .get("/berita")
+      .then((res) => {
+        if (mounted) {
+          setDataBerita(res.data.data);
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const handleSimpan = async () => {
     try {
@@ -161,18 +189,23 @@ export default function Berita() {
   return (
     <div className="p-4 space-y-4">
       {/* HEADER */}
+
       <div className="flex items-center gap-2">
         <Newspaper size={24} />
+
         <h1 className="text-2xl font-light tracking-wide">BERITA TPQ</h1>
       </div>
 
       {/* CARD STATISTIK */}
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white rounded-xl shadow p-4">
           <div className="flex items-center gap-3">
             <FileText className="text-blue-600" />
+
             <div>
               <p className="text-sm text-gray-500">Total Berita</p>
+
               <h2 className="text-2xl font-semibold">{totalBerita}</h2>
             </div>
           </div>
@@ -181,8 +214,10 @@ export default function Berita() {
         <div className="bg-white rounded-xl shadow p-4">
           <div className="flex items-center gap-3">
             <CalendarDays className="text-green-600" />
+
             <div>
               <p className="text-sm text-gray-500">Bulan Ini</p>
+
               <h2 className="text-2xl font-semibold">{bulanIni}</h2>
             </div>
           </div>
@@ -191,8 +226,10 @@ export default function Berita() {
         <div className="bg-white rounded-xl shadow p-4">
           <div className="flex items-center gap-3">
             <CalendarDays className="text-orange-600" />
+
             <div>
               <p className="text-sm text-gray-500">Hari Ini</p>
+
               <h2 className="text-2xl font-semibold">{hariIni}</h2>
             </div>
           </div>
@@ -200,6 +237,7 @@ export default function Berita() {
       </div>
 
       {/* TOOLBAR */}
+
       <div className="bg-white rounded-xl shadow p-4">
         <div className="flex flex-col md:flex-row gap-3 justify-between">
           <button
@@ -215,15 +253,14 @@ export default function Berita() {
               });
 
               setPreview(null);
-
               setShowModal(true);
             }}
             className="
-    flex items-center gap-2
-    bg-blue-600 text-white
-    px-4 py-2 rounded-lg
-    hover:bg-blue-700
-  "
+              flex items-center gap-2
+              bg-blue-600 text-white
+              px-4 py-2 rounded-lg
+              hover:bg-blue-700
+            "
           >
             <Plus size={18} />
             Tambah Berita
@@ -238,18 +275,20 @@ export default function Berita() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="
-    border rounded-lg
-    pl-10 pr-4 py-2
-    w-full md:w-72
-  "
+                border rounded-lg
+                pl-10 pr-4 py-2
+                w-full md:w-72
+              "
             />
           </div>
         </div>
       </div>
 
       {/* TABEL */}
+
       <div className="bg-white rounded-xl shadow overflow-hidden">
         {/* MOBILE CARD */}
+
         <div className="md:hidden p-3 space-y-3">
           {filteredBerita.map((item) => (
             <div
@@ -258,7 +297,10 @@ export default function Berita() {
             >
               {item.foto && (
                 <img
-                  src={`${api.defaults.baseURL.replace(/\/api\/?$/, "")}/storage/${item.foto}`}
+                  src={`${api.defaults.baseURL.replace(
+                    /\/api\/?$/,
+                    "",
+                  )}/storage/${item.foto}`}
                   alt=""
                   className="w-full h-40 object-cover rounded-lg mb-3"
                 />
@@ -271,6 +313,14 @@ export default function Berita() {
               </p>
 
               <p className="mt-2 text-sm">Penulis: {item.penulis}</p>
+
+              {/* DIBACA */}
+
+              <div className="mt-2 flex items-center gap-2 text-sm text-gray-500">
+                <Eye size={16} />
+
+                <span>{item.views ?? 0} dibaca</span>
+              </div>
 
               <div className="mt-2">
                 <span
@@ -302,6 +352,7 @@ export default function Berita() {
         </div>
 
         {/* DESKTOP TABLE */}
+
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-100">
@@ -312,6 +363,7 @@ export default function Berita() {
                 <th className="p-3 text-left">Tanggal</th>
                 <th className="p-3 text-left">Penulis</th>
                 <th className="p-3 text-left">Status</th>
+                <th className="p-3 text-center">Dibaca</th>
                 <th className="p-3 text-center">Aksi</th>
               </tr>
             </thead>
@@ -319,7 +371,7 @@ export default function Berita() {
             <tbody>
               {dataBerita.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="text-center py-10 text-gray-500">
+                  <td colSpan="8" className="text-center py-10 text-gray-500">
                     Belum ada data berita
                   </td>
                 </tr>
@@ -331,7 +383,10 @@ export default function Berita() {
                     <td className="p-3">
                       {item.foto ? (
                         <img
-                          src={`${api.defaults.baseURL.replace(/\/api\/?$/, "")}/storage/${item.foto}`}
+                          src={`${api.defaults.baseURL.replace(
+                            /\/api\/?$/,
+                            "",
+                          )}/storage/${item.foto}`}
                           alt=""
                           className="w-14 h-14 object-cover rounded"
                         />
@@ -360,6 +415,16 @@ export default function Berita() {
                       </span>
                     </td>
 
+                    {/* DIBACA */}
+
+                    <td className="p-3 text-center">
+                      <span className="inline-flex items-center justify-center gap-1 text-gray-600">
+                        <Eye size={16} />
+
+                        {item.views ?? 0}
+                      </span>
+                    </td>
+
                     <td className="p-3 text-center">
                       <button
                         onClick={() => handleEdit(item)}
@@ -382,19 +447,21 @@ export default function Berita() {
           </table>
         </div>
 
+        {/* MODAL */}
+
         {showModal && (
           <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
             <div
               className="
-    bg-white
-    w-full
-    max-w-2xl
-    rounded-xl
-    shadow-xl
-    p-6
-    max-h-[90vh]
-    overflow-y-auto
-  "
+                bg-white
+                w-full
+                max-w-2xl
+                rounded-xl
+                shadow-xl
+                p-6
+                max-h-[90vh]
+                overflow-y-auto
+              "
             >
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-semibold">
@@ -460,7 +527,6 @@ export default function Berita() {
                   }
                 >
                   <option value="Draft">Draft</option>
-
                   <option value="Publish">Publish</option>
                 </select>
 
@@ -481,20 +547,22 @@ export default function Berita() {
                     setPreview(URL.createObjectURL(file));
                   }}
                 />
+
                 {preview && (
                   <div className="border rounded-lg p-2">
                     <img
                       src={preview}
                       alt="Preview"
                       className="
-    w-28
-    h-18
-    object-cover
-    rounded-lg
-  "
+                        w-28
+                        h-18
+                        object-cover
+                        rounded-lg
+                      "
                     />
                   </div>
                 )}
+
                 <div className="flex justify-end gap-2">
                   <button
                     onClick={() => {

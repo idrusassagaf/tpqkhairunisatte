@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+import { useOutletContext } from "react-router-dom";
 
 import { api } from "../api";
 
 import heroImage from "../assets/hero-putih04.jpg";
+import notoNaskhArabicRegular from "../assets/NotoNaskhArabic-Regular.ttf";
 
 import {
   CalendarDays,
@@ -20,24 +22,135 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 export default function KalenderPublic() {
+  const { language } = useOutletContext();
+
   const [currentDate, setCurrentDate] = useState(new Date());
-
   const [jadwal, setJadwal] = useState({});
-
   const [showDownload, setShowDownload] = useState(false);
 
-  useEffect(() => {
-    loadJadwal();
-  }, []);
+  // =========================================================
+  // TRANSLATIONS
+  // =========================================================
+
+  const translations = {
+    id: {
+      title: "Kalender Pengajian",
+      study: "Mengaji",
+      holiday: "Libur",
+      download: "Download",
+      excel: "Excel",
+      pdf: "PDF",
+      days: ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"],
+      months: [
+        "Januari",
+        "Februari",
+        "Maret",
+        "April",
+        "Mei",
+        "Juni",
+        "Juli",
+        "Agustus",
+        "September",
+        "Oktober",
+        "November",
+        "Desember",
+      ],
+      pdfTitle: "KALENDER PENGAJIAN",
+      pdfPeriod: "Periode",
+      pdfStudy: "Mengaji",
+      pdfHoliday: "Libur",
+      pdfHeaderNo: "No",
+      pdfHeaderDate: "Tanggal",
+      pdfHeaderDescription: "Keterangan",
+      pdfFooter: "Kalender Pengajian",
+    },
+
+    en: {
+      title: "Study Schedule Calendar",
+      study: "Study",
+      holiday: "Holiday",
+      download: "Download",
+      excel: "Excel",
+      pdf: "PDF",
+      days: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      months: [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ],
+      pdfTitle: "STUDY SCHEDULE CALENDAR",
+      pdfPeriod: "Period",
+      pdfStudy: "Study",
+      pdfHoliday: "Holiday",
+      pdfHeaderNo: "No",
+      pdfHeaderDate: "Date",
+      pdfHeaderDescription: "Description",
+      pdfFooter: "Study Schedule Calendar",
+    },
+
+    ar: {
+      title: "تقويم الدراسة",
+      study: "الدراسة",
+      holiday: "عطلة",
+      download: "تحميل",
+      excel: "Excel",
+      pdf: "PDF",
+      days: [
+        "الإثنين",
+        "الثلاثاء",
+        "الأربعاء",
+        "الخميس",
+        "الجمعة",
+        "السبت",
+        "الأحد",
+      ],
+      months: [
+        "يناير",
+        "فبراير",
+        "مارس",
+        "أبريل",
+        "مايو",
+        "يونيو",
+        "يوليو",
+        "أغسطس",
+        "سبتمبر",
+        "أكتوبر",
+        "نوفمبر",
+        "ديسمبر",
+      ],
+      pdfTitle: "تقويم الدراسة",
+      pdfPeriod: "الفترة",
+      pdfStudy: "الدراسة",
+      pdfHoliday: "عطلة",
+      pdfHeaderNo: "الرقم",
+      pdfHeaderDate: "التاريخ",
+      pdfHeaderDescription: "البيان",
+      pdfFooter: "تقويم الدراسة",
+    },
+  };
+
+  const t = translations[language] || translations.id;
 
   // =========================================================
   // LOAD JADWAL
   // =========================================================
 
+  useEffect(() => {
+    loadJadwal();
+  }, []);
+
   const loadJadwal = async () => {
     try {
       const res = await api.get("/jadwal");
-
       setJadwal(res.data);
     } catch (err) {
       console.error(err);
@@ -48,13 +161,9 @@ export default function KalenderPublic() {
   // DATA BULAN
   // =========================================================
 
-  const bulanTahun = currentDate.toLocaleDateString("id-ID", {
-    month: "long",
-    year: "numeric",
-  });
+  const bulanTahun = `${t.months[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
 
   const tahun = currentDate.getFullYear();
-
   const bulan = currentDate.getMonth();
 
   const jumlahHari = new Date(tahun, bulan + 1, 0).getDate();
@@ -62,25 +171,6 @@ export default function KalenderPublic() {
   const firstDay = new Date(tahun, bulan, 1).getDay();
 
   const offset = firstDay === 0 ? 6 : firstDay - 1;
-
-  // =========================================================
-  // NAMA BULAN
-  // =========================================================
-
-  const bulanList = [
-    "Januari",
-    "Februari",
-    "Maret",
-    "April",
-    "Mei",
-    "Juni",
-    "Juli",
-    "Agustus",
-    "September",
-    "Oktober",
-    "November",
-    "Desember",
-  ];
 
   // =========================================================
   // PINDAH BULAN
@@ -117,17 +207,17 @@ export default function KalenderPublic() {
       let keterangan = "-";
 
       if (status === "mengaji") {
-        keterangan = "Mengaji";
+        keterangan = t.pdfStudy;
       }
 
       if (status === "libur") {
-        keterangan = "Libur";
+        keterangan = t.pdfHoliday;
       }
 
       return {
         no: tanggal,
         tanggal: `${String(tanggal).padStart(2, "0")} ${
-          bulanList[bulan]
+          t.months[bulan]
         } ${tahun}`,
         status: keterangan,
       };
@@ -143,12 +233,12 @@ export default function KalenderPublic() {
       const downloadData = getDownloadData();
 
       const excelData = [
-        ["KALENDER PENGAJIAN"],
+        [t.pdfTitle],
         ["TPQ Khairunissa Ternate"],
         [],
-        ["Bulan", bulanList[bulan], "|", "Tahun", tahun],
+        [t.pdfPeriod, t.months[bulan], "|", "Tahun", tahun],
         [],
-        ["No", "Tanggal", "Keterangan"],
+        [t.pdfHeaderNo, t.pdfHeaderDate, t.pdfHeaderDescription],
       ];
 
       downloadData.forEach((item) => {
@@ -189,16 +279,32 @@ export default function KalenderPublic() {
   };
 
   // =========================================================
+  // ARRAY BUFFER -> BASE64
+  // =========================================================
+
+  const arrayBufferToBase64 = (buffer) => {
+    const bytes = new Uint8Array(buffer);
+
+    let binary = "";
+
+    const chunkSize = 0x8000;
+
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+      const chunk = bytes.subarray(i, Math.min(i + chunkSize, bytes.length));
+
+      binary += String.fromCharCode(...chunk);
+    }
+
+    return btoa(binary);
+  };
+
+  // =========================================================
   // DOWNLOAD PDF
   // =========================================================
 
-  const downloadPDF = () => {
+  const downloadPDF = async () => {
     try {
       const downloadData = getDownloadData();
-
-      // =====================================================
-      // TANGGAL REALTIME SAAT PDF DI-DOWNLOAD
-      // =====================================================
 
       const sekarang = new Date();
 
@@ -207,10 +313,6 @@ export default function KalenderPublic() {
         month: "long",
         year: "numeric",
       });
-
-      // =====================================================
-      // BUAT PDF A4 PORTRAIT
-      // =====================================================
 
       const doc = new jsPDF({
         orientation: "portrait",
@@ -221,8 +323,32 @@ export default function KalenderPublic() {
       console.log("PDF KALENDER: PORTRAIT AKTIF");
 
       // =====================================================
-      // UKURAN HALAMAN
+      // FONT ARABIC
       // =====================================================
+
+      if (language === "ar") {
+        console.log("PDF KALENDER: MEMUAT FONT ARABIC");
+
+        const fontResponse = await fetch(notoNaskhArabicRegular);
+
+        if (!fontResponse.ok) {
+          throw new Error(
+            `Font Arabic gagal dimuat. HTTP ${fontResponse.status}`,
+          );
+        }
+
+        const fontArrayBuffer = await fontResponse.arrayBuffer();
+
+        const fontBase64 = arrayBufferToBase64(fontArrayBuffer);
+
+        doc.addFileToVFS("NotoNaskhArabic-Regular.ttf", fontBase64);
+
+        doc.addFont("NotoNaskhArabic-Regular.ttf", "NotoNaskhArabic", "normal");
+
+        doc.setFont("NotoNaskhArabic", "normal");
+
+        console.log("PDF KALENDER: FONT ARABIC BERHASIL DIMUAT");
+      }
 
       const pageWidth = doc.internal.pageSize.getWidth();
 
@@ -231,14 +357,28 @@ export default function KalenderPublic() {
       const centerX = pageWidth / 2;
 
       // =====================================================
+      // HELPER TEXT ARABIC
+      // =====================================================
+
+      const pdfText = (text) => {
+        if (language === "ar") {
+          return doc.processArabic(String(text));
+        }
+
+        return text;
+      };
+
+      // =====================================================
       // JUDUL
       // =====================================================
 
-      doc.setFont("helvetica", "bold");
+      if (language !== "ar") {
+        doc.setFont("helvetica", "bold");
+      }
 
       doc.setFontSize(16);
 
-      doc.text("KALENDER PENGAJIAN", centerX, 15, {
+      doc.text(pdfText(t.pdfTitle), centerX, 15, {
         align: "center",
       });
 
@@ -246,7 +386,9 @@ export default function KalenderPublic() {
       // SUB JUDUL
       // =====================================================
 
-      doc.setFont("helvetica", "normal");
+      if (language !== "ar") {
+        doc.setFont("helvetica", "normal");
+      }
 
       doc.setFontSize(10);
 
@@ -261,7 +403,7 @@ export default function KalenderPublic() {
       doc.setFontSize(9);
 
       doc.text(
-        `Periode: ${bulanList[bulan].toUpperCase()} ${tahun}`,
+        pdfText(`${t.pdfPeriod}: ${t.months[bulan].toUpperCase()} ${tahun}`),
         centerX,
         27,
         {
@@ -275,18 +417,9 @@ export default function KalenderPublic() {
 
       const rows = downloadData.map((item) => [
         item.no,
-        item.tanggal,
-        item.status,
+        pdfText(item.tanggal),
+        pdfText(item.status),
       ]);
-
-      // =====================================================
-      // TABEL
-      //
-      // A4 PORTRAIT = 210 mm
-      //
-      // Lebar tabel dibuat 170 mm agar proporsional
-      // dengan halaman portrait.
-      // =====================================================
 
       const tableWidth = 170;
 
@@ -295,7 +428,13 @@ export default function KalenderPublic() {
       autoTable(doc, {
         startY: 33,
 
-        head: [["No", "Tanggal", "Keterangan"]],
+        head: [
+          [
+            pdfText(t.pdfHeaderNo),
+            pdfText(t.pdfHeaderDate),
+            pdfText(t.pdfHeaderDescription),
+          ],
+        ],
 
         body: rows,
 
@@ -318,49 +457,60 @@ export default function KalenderPublic() {
           valign: "middle",
 
           halign: "center",
+
+          ...(language === "ar"
+            ? {
+                font: "NotoNaskhArabic",
+              }
+            : {}),
         },
 
         headStyles: {
           fontSize: 8,
 
-          fontStyle: "bold",
+          fontStyle: language === "ar" ? "normal" : "bold",
 
           halign: "center",
+
+          ...(language === "ar"
+            ? {
+                font: "NotoNaskhArabic",
+              }
+            : {}),
         },
 
         columnStyles: {
           0: {
             cellWidth: 20,
-
             halign: "center",
           },
 
           1: {
             cellWidth: 75,
-
-            halign: "left",
+            halign: language === "ar" ? "right" : "left",
           },
 
           2: {
             cellWidth: 75,
-
             halign: "center",
           },
         },
 
-        // ===================================================
-        // FOOTER
-        // ===================================================
-
         didDrawPage: () => {
           const nomorHalaman = doc.internal.getNumberOfPages();
 
-          doc.setFont("helvetica", "normal");
+          if (language !== "ar") {
+            doc.setFont("helvetica", "normal");
+          } else {
+            doc.setFont("NotoNaskhArabic", "normal");
+          }
 
           doc.setFontSize(7);
 
           doc.text(
-            `TPQ Khairunissa • Kalender Pengajian • Update ${tanggalUpdate} • Halaman ${nomorHalaman}`,
+            pdfText(
+              `TPQ Khairunissa • ${t.pdfFooter} • Update ${tanggalUpdate} • Halaman ${nomorHalaman}`,
+            ),
             centerX,
             pageHeight - 7,
             {
@@ -394,10 +544,6 @@ export default function KalenderPublic() {
 
   return (
     <div className="bg-[#f8faf8] min-h-screen">
-      {/* ===================================================
-          HERO
-      =================================================== */}
-
       <section
         className="
           relative
@@ -413,6 +559,7 @@ export default function KalenderPublic() {
         }}
       >
         <div className="absolute inset-0 bg-white/10"></div>
+
         <div
           className="
             relative
@@ -424,10 +571,6 @@ export default function KalenderPublic() {
             md:pt-4
           "
         >
-          {/* =================================================
-              JUDUL
-          ================================================= */}
-
           <div className="text-center mb-5">
             <h1
               className="
@@ -437,13 +580,9 @@ export default function KalenderPublic() {
                 text-green-800
               "
             >
-              Kalender Pengajian
+              {t.title}
             </h1>
           </div>
-
-          {/* =================================================
-              CARD BULAN
-          ================================================= */}
 
           <div
             className="
@@ -459,8 +598,6 @@ export default function KalenderPublic() {
             "
           >
             <div className="flex items-center justify-between">
-              {/* PREVIOUS */}
-
               <button
                 onClick={prevMonth}
                 className="
@@ -472,8 +609,6 @@ export default function KalenderPublic() {
               >
                 <ChevronLeft />
               </button>
-
-              {/* BULAN */}
 
               <div className="flex items-center gap-2">
                 <CalendarDays className="text-green-700" size={20} />
@@ -491,8 +626,6 @@ export default function KalenderPublic() {
                 </h2>
               </div>
 
-              {/* NEXT */}
-
               <button
                 onClick={nextMonth}
                 className="
@@ -507,10 +640,6 @@ export default function KalenderPublic() {
             </div>
           </div>
 
-          {/* =================================================
-              KALENDER
-          ================================================= */}
-
           <div
             className="
               bg-white/35
@@ -523,26 +652,22 @@ export default function KalenderPublic() {
               md:p-5
             "
           >
-            {/* HARI */}
-
             <div className="grid grid-cols-7 gap-1 mb-3">
-              {["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"].map((hari) => (
+              {t.days.map((hari) => (
                 <div
                   key={hari}
                   className="
-                      text-center
-                      text-xs
-                      md:text-base
-                      font-bold
-                      text-green-700
-                    "
+                    text-center
+                    text-xs
+                    md:text-base
+                    font-bold
+                    text-green-700
+                  "
                 >
                   {hari}
                 </div>
               ))}
             </div>
-
-            {/* TANGGAL */}
 
             <div className="grid grid-cols-7 gap-1 md:gap-2">
               {Array.from({
@@ -636,10 +761,7 @@ export default function KalenderPublic() {
             </div>
           </div>
         </div>
-        ```jsx
-        {/* ===================================================
-            KETERANGAN + DOWNLOAD
-        =================================================== */}
+
         <div
           className="
             flex
@@ -654,8 +776,6 @@ export default function KalenderPublic() {
             flex-wrap
           "
         >
-          {/* MENGAJI */}
-
           <div className="flex items-center gap-2 md:gap-3">
             <div
               className="
@@ -673,10 +793,8 @@ export default function KalenderPublic() {
               M
             </div>
 
-            <span className="font-medium text-gray-700">Mengaji</span>
+            <span className="font-medium text-gray-700">{t.study}</span>
           </div>
-
-          {/* LIBUR */}
 
           <div className="flex items-center gap-2 md:gap-3">
             <div
@@ -695,10 +813,8 @@ export default function KalenderPublic() {
               L
             </div>
 
-            <span className="font-medium text-gray-700">Libur</span>
+            <span className="font-medium text-gray-700">{t.holiday}</span>
           </div>
-
-          {/* DOWNLOAD */}
 
           <div className="relative">
             <button
@@ -722,7 +838,7 @@ export default function KalenderPublic() {
               "
             >
               <Download size={17} />
-              Download
+              {t.download}
             </button>
 
             {showDownload && (
@@ -743,8 +859,6 @@ export default function KalenderPublic() {
                   overflow-hidden
                 "
               >
-                {/* EXCEL */}
-
                 <button
                   type="button"
                   onClick={downloadExcel}
@@ -764,13 +878,11 @@ export default function KalenderPublic() {
                   <FileSpreadsheet size={18} className="text-green-600" />
 
                   <div className="text-left">
-                    <div className="font-medium">Excel</div>
+                    <div className="font-medium">{t.excel}</div>
 
                     <div className="text-xs text-gray-400">.xlsx</div>
                   </div>
                 </button>
-
-                {/* PDF */}
 
                 <button
                   type="button"
@@ -792,7 +904,7 @@ export default function KalenderPublic() {
                   <FileText size={18} className="text-red-600" />
 
                   <div className="text-left">
-                    <div className="font-medium">PDF</div>
+                    <div className="font-medium">{t.pdf}</div>
 
                     <div className="text-xs text-gray-400">.pdf</div>
                   </div>

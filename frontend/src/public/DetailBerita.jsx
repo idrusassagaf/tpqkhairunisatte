@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useParams, Link, useOutletContext } from "react-router-dom";
 import { api } from "../api";
 import heroImage from "../assets/hero-putih04.jpg";
 import {
   User,
   CalendarDays,
+  Eye,
   ArrowLeft,
   ChevronDown,
   Share2,
@@ -13,9 +14,18 @@ import {
 
 export default function DetailBerita() {
   const { id } = useParams();
+  const { language } = useOutletContext();
 
   const [berita, setBerita] = useState(null);
+  const [translatedBerita, setTranslatedBerita] = useState(null);
   const [showShare, setShowShare] = useState(false);
+  const [loadingTranslation, setLoadingTranslation] = useState(false);
+
+  const isArabic = language === "ar";
+
+  // Mencegah hitungan dibaca dobel akibat React Strict Mode.
+  // Tetap memungkinkan berita berbeda dihitung saat navigasi tanpa reload.
+  const countedBeritaId = useRef(null);
 
   const scrollToIsiBerita = () => {
     document.getElementById("isi-berita")?.scrollIntoView({
@@ -24,53 +34,244 @@ export default function DetailBerita() {
     });
   };
 
+  // CATAT BERITA DIBACA
   useEffect(() => {
-    loadBerita();
-  }, []);
+    if (!id) return;
 
-  const loadBerita = async () => {
-    try {
-      const res = await api.get("/berita");
-
-      const data = res.data.data || res.data;
-
-      const item = data.find((b) => String(b.id) === String(id));
-
-      setBerita(item);
-    } catch (err) {
-      console.error(err);
+    if (countedBeritaId.current === String(id)) {
+      return;
     }
+
+    countedBeritaId.current = String(id);
+
+    api
+      .post(`/berita/${id}/dibaca`)
+      .then((res) => {
+        console.log("Jumlah pembaca diperbarui:", res.data?.views);
+      })
+      .catch((err) => {
+        console.error("Gagal mencatat berita dibaca:", err);
+      });
+  }, [id]);
+
+  // LOAD BERITA
+  useEffect(() => {
+    let mounted = true;
+
+    api
+      .get("/berita")
+      .then((res) => {
+        if (!mounted) return;
+
+        const data = res.data.data || res.data;
+        const item = data.find((b) => String(b.id) === String(id));
+
+        setBerita(item || null);
+
+        if (item && language === "id") {
+          setTranslatedBerita(item);
+        }
+      })
+      .catch((err) => {
+        if (!mounted) return;
+
+        console.error(err);
+        setBerita(null);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [id, language]);
+
+  // TRANSLATE BERITA
+  const translateBeritaItem = async (item) => {
+    const cacheKey = `tpq_berita_translation_${item.id}_${language}`;
+
+    try {
+      const cached = sessionStorage.getItem(cacheKey);
+
+      if (cached) {
+        const parsed = JSON.parse(cached);
+
+        if (parsed?.judul && parsed?.isi !== undefined) {
+          return {
+            ...item,
+            judul: parsed.judul,
+            isi: parsed.isi,
+          };
+        }
+      }
+    } catch {
+      sessionStorage.removeItem(cacheKey);
+    }
+
+    const response = await api.post("/berita/translate", {
+      judul: item.judul || "",
+      isi: item.isi || "",
+      language,
+    });
+
+    if (!response.data?.success || !response.data?.data) {
+      throw new Error("Hasil terjemahan berita tidak valid.");
+    }
+
+    const translated = {
+      judul: response.data.data.judul || item.judul,
+      isi: response.data.data.isi || item.isi,
+    };
+
+    try {
+      sessionStorage.setItem(cacheKey, JSON.stringify(translated));
+    } catch {
+      console.warn("Cache terjemahan berita tidak dapat disimpan.");
+    }
+
+    return {
+      ...item,
+      judul: translated.judul,
+      isi: translated.isi,
+    };
   };
 
-  /* =========================
-     URL BERITA
-  ========================= */
+  useEffect(() => {
+    if (!berita) return;
+
+    if (language === "id") {
+      setTranslatedBerita(berita);
+      setLoadingTranslation(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const translateBerita = async () => {
+      setLoadingTranslation(true);
+      setTranslatedBerita(null);
+
+      try {
+        const translatedItem = await translateBeritaItem(berita);
+
+        if (cancelled) return;
+
+        setTranslatedBerita(translatedItem);
+      } catch (err) {
+        if (!cancelled) {
+          console.error("Gagal menerjemahkan berita:", err);
+
+          setTranslatedBerita({
+            ...berita,
+          });
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingTranslation(false);
+        }
+      }
+    };
+
+    translateBerita();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [language, berita, id]);
+
+  const texts = {
+    id: {
+      information: "Informasi TPQ",
+      description: "Informasi terbaru kegiatan TPQ Khairunnisa.",
+      back: "Kembali ke Berita",
+      share: "Bagikan",
+      shareTitle: "Bagikan Berita",
+      chooseApp: "Pilih aplikasi",
+      other: "Lainnya",
+      noPhoto: "Tidak ada foto",
+      notFound: "Berita tidak ditemukan",
+      translating: "Menerjemahkan berita...",
+      admin: "Admin",
+      read: "Dibaca",
+      unavailable: "Fitur Bagikan tidak tersedia di browser ini.",
+    },
+
+    en: {
+      information: "TPQ Information",
+      description: "Latest information about TPQ Khairunnisa activities.",
+      back: "Back to News",
+      share: "Share",
+      shareTitle: "Share News",
+      chooseApp: "Choose an application",
+      other: "Other",
+      noPhoto: "No photo",
+      notFound: "News not found",
+      translating: "Translating news...",
+      admin: "Admin",
+      read: "Read",
+      unavailable: "The Share feature is not available in this browser.",
+    },
+
+    ar: {
+      information: "معلومات TPQ",
+      description:
+        "أحدث المعلومات حول أنشطة TPQ Khairunnisa.",
+      back: "العودة إلى الأخبار",
+      share: "مشاركة",
+      shareTitle: "مشاركة الخبر",
+      chooseApp: "اختر التطبيق",
+      other: "أخرى",
+      noPhoto: "لا توجد صورة",
+      notFound: "الخبر غير موجود",
+      translating: "جاري ترجمة الخبر...",
+      admin: "المسؤول",
+      read: "قراءة",
+      unavailable:
+        "ميزة المشاركة غير متاحة في هذا المتصفح.",
+    },
+  };
+
+  const t = texts[language] || texts.id;
+
+  const displayBerita = language === "id" ? berita : translatedBerita;
 
   const getBeritaUrl = () => {
+    if (!berita) return "";
+
     return "http://127.0.0.1:8000/share/berita/" + berita.id;
   };
 
-  /* =========================
-     TEKS SHARE
-  ========================= */
-
   const getShareText = () => {
-    if (!berita) return "";
+    if (!displayBerita) return "";
 
-    return `${berita.judul}
+    const locale =
+      language === "en" ? "en-US" : language === "ar" ? "ar-SA" : "id-ID";
 
-${berita.isi}
+    const tanggal = new Date(displayBerita?.created_at).toLocaleDateString(
+      locale,
+    );
 
-Penulis: ${berita.penulis || "Admin"}
-Tanggal: ${new Date(berita.created_at).toLocaleDateString("id-ID")}
+    const penulis = displayBerita.penulis || t.admin;
 
-Baca selengkapnya:
+    return `${displayBerita.judul}
+${displayBerita.isi}
+
+${
+  language === "en" ? "Author" : language === "ar" ? "الكاتب" : "Penulis"
+}: ${penulis}
+
+${
+  language === "en" ? "Date" : language === "ar" ? "التاريخ" : "Tanggal"
+}: ${tanggal}
+
+${
+  language === "en"
+    ? "Read more"
+    : language === "ar"
+      ? "اقرأ المزيد"
+      : "Baca selengkapnya"
+}:
+
 ${getBeritaUrl()}`;
   };
-
-  /* =========================
-     WHATSAPP
-  ========================= */
 
   const shareWhatsApp = () => {
     const text = getShareText();
@@ -81,10 +282,6 @@ ${getBeritaUrl()}`;
 
     setShowShare(false);
   };
-
-  /* =========================
-     FACEBOOK
-  ========================= */
 
   const shareFacebook = () => {
     const url = getBeritaUrl();
@@ -97,32 +294,24 @@ ${getBeritaUrl()}`;
     setShowShare(false);
   };
 
-  /* =========================
-     INSTAGRAM
-  ========================= */
-
   const shareInstagram = () => {
     window.open("https://www.instagram.com/", "_blank");
 
     setShowShare(false);
   };
 
-  /* =========================
-     LAINNYA
-  ========================= */
-
   const shareOther = async () => {
     try {
       if (navigator.share) {
         await navigator.share({
-          title: berita.judul,
+          title: displayBerita?.judul,
           text: getShareText(),
           url: getBeritaUrl(),
         });
       } else {
-        alert("Fitur Bagikan tidak tersedia di browser ini.");
+        alert(t.unavailable);
       }
-    } catch (err) {
+    } catch {
       console.log("Bagikan dibatalkan.");
     }
 
@@ -130,15 +319,26 @@ ${getBeritaUrl()}`;
   };
 
   if (!berita) {
-    return <div className="p-10 text-center">Berita tidak ditemukan</div>;
+    return (
+      <div className="p-10 text-center" dir={isArabic ? "rtl" : "ltr"}>
+        {t.notFound}
+      </div>
+    );
+  }
+
+  if (language !== "id" && loadingTranslation && !translatedBerita) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center p-10 text-center"
+        dir={isArabic ? "rtl" : "ltr"}
+      >
+        <div className="text-green-700 font-semibold">{t.translating}</div>
+      </div>
+    );
   }
 
   return (
-    <div className="bg-[#f8faf8] min-h-screen">
-      {/* =========================
-          HERO
-      ========================= */}
-
+    <div className="bg-[#f8faf8] min-h-screen" dir={isArabic ? "rtl" : "ltr"}>
       <section
         className="
           relative
@@ -154,7 +354,7 @@ ${getBeritaUrl()}`;
           backgroundPosition: "center",
         }}
       >
-        <div className="absolute inset-0 bg-white/10"></div>
+        <div className="absolute inset-0 bg-white/10" />
 
         <div
           className="
@@ -178,8 +378,6 @@ ${getBeritaUrl()}`;
             "
           >
             <div className="grid md:grid-cols-2">
-              {/* FOTO */}
-
               <div>
                 {berita.foto ? (
                   <img
@@ -187,7 +385,7 @@ ${getBeritaUrl()}`;
                       /\/api\/?$/,
                       "",
                     )}/storage/${berita.foto}`}
-                    alt={berita.judul}
+                    alt={displayBerita?.judul}
                     className="
                       w-full
                       h-48
@@ -204,12 +402,10 @@ ${getBeritaUrl()}`;
                       justify-center
                     "
                   >
-                    Tidak ada foto
+                    {t.noPhoto}
                   </div>
                 )}
               </div>
-
-              {/* INFORMASI */}
 
               <div
                 className="
@@ -230,7 +426,7 @@ ${getBeritaUrl()}`;
                     w-fit
                   "
                 >
-                  Informasi TPQ
+                  {t.information}
                 </span>
 
                 <h1
@@ -242,7 +438,7 @@ ${getBeritaUrl()}`;
                     text-green-800
                   "
                 >
-                  {berita.judul}
+                  {displayBerita?.judul}
                 </h1>
 
                 <p
@@ -253,7 +449,7 @@ ${getBeritaUrl()}`;
                     md:text-base
                   "
                 >
-                  Informasi terbaru kegiatan TPQ Khairunnisa.
+                  {t.description}
                 </p>
 
                 <div
@@ -267,22 +463,28 @@ ${getBeritaUrl()}`;
                 >
                   <div className="flex items-center gap-2">
                     <User size={18} />
-                    {berita.penulis || "Admin"}
+                    {displayBerita?.penulis || t.admin}
                   </div>
 
                   <div className="flex items-center gap-2">
                     <CalendarDays size={18} />
-                    {new Date(berita.created_at).toLocaleDateString("id-ID")}
+
+                    {new Date(displayBerita?.created_at).toLocaleDateString(
+                      language === "en"
+                        ? "en-US"
+                        : language === "ar"
+                          ? "ar-SA"
+                          : "id-ID",
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Eye size={18} />
+                    {displayBerita?.views ?? 0} {t.read}
                   </div>
                 </div>
 
-                {/* =========================
-                    TOMBOL
-                ========================= */}
-
                 <div className="mt-3 flex flex-wrap gap-2">
-                  {/* KEMBALI */}
-
                   <Link
                     to="/web/berita"
                     className="
@@ -301,10 +503,8 @@ ${getBeritaUrl()}`;
                     "
                   >
                     <ArrowLeft size={18} />
-                    Kembali ke Berita
+                    {t.back}
                   </Link>
-
-                  {/* BAGIKAN */}
 
                   <button
                     type="button"
@@ -324,7 +524,7 @@ ${getBeritaUrl()}`;
                     "
                   >
                     <Share2 size={18} />
-                    Bagikan
+                    {t.share}
                   </button>
                 </div>
               </div>
@@ -332,10 +532,6 @@ ${getBeritaUrl()}`;
           </div>
         </div>
       </section>
-
-      {/* =========================
-          TOMBOL SCROLL
-      ========================= */}
 
       <div
         className="
@@ -349,6 +545,7 @@ ${getBeritaUrl()}`;
         "
       >
         <button
+          type="button"
           onClick={scrollToIsiBerita}
           className="
             animate-bounce
@@ -365,10 +562,6 @@ ${getBeritaUrl()}`;
         </button>
       </div>
 
-      {/* =========================
-          ISI BERITA
-      ========================= */}
-
       <section
         id="isi-berita"
         className="
@@ -381,37 +574,21 @@ ${getBeritaUrl()}`;
         "
       >
         <div className="bg-white rounded-3xl shadow-md p-5 md:p-8">
-          <h2
-            className="
-              text-xs
-              md:text-base
-              font-bold
-              text-green-700
-              mb-2
-            "
-          >
-            BACA BERITA SELENGKAPNYA ...
-          </h2>
-
           <div
             className="
               text-black
               text-justify
-              leading-7
+              leading-5
               md:leading-8
               whitespace-pre-line
               text-sm
               md:text-base
             "
           >
-            {berita.isi}
+            {displayBerita?.isi}
           </div>
         </div>
       </section>
-
-      {/* =========================
-          POPUP BAGIKAN
-      ========================= */}
 
       {showShare && (
         <div
@@ -439,8 +616,6 @@ ${getBeritaUrl()}`;
             "
             onClick={(e) => e.stopPropagation()}
           >
-            {/* TUTUP */}
-
             <button
               type="button"
               onClick={() => setShowShare(false)}
@@ -457,23 +632,15 @@ ${getBeritaUrl()}`;
               <X size={20} />
             </button>
 
-            {/* JUDUL */}
-
             <div className="text-center mb-6">
               <div className="text-xl font-bold text-gray-800">
-                Bagikan Berita
+                {t.shareTitle}
               </div>
 
-              <div className="text-sm text-gray-500 mt-1">Pilih aplikasi</div>
+              <div className="text-sm text-gray-500 mt-1">{t.chooseApp}</div>
             </div>
 
-            {/* =========================
-                PILIHAN SHARE
-            ========================= */}
-
             <div className="grid grid-cols-2 gap-4">
-              {/* WHATSAPP */}
-
               <button
                 type="button"
                 onClick={shareWhatsApp}
@@ -492,11 +659,8 @@ ${getBeritaUrl()}`;
                 "
               >
                 <div className="text-4xl">🟢</div>
-
                 <span className="font-semibold">WhatsApp</span>
               </button>
-
-              {/* FACEBOOK */}
 
               <button
                 type="button"
@@ -516,11 +680,8 @@ ${getBeritaUrl()}`;
                 "
               >
                 <div className="text-4xl font-bold">f</div>
-
                 <span className="font-semibold">Facebook</span>
               </button>
-
-              {/* INSTAGRAM */}
 
               <button
                 type="button"
@@ -540,11 +701,8 @@ ${getBeritaUrl()}`;
                 "
               >
                 <div className="text-4xl">◎</div>
-
                 <span className="font-semibold">Instagram</span>
               </button>
-
-              {/* LAINNYA */}
 
               <button
                 type="button"
@@ -564,8 +722,7 @@ ${getBeritaUrl()}`;
                 "
               >
                 <div className="text-4xl">⋯</div>
-
-                <span className="font-semibold">Lainnya</span>
+                <span className="font-semibold">{t.other}</span>
               </button>
             </div>
           </div>

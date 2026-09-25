@@ -529,7 +529,7 @@ export default function MasterData() {
   // =========================================================
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="w-full max-w-full min-w-0 space-y-4 p-2 md:p-4 overflow-x-hidden">
       <h1 className="text-lg font-light text-black tracking-wider">
         MASTER DATA
       </h1>
@@ -578,11 +578,11 @@ export default function MasterData() {
       {/* ===================================================== */}
 
       {tab === "santri" && (
-        <div className="bg-white p-4 md:p-4 rounded-xl shadow-sm md:border">
+        <div className="w-[calc(100%-8px)] mx-auto md:w-auto md:mx-0 bg-white p-3 md:p-4 rounded-xl shadow-sm md:border">
           <div className="md:max-w-4xl md:mx-auto">
             <form
               onSubmit={handleSubmit}
-              className="grid md:grid-cols-2 gap-3 md:gap-4 text-xs"
+              className="w-full max-w-full min-w-0 grid md:grid-cols-2 gap-3 md:gap-4 text-xs"
             >
               <div className="hidden md:block md:col-span-2 font-extralight text-black border-b pb-1">
                 Isi Data Santri dan Orangtua berdasarkan dokumen resmi KTP/Kartu
@@ -734,11 +734,11 @@ export default function MasterData() {
       {/* ===================================================== */}
 
       {tab === "guru" && (
-        <div className="bg-white p-4 md:p-4 rounded-xl shadow-sm md:border">
+        <div className="w-[calc(100%-8px)] mx-auto md:w-auto md:mx-0 bg-white p-3 md:p-4 rounded-xl shadow-sm md:border">
           <div className="md:max-w-4xl md:mx-auto">
             <form
               onSubmit={handleSubmitGuru}
-              className="grid md:grid-cols-2 gap-3 md:gap-4 text-sm"
+              className="w-full max-w-full min-w-0 grid md:grid-cols-2 gap-3 md:gap-4 text-sm"
             >
               <input
                 name="nama_guru"
@@ -832,7 +832,7 @@ export default function MasterData() {
       {/* ===================================================== */}
 
       {tab === "viewSantri" && (
-        <div className="bg-white p-5 rounded-xl shadow">
+        <div className="w-[calc(100%+8px)] -ml-1 md:w-auto md:ml-0 bg-transparent md:bg-white p-0 md:p-5 md:rounded-xl md:shadow">
           {/* SEARCH */}
           <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <input
@@ -865,7 +865,7 @@ export default function MasterData() {
                   className="border rounded-2xl shadow overflow-hidden bg-white"
                 >
                   {/* HEADER */}
-                  <div className="bg-purple-600 text-white text-center py-2 px-4">
+                  <div className="bg-gray-300 text-white text-center py-2 px-4">
                     <div className="flex justify-center mb-3">
                       {d.foto ? (
                         <img
@@ -880,11 +880,13 @@ export default function MasterData() {
                       )}
                     </div>
 
-                    <div className="font-bold text-lg uppercase">{d.nama}</div>
+                    <div className="text-black font-bold text-lg uppercase">
+                      {d.nama}
+                    </div>
                   </div>
 
                   {/* NARASI */}
-                  <div className="text-base p-4 space-y-3 bg-gray-200 text-gray-700 text-justify">
+                  <div className="text-base p-4 space-y-3 bg-blue-100 text-gray-700 text-justify">
                     Adalah santri TPQ Khairunisa Ternate - nomor ID {d.nis}{" "}
                     Kelas pada {d.kelas || "-"} dengan jenis kelamin{" "}
                     {d.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"}{" "}
@@ -1149,7 +1151,7 @@ export default function MasterData() {
       {/* ===================================================== */}
 
       {tab === "viewGuru" && (
-        <div className="bg-white p-5 rounded-xl shadow">
+        <div className="w-[calc(100%+8px)] -ml-1 md:w-auto md:ml-0 bg-transparent md:bg-white p-0 md:p-5 md:rounded-xl md:shadow">
           {/* SEARCH */}
           <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <input
@@ -1181,7 +1183,7 @@ export default function MasterData() {
                   className="border rounded-2xl shadow overflow-hidden bg-white"
                 >
                   {/* HEADER */}
-                  <div className="bg-purple-600 text-white text-center py-3 px-4">
+                  <div className="bg-gray-300 text-white text-center py-3 px-4">
                     <div className="flex justify-center mb-3">
                       {g.foto ? (
                         <img
@@ -1196,13 +1198,13 @@ export default function MasterData() {
                       )}
                     </div>
 
-                    <div className="font-bold text-lg uppercase">
+                    <div className="text-black font-bold text-lg uppercase">
                       {g.nama_guru}
                     </div>
                   </div>
 
                   {/* NARASI */}
-                  <div className="text-base p-4 space-y-3 bg-gray-200 text-gray-700 text-justify">
+                  <div className="text-base p-4 space-y-3 bg-blue-100 text-gray-700 text-justify">
                     Adalah guru TPQ Khairunnisa Ternate dengan nomor ID {g.nig}.
                     Berjenis kelamin{" "}
                     {g.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"}{" "}

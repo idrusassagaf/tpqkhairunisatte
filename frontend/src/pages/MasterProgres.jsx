@@ -204,68 +204,154 @@ export default function MasterProgres() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(progresData));
 
-      // ================= SIMPAN IQRA =================
-      for (const s of santriIqra) {
-        const namaGuru = progresData[`guru_${s.nis}`] || "";
+      let berhasil = 0;
+      let dilewati = 0;
 
-        const dataGuru = guru.find((g) => g.nama_guru === namaGuru);
+      // =====================================================
+      // SIMPAN IQRA SAJA JIKA TAB IQRA AKTIF
+      // =====================================================
+      if (tab === "iqra") {
+        for (const s of santriIqra) {
+          const namaGuru =
+            progresData[`guru_${s.nis}`]?.toString().trim() || "";
 
-        const progres = progresData[s.nis] || "";
+          // Jika guru belum dipilih, jangan kirim ke database
+          // karena kolom NIG wajib terisi.
+          if (!namaGuru) {
+            dilewati++;
+            continue;
+          }
 
-        const prestasi =
-          progres === "Lancar"
-            ? "Di-Lanjut"
-            : progres === "Belum"
-              ? "Di-Ulang"
-              : "";
+          const dataGuru = guru.find(
+            (g) =>
+              g.nama_guru?.toString().trim().toLowerCase() ===
+              namaGuru.toLowerCase(),
+          );
 
-        await api.post("/progres-iqra", {
-          nama_santri: s.nama,
-          nis: s.nis,
-          nama_guru: namaGuru,
-          nig: dataGuru?.nig || "",
-          kelas: s.kelas,
-          jilid: progresData[`jilid_${s.nis}`] || "",
-          halaman: progresData[`hal_${s.nis}`] || "",
-          progres: progres,
-          prestasi: prestasi,
-        });
+          // Jika nama guru tidak ditemukan di master Guru,
+          // jangan kirim data dengan NIG kosong.
+          if (!dataGuru?.nig) {
+            console.warn(
+              `Guru tidak ditemukan atau NIG kosong untuk NIS ${s.nis}:`,
+              namaGuru,
+            );
+            dilewati++;
+            continue;
+          }
+
+          const progres = progresData[s.nis] || "";
+
+          const prestasi =
+            progres === "Lancar"
+              ? "Di-Lanjut"
+              : progres === "Belum"
+                ? "Di-Ulang"
+                : "";
+
+          await api.post("/progres-iqra", {
+            nama_santri: s.nama,
+            nis: s.nis,
+            nama_guru: namaGuru,
+            nig: dataGuru.nig,
+            kelas: s.kelas,
+            jilid: progresData[`jilid_${s.nis}`] || "",
+            halaman: progresData[`hal_${s.nis}`] || "",
+            progres: progres,
+            prestasi: prestasi,
+          });
+
+          berhasil++;
+        }
       }
 
-      // ================= SIMPAN AL-QURAN =================
-      for (const s of santriQuran) {
-        const namaGuru = progresData[`quran_guru_${s.nis}`] || "";
+      // =====================================================
+      // SIMPAN AL-QURAN SAJA JIKA TAB AL-QURAN AKTIF
+      // =====================================================
+      if (tab === "quran") {
+        for (const s of santriQuran) {
+          const namaGuru =
+            progresData[`quran_guru_${s.nis}`]?.toString().trim() || "";
 
-        const dataGuru = guru.find((g) => g.nama_guru === namaGuru);
+          // Jika guru belum dipilih, jangan kirim ke database
+          // karena kolom NIG wajib terisi.
+          if (!namaGuru) {
+            dilewati++;
+            continue;
+          }
 
-        const progres = progresData[`quran_progres_${s.nis}`] || "";
+          const dataGuru = guru.find(
+            (g) =>
+              g.nama_guru?.toString().trim().toLowerCase() ===
+              namaGuru.toLowerCase(),
+          );
 
-        const prestasi =
-          progres === "Lancar"
-            ? "Di-Lanjut"
-            : progres === "Belum"
-              ? "Di-Ulang"
-              : "";
+          // Jika nama guru tidak ditemukan di master Guru,
+          // jangan kirim data dengan NIG kosong.
+          if (!dataGuru?.nig) {
+            console.warn(
+              `Guru tidak ditemukan atau NIG kosong untuk NIS ${s.nis}:`,
+              namaGuru,
+            );
+            dilewati++;
+            continue;
+          }
 
-        await api.post("/progres-quran", {
-          nama_santri: s.nama,
-          nis: s.nis,
-          nama_guru: namaGuru,
-          nig: dataGuru?.nig || "",
-          kelas: s.kelas,
-          juz: progresData[`quran_juz_${s.nis}`] || "",
-          surah: progresData[`quran_surah_${s.nis}`] || "",
-          ayat: progresData[`quran_ayat_${s.nis}`] || "",
-          halaman: progresData[`quran_hal_${s.nis}`] || "",
-          progres: progres,
-          prestasi: prestasi,
-        });
+          const progres = progresData[`quran_progres_${s.nis}`] || "";
+
+          const prestasi =
+            progres === "Lancar"
+              ? "Di-Lanjut"
+              : progres === "Belum"
+                ? "Di-Ulang"
+                : "";
+
+          await api.post("/progres-quran", {
+            nama_santri: s.nama,
+            nis: s.nis,
+            nama_guru: namaGuru,
+            nig: dataGuru.nig,
+            kelas: s.kelas,
+            juz: progresData[`quran_juz_${s.nis}`] || "",
+            surah: progresData[`quran_surah_${s.nis}`] || "",
+            ayat: progresData[`quran_ayat_${s.nis}`] || "",
+            halaman: progresData[`quran_hal_${s.nis}`] || "",
+            progres: progres,
+            prestasi: prestasi,
+          });
+
+          berhasil++;
+        }
       }
 
-      alert("Data berhasil disimpan ke database");
+      // =====================================================
+      // HASIL
+      // =====================================================
+      if (berhasil === 0 && dilewati > 0) {
+        alert(
+          "Tidak ada data yang disimpan.\n\n" +
+            "Pastikan Guru sudah dipilih pada data yang ingin disimpan.",
+        );
+        return;
+      }
+
+      if (dilewati > 0) {
+        alert(
+          `Data berhasil disimpan ke database.\n\n` +
+            `Berhasil: ${berhasil} data\n` +
+            `Dilewati: ${dilewati} data karena Guru belum dipilih atau NIG tidak ditemukan.`,
+        );
+      } else {
+        alert(`Data berhasil disimpan ke database (${berhasil} data).`);
+      }
     } catch (err) {
-      console.error(err);
-      alert("Gagal menyimpan data");
+      console.error("Gagal menyimpan Master Progres:", err);
+
+      const message =
+        err?.response?.data?.message ||
+        err?.response?.data?.error ||
+        "Gagal menyimpan data";
+
+      alert(message);
     }
   };
 
@@ -290,7 +376,7 @@ export default function MasterProgres() {
   };
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="w-full max-w-full min-w-0 space-y-4 p-2 md:p-4 overflow-x-hidden">
       {/* ================= TITLE ================= */}
       <h1 className="text-lg font-light text-black tracking-wide">
         MASTER PROGRES
@@ -329,7 +415,7 @@ export default function MasterProgres() {
 
       {tab === "iqra" && (
         <>
-          <div className="bg-white rounded-xl shadow p-4 overflow-x-auto">
+          <div className="w-[calc(100%+8px)] -ml-1 md:w-auto md:ml-0 bg-transparent md:bg-white md:rounded-xl md:shadow p-0 md:p-4 overflow-x-auto">
             {/* ================= FILTER IQRA ================= */}
             <div className="mb-4 flex flex-col md:flex-row flex-wrap gap-2">
               {/* SEARCH */}
@@ -570,7 +656,7 @@ export default function MasterProgres() {
             </div>
 
             {/* ================= MOBILE IQRA ================= */}
-            <div className="md:hidden space-y-4">
+            <div className="md:hidden space-y-3">
               {paginatedSantriIqra.map((s, i) => {
                 const namaGuru = progresData[`guru_${s.nis}`] || "-";
 
@@ -588,25 +674,30 @@ export default function MasterProgres() {
                 return (
                   <div
                     key={s.nis || i}
-                    className="bg-gray-300 border rounded-2xl shadow overflow-hidden"
+                    className="w-full max-w-full bg-blue-50 border border-blue-200 rounded-2xl shadow overflow-hidden"
                   >
-                    <div className="bg-purple-600 text-white text-center font-bold py-3 px-3 text-sm leading-5">
-                      {s.nama?.toUpperCase()}
-                      <br />
-                      NIS : {s.nis}
-                    </div>
-
-                    <div className="p-4 text-xs text-gray-700 space-y-4">
-                      <div className="font-medium">
-                        • Kelas : {s.kelas || "-"}
+                    {/* HEADER */}
+                    <div className="bg-gray-300 text-black text-center px-3 py-2.5">
+                      <div className="font-bold text-sm leading-5">
+                        {s.nama?.toUpperCase()}
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <div className="w-20 font-medium">• Jilid</div>
+                      <div className="text-xs leading-5">
+                        NIS : {s.nis} | KELAS {s.kelas?.toUpperCase() || "IQRA"}
+                      </div>
+                    </div>
 
-                        <div className="flex-1">
+                    {/* DATA PROGRES */}
+                    <div className="px-3 py-3 text-xs text-gray-700 space-y-2">
+                      {/* JILID | HALAMAN */}
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="flex-1 min-w-0 flex items-center gap-1">
+                          <span className="font-medium whitespace-nowrap">
+                            Jilid
+                          </span>
+
                           <select
-                            className="border rounded-lg px-3 py-2 text-xs w-full"
+                            className="flex-1 min-w-0 border rounded-lg px-2 py-1.5 text-xs bg-white"
                             value={progresData[`jilid_${s.nis}`] || ""}
                             onChange={(e) =>
                               handleProgresChange(
@@ -615,7 +706,7 @@ export default function MasterProgres() {
                               )
                             }
                           >
-                            <option value="">Pilih Jilid</option>
+                            <option value="">Pilih</option>
                             <option value="Iqra 1">Iqra 1</option>
                             <option value="Iqra 2">Iqra 2</option>
                             <option value="Iqra 3">Iqra 3</option>
@@ -624,16 +715,18 @@ export default function MasterProgres() {
                             <option value="Iqra 6">Iqra 6</option>
                           </select>
                         </div>
-                      </div>
 
-                      <div className="flex items-center gap-2">
-                        <div className="w-20 font-medium">• Halaman</div>
+                        <span className="text-gray-400">|</span>
 
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0 flex items-center gap-1">
+                          <span className="font-medium whitespace-nowrap">
+                            Halaman
+                          </span>
+
                           <input
                             type="number"
-                            className="border rounded-lg px-3 py-2 text-xs w-full"
-                            placeholder="Masukkan halaman"
+                            className="w-14 border rounded-lg px-2 py-1.5 text-xs bg-white"
+                            placeholder="0"
                             value={progresData[`hal_${s.nis}`] || ""}
                             onChange={(e) =>
                               handleProgresChange(
@@ -645,73 +738,78 @@ export default function MasterProgres() {
                         </div>
                       </div>
 
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <div className="w-20 font-medium">• Guru</div>
+                      {/* GURU | NIG */}
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="flex-1 min-w-0 flex items-center gap-1">
+                          <span className="font-medium whitespace-nowrap">
+                            Guru
+                          </span>
 
-                          <div className="flex-1">
-                            <select
-                              className="border rounded-lg px-3 py-2 text-xs w-full"
-                              value={progresData[`guru_${s.nis}`] || ""}
-                              onChange={(e) =>
-                                handleProgresChange(
-                                  `guru_${s.nis}`,
-                                  e.target.value,
-                                )
-                              }
-                            >
-                              <option value="">Pilih Guru</option>
+                          <select
+                            className="flex-1 min-w-0 border rounded-lg px-2 py-1.5 text-xs bg-white"
+                            value={progresData[`guru_${s.nis}`] || ""}
+                            onChange={(e) =>
+                              handleProgresChange(
+                                `guru_${s.nis}`,
+                                e.target.value,
+                              )
+                            }
+                          >
+                            <option value="">Pilih Guru</option>
 
-                              {guru.map((g, index) => (
-                                <option
-                                  key={g.nig || index}
-                                  value={g.nama_guru}
-                                >
-                                  {g.nama_guru}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
+                            {guru.map((g, index) => (
+                              <option key={g.nig || index} value={g.nama_guru}>
+                                {g.nama_guru}
+                              </option>
+                            ))}
+                          </select>
                         </div>
 
-                        <div className="pl-[88px] text-[11px] text-gray-500">
-                          NIG : {dataGuru?.nig || "-"}
-                        </div>
-                      </div>
+                        <span className="text-gray-400">|</span>
 
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <div className="w-20 font-medium">• Progres</div>
-
-                          <div className="flex-1">
-                            <select
-                              className="border rounded-lg px-3 py-2 text-xs w-full"
-                              value={progresData[s.nis] || ""}
-                              onChange={(e) =>
-                                handleProgresChange(s.nis, e.target.value)
-                              }
-                            >
-                              <option value="">Pilih Progres</option>
-                              <option value="Belum">Belum Lancar</option>
-                              <option value="Lancar">Lancar</option>
-                            </select>
-                          </div>
-                        </div>
-
-                        <div className="pl-[88px] text-[11px] text-gray-500">
-                          Prestasi :{" "}
-                          <span className="font-medium">{prestasi}</span>
+                        <div className="shrink-0">
+                          <span className="font-medium">NIG</span>{" "}
+                          {dataGuru?.nig || "-"}
                         </div>
                       </div>
 
-                      <div className="text-[11px] text-purple-700 border-t pt-3">
-                        Update tanggal{" "}
-                        {new Date().toLocaleDateString("id-ID", {
-                          day: "2-digit",
-                          month: "long",
-                          year: "numeric",
-                        })}
+                      {/* PROGRES | PRESTASI */}
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="flex-1 min-w-0 flex items-center gap-1">
+                          <span className="font-medium whitespace-nowrap">
+                            Progres :
+                          </span>
+
+                          <select
+                            className="flex-1 min-w-0 border rounded-lg px-2 py-1.5 text-xs bg-white"
+                            value={progresData[s.nis] || ""}
+                            onChange={(e) =>
+                              handleProgresChange(s.nis, e.target.value)
+                            }
+                          >
+                            <option value="">Pilih</option>
+                            <option value="Belum">Belum Lancar</option>
+                            <option value="Lancar">Lancar</option>
+                          </select>
+                        </div>
+
+                        <span className="text-gray-400">|</span>
+
+                        <div className="shrink-0">
+                          <span className="font-medium">Prestasi :</span>{" "}
+                          {prestasi}
+                        </div>
                       </div>
+                    </div>
+
+                    {/* FOOTER */}
+                    <div className="border-t border-blue-200 bg-gray-200 px-3 py-2 text-[11px] text-purple-700">
+                      Update tanggal{" "}
+                      {new Date().toLocaleDateString("id-ID", {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                      })}
                     </div>
                   </div>
                 );
@@ -786,7 +884,7 @@ export default function MasterProgres() {
 
       {tab === "quran" && (
         <>
-          <div className="bg-white rounded-xl shadow p-4 overflow-x-auto">
+          <div className="w-[calc(100%+8px)] -ml-1 md:w-auto md:ml-0 bg-transparent md:bg-white md:rounded-xl md:shadow p-0 md:p-4 overflow-x-auto">
             {/* ================= FILTER QURAN ================= */}
             <div className="mb-4 flex flex-col md:flex-row flex-wrap items-stretch gap-2">
               {/* SEARCH */}
@@ -1068,7 +1166,7 @@ export default function MasterProgres() {
               </table>
             </div>
             {/* ================= MOBILE QURAN ================= */}
-            <div className="md:hidden space-y-4 mt-4">
+            <div className="md:hidden space-y-3 mt-4">
               {paginatedSantriQuran.map((s, i) => {
                 const namaGuru = progresData[`quran_guru_${s.nis}`] || "-";
 
@@ -1086,28 +1184,33 @@ export default function MasterProgres() {
                 return (
                   <div
                     key={s.nis || i}
-                    className="bg-gray-300 border rounded-2xl shadow overflow-hidden"
+                    className="w-full max-w-full bg-blue-50 border border-blue-200 rounded-2xl shadow overflow-hidden"
                   >
-                    <div className="bg-purple-600 text-white text-center font-bold py-3 px-3 text-sm leading-5">
-                      {s.nama?.toUpperCase()}
-                      <br />
-                      NIS : {s.nis}
-                    </div>
-
-                    <div className="p-4 text-xs text-gray-700 space-y-4">
-                      <div className="font-medium">
-                        • Kelas : {s.kelas || "-"}
+                    {/* HEADER */}
+                    <div className="bg-gray-300 text-black text-center px-3 py-2.5">
+                      <div className="font-bold text-sm leading-5">
+                        {s.nama?.toUpperCase()}
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <div className="w-20 font-medium">• Juz</div>
+                      <div className="text-xs leading-5">
+                        NIS : {s.nis} | KELAS AL-QUR'AN
+                      </div>
+                    </div>
 
-                        <div className="flex-1">
+                    {/* DATA */}
+                    <div className="px-3 py-3 text-xs text-gray-700 space-y-2">
+                      {/* JUZ | SURAH */}
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="flex-1 min-w-0 flex items-center gap-1">
+                          <span className="font-medium whitespace-nowrap">
+                            Juz
+                          </span>
+
                           <input
                             type="number"
                             min="1"
                             max="30"
-                            className="border rounded-lg px-3 py-2 text-xs w-full"
+                            className="flex-1 min-w-0 border rounded-lg px-2 py-1.5 text-xs bg-white"
                             value={progresData[`quran_juz_${s.nis}`] || ""}
                             onChange={(e) =>
                               handleProgresChange(
@@ -1117,15 +1220,17 @@ export default function MasterProgres() {
                             }
                           />
                         </div>
-                      </div>
 
-                      <div className="flex items-center gap-2">
-                        <div className="w-20 font-medium">• Surah</div>
+                        <span className="text-gray-400">|</span>
 
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0 flex items-center gap-1">
+                          <span className="font-medium whitespace-nowrap">
+                            Surah
+                          </span>
+
                           <input
                             type="text"
-                            className="border rounded-lg px-3 py-2 text-xs w-full"
+                            className="flex-1 min-w-0 border rounded-lg px-2 py-1.5 text-xs bg-white"
                             value={progresData[`quran_surah_${s.nis}`] || ""}
                             onChange={(e) =>
                               handleProgresChange(
@@ -1137,13 +1242,16 @@ export default function MasterProgres() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <div className="w-20 font-medium">• Ayat</div>
+                      {/* AYAT | HALAMAN */}
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="flex-1 min-w-0 flex items-center gap-1">
+                          <span className="font-medium whitespace-nowrap">
+                            Ayat
+                          </span>
 
-                        <div className="flex-1">
                           <input
                             type="number"
-                            className="border rounded-lg px-3 py-2 text-xs w-full"
+                            className="flex-1 min-w-0 border rounded-lg px-2 py-1.5 text-xs bg-white"
                             value={progresData[`quran_ayat_${s.nis}`] || ""}
                             onChange={(e) =>
                               handleProgresChange(
@@ -1153,15 +1261,17 @@ export default function MasterProgres() {
                             }
                           />
                         </div>
-                      </div>
 
-                      <div className="flex items-center gap-2">
-                        <div className="w-20 font-medium">• Halaman</div>
+                        <span className="text-gray-400">|</span>
 
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0 flex items-center gap-1">
+                          <span className="font-medium whitespace-nowrap">
+                            Halaman
+                          </span>
+
                           <input
                             type="number"
-                            className="border rounded-lg px-3 py-2 text-xs w-full"
+                            className="flex-1 min-w-0 border rounded-lg px-2 py-1.5 text-xs bg-white"
                             value={progresData[`quran_hal_${s.nis}`] || ""}
                             onChange={(e) =>
                               handleProgresChange(
@@ -1173,78 +1283,81 @@ export default function MasterProgres() {
                         </div>
                       </div>
 
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <div className="w-20 font-medium">• Guru</div>
+                      {/* GURU | NIG */}
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="flex-1 min-w-0 flex items-center gap-1">
+                          <span className="font-medium whitespace-nowrap">
+                            Guru
+                          </span>
 
-                          <div className="flex-1">
-                            <select
-                              className="border rounded-lg px-3 py-2 text-xs w-full"
-                              value={progresData[`quran_guru_${s.nis}`] || ""}
-                              onChange={(e) =>
-                                handleProgresChange(
-                                  `quran_guru_${s.nis}`,
-                                  e.target.value,
-                                )
-                              }
-                            >
-                              <option value="">Pilih Guru</option>
+                          <select
+                            className="flex-1 min-w-0 border rounded-lg px-2 py-1.5 text-xs bg-white"
+                            value={progresData[`quran_guru_${s.nis}`] || ""}
+                            onChange={(e) =>
+                              handleProgresChange(
+                                `quran_guru_${s.nis}`,
+                                e.target.value,
+                              )
+                            }
+                          >
+                            <option value="">Pilih Guru</option>
 
-                              {guru.map((g, index) => (
-                                <option
-                                  key={g.nig || index}
-                                  value={g.nama_guru}
-                                >
-                                  {g.nama_guru}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
+                            {guru.map((g, index) => (
+                              <option key={g.nig || index} value={g.nama_guru}>
+                                {g.nama_guru}
+                              </option>
+                            ))}
+                          </select>
                         </div>
 
-                        <div className="pl-[88px] text-[11px] text-gray-500">
-                          NIG : {dataGuru?.nig || "-"}
-                        </div>
-                      </div>
+                        <span className="text-gray-400">|</span>
 
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <div className="w-20 font-medium">• Progres</div>
-
-                          <div className="flex-1">
-                            <select
-                              className="border rounded-lg px-3 py-2 text-xs w-full"
-                              value={
-                                progresData[`quran_progres_${s.nis}`] || ""
-                              }
-                              onChange={(e) =>
-                                handleProgresChange(
-                                  `quran_progres_${s.nis}`,
-                                  e.target.value,
-                                )
-                              }
-                            >
-                              <option value="">Pilih Progres</option>
-                              <option value="Belum">Belum</option>
-                              <option value="Lancar">Lancar</option>
-                            </select>
-                          </div>
-                        </div>
-
-                        <div className="pl-[88px] text-[11px] text-gray-500">
-                          Prestasi :{" "}
-                          <span className="font-medium">{prestasi}</span>
+                        <div className="shrink-0">
+                          <span className="font-medium">NIG</span>{" "}
+                          {dataGuru?.nig || "-"}
                         </div>
                       </div>
 
-                      <div className="text-[11px] text-purple-700 border-t pt-3">
-                        Update tanggal{" "}
-                        {new Date().toLocaleDateString("id-ID", {
-                          day: "2-digit",
-                          month: "long",
-                          year: "numeric",
-                        })}
+                      {/* PROGRES | PRESTASI */}
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="flex-1 min-w-0 flex items-center gap-1">
+                          <span className="font-medium whitespace-nowrap">
+                            Progres :
+                          </span>
+
+                          <select
+                            className="flex-1 min-w-0 border rounded-lg px-2 py-1.5 text-xs bg-white"
+                            value={progresData[`quran_progres_${s.nis}`] || ""}
+                            onChange={(e) =>
+                              handleProgresChange(
+                                `quran_progres_${s.nis}`,
+                                e.target.value,
+                              )
+                            }
+                          >
+                            <option value="">Pilih</option>
+                            <option value="Belum">Belum Lancar</option>
+                            <option value="Lancar">Lancar</option>
+                          </select>
+                        </div>
+
+                        <span className="text-gray-400">|</span>
+
+                        <div className="shrink-0">
+                          <span className="font-medium">Prestasi :</span>{" "}
+                          {prestasi}
+                        </div>
                       </div>
+                    </div>
+
+                    {/* FOOTER */}
+                    <div className="border-t border-blue-200 bg-gray-200 px-3 py-2 text-[11px] text-purple-700">
+                      Update tanggal{" "}
+                      {new Date().toLocaleDateString("id-ID", {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                      })}
                     </div>
                   </div>
                 );

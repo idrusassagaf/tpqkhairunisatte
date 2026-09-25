@@ -577,7 +577,7 @@ export default function ProgresQuran() {
           FILTER
       ===================================================== */}
 
-      <div className="bg-white rounded-xl shadow p-4 overflow-x-auto">
+      <div className="p-0 md:bg-white md:rounded-xl md:shadow md:p-4 md:overflow-x-auto">
         <div className="mb-4 flex flex-wrap gap-2">
           {/* FILTER JUZ */}
 
@@ -710,7 +710,7 @@ export default function ProgresQuran() {
             MOBILE
         ================================================= */}
 
-        <div className="md:hidden space-y-4">
+        <div className="md:hidden w-full max-w-full space-y-4">
           {currentData.length === 0 ? (
             <div className="text-center text-gray-500">
               Belum ada data progres Qur'an
@@ -719,11 +719,11 @@ export default function ProgresQuran() {
             currentData.map((d, i) => (
               <div
                 key={i}
-                className="bg-gray-300 border rounded-2xl shadow overflow-hidden"
+                className="w-full max-w-full bg-gray-0 border rounded-2xl shadow overflow-hidden"
               >
                 {/* HEADER */}
 
-                <div className="bg-purple-600 text-white text-center font-bold py-3 px-3 text-sm leading-5">
+                <div className="bg-gray-300 text-black text-center font-bold py-3 px-3 text-sm leading-5">
                   {d.nama?.toUpperCase()}
                   <br />
                   NIS : {d.nis} | Kelas {d.kelas}

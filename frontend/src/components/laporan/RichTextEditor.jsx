@@ -51,121 +51,143 @@ export default function RichTextEditor({ value, onChange }) {
       {/* TOOLBAR */}
       {/* ========================= */}
 
-      <div className="flex flex-wrap gap-2 p-3 border-b bg-gray-100">
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className={`px-3 py-1 rounded ${
-            editor.isActive("bold")
-              ? "bg-blue-600 text-white"
-              : "bg-white border"
-          }`}
+      <div
+        className="
+    w-full
+    max-w-full
+    overflow-hidden
+    border-b
+    bg-gray-200
+    p-1
+    md:p-3
+  "
+      >
+        <div
+          className="
+    grid
+    grid-cols-4
+    gap-1
+    w-full
+    max-w-[calc(100vw-32px)]
+    md:flex
+    md:flex-wrap
+    md:gap-2
+    "
         >
-          B
-        </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            className={`w-full px-2 py-1 text-xs md:w-auto md:px-3 md:text-base rounded ${
+              editor.isActive("bold")
+                ? "bg-blue-600 text-white"
+                : "bg-white border"
+            }`}
+          >
+            B
+          </button>
 
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={`px-3 py-1 rounded ${
-            editor.isActive("italic")
-              ? "bg-blue-600 text-white"
-              : "bg-white border"
-          }`}
-        >
-          I
-        </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            className={`w-full px-2 py-1 text-xs md:w-auto md:px-3 md:text-base rounded ${
+              editor.isActive("italic")
+                ? "bg-blue-600 text-white"
+                : "bg-white border"
+            }`}
+          >
+            I
+          </button>
 
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleUnderline().run()}
-          className={`px-3 py-1 rounded ${
-            editor.isActive("underline")
-              ? "bg-blue-600 text-white"
-              : "bg-white border"
-          }`}
-        >
-          U
-        </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleUnderline().run()}
+            className={`w-full px-2 py-1 text-xs md:w-auto md:px-3 md:text-base rounded ${
+              editor.isActive("underline")
+                ? "bg-blue-600 text-white"
+                : "bg-white border"
+            }`}
+          >
+            U
+          </button>
 
-        <div className="w-px bg-gray-300 mx-2"></div>
+          <div className="hidden md:block w-px bg-gray-300 mx-2"></div>
 
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().setTextAlign("left").run()}
-          className="px-3 py-1 bg-white border rounded"
-        >
-          Left
-        </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().setTextAlign("left").run()}
+            className="w-full px-2 py-1 text-xs md:w-auto md:px-3 md:text-base bg-white border rounded"
+          >
+            Left
+          </button>
 
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().setTextAlign("center").run()}
-          className="px-3 py-1 bg-white border rounded"
-        >
-          Center
-        </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().setTextAlign("center").run()}
+            className="w-full px-2 py-1 text-xs md:w-auto md:px-3 md:text-base bg-white border rounded"
+          >
+            Center
+          </button>
 
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().setTextAlign("right").run()}
-          className="px-3 py-1 bg-white border rounded"
-        >
-          Right
-        </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().setTextAlign("right").run()}
+            className="w-full px-2 py-1 text-xs md:w-auto md:px-3 md:text-base bg-white border rounded"
+          >
+            Right
+          </button>
 
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().setTextAlign("justify").run()}
-          className="px-3 py-1 bg-white border rounded"
-        >
-          Justify
-        </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().setTextAlign("justify").run()}
+            className="w-full px-2 py-1 text-xs md:w-auto md:px-3 md:text-base bg-white border rounded"
+          >
+            Justify
+          </button>
 
-        <div className="w-px bg-gray-300 mx-2"></div>
+          <div className="hidden md:block w-px bg-gray-300 mx-2"></div>
 
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className="px-3 py-1 bg-white border rounded"
-        >
-          • List
-        </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+            className="w-full px-2 py-1 text-xs md:w-auto md:px-3 md:text-base bg-white border rounded"
+          >
+            • List
+          </button>
 
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className="px-3 py-1 bg-white border rounded"
-        >
-          1. List
-        </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().toggleOrderedList().run()}
+            className="w-full px-2 py-1 text-xs md:w-auto md:px-3 md:text-base bg-white border rounded"
+          >
+            1. List
+          </button>
 
-        <div className="w-px bg-gray-300 mx-2"></div>
+          <div className="hidden md:block w-px bg-gray-300 mx-2"></div>
 
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().undo().run()}
-          className="px-3 py-1 bg-white border rounded"
-        >
-          Undo
-        </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().undo().run()}
+            className="w-full px-2 py-1 text-xs md:w-auto md:px-3 md:text-base bg-white border rounded"
+          >
+            Undo
+          </button>
 
-        <button
-          type="button"
-          onClick={() => editor.chain().focus().redo().run()}
-          className="px-3 py-1 bg-white border rounded"
-        >
-          Redo
-        </button>
+          <button
+            type="button"
+            onClick={() => editor.chain().focus().redo().run()}
+            className="w-full px-2 py-1 text-xs md:w-auto md:px-3 md:text-base bg-white border rounded"
+          >
+            Redo
+          </button>
+        </div>
       </div>
-
       {/* ========================= */}
       {/* EDITOR */}
       {/* ========================= */}
 
       <EditorContent
         editor={editor}
-        className="min-h-[250px] p-5 prose max-w-none focus:outline-none"
+        className="min-h-[250px] p-5 prose max-w-none focus:outline-none text-justify"
       />
     </div>
   );

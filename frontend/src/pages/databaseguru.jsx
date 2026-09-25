@@ -526,7 +526,7 @@ export default function DatabaseGuru() {
             >
               {/* HEADER CARD */}
 
-              <div className="bg-purple-600 p-2 mb-1 flex flex-col items-center space-y-0.5 text-center">
+              <div className="bg-gray-300 p-2 mb-1 flex flex-col items-center space-y-0.5 text-center">
                 {g.foto_url ? (
                   <img
                     src={g.foto_url}
@@ -539,14 +539,14 @@ export default function DatabaseGuru() {
                   </div>
                 )}
 
-                <h2 className="mt-1 text-white font-bold text-lg uppercase">
+                <h2 className="mt-1 text-black font-bold text-lg uppercase">
                   {g.nama_guru}
                 </h2>
               </div>
 
               {/* NARASI */}
 
-              <div className="bg-gray-300 p-4 font-extralight text-sm text-gray-800 space-y-3 text-justify">
+              <div className="bg-gray-0 p-4 font-extralight text-sm text-black space-y-3 text-justify">
                 <p>
                   Adalah guru TPQ Khairunisa Ternate dengan nomor ID{" "}
                   <b>{g.nig}</b>. Berjenis kelamin{" "}

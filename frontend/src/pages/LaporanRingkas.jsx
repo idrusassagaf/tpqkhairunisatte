@@ -59,7 +59,10 @@ export default function LaporanRingkas() {
   };
 
   const previewPdf = () => {
-    window.open("http://127.0.0.1:8000/api/laporan-ringkas/view", "_blank");
+    window.open(
+      "http://127.0.0.1:8000/api/laporan-ringkas/view?language=id",
+      "_blank",
+    );
   };
 
   const downloadPdf = () => {
@@ -71,10 +74,10 @@ export default function LaporanRingkas() {
   }
 
   return (
-    <div className="p-6">
-      <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl border">
+    <div className="-mx-2 px-1 py-2 md:mx-0 md:p-6">
+      <div className="w-auto mx-2 md:w-full md:max-w-7xl md:mx-auto bg-white rounded-2xl shadow-xl border">
         {/* HEADER */}
-        <div className="border-b bg-gray-50 px-8 py-6">
+        <div className="border-b bg-gray-50 px-4 md:px-8 py-5 md:py-6">
           <h1 className="text-xl font-light text-gray-800">
             Pengaturan Laporan Ringkas
           </h1>
@@ -83,11 +86,11 @@ export default function LaporanRingkas() {
             Kelola narasi umum setiap bagian laporan ringkas TPQ Khairunissa.
           </p>
         </div>
-        <div className="p-8 space-y-6">
+        <div className="p-3 md:p-8 space-y-6">
           {/* BARIS ATAS */}
 
-          <div className="grid grid-cols-12 gap-5">
-            <div className="col-span-3">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+            <div className="col-span-1 md:col-span-3">
               <label className="font-semibold block mb-2">Topik</label>
 
               <select
@@ -121,7 +124,7 @@ export default function LaporanRingkas() {
               </select>
             </div>
 
-            <div className="col-span-4">
+            <div className="col-span-1 md:col-span-4">
               <label className="font-semibold block mb-2">Judul</label>
 
               <input
@@ -132,7 +135,7 @@ export default function LaporanRingkas() {
               />
             </div>
 
-            <div className="col-span-5">
+            <div className="col-span-1 md:col-span-5">
               <label className="font-semibold block mb-2">Sub Judul</label>
 
               <input
@@ -181,10 +184,10 @@ export default function LaporanRingkas() {
               </select>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
               <button
                 onClick={simpanPengaturan}
-                className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-3 rounded-xl flex items-center gap-2"
+                className="w-full md:w-auto bg-purple-600 hover:bg-purple-700 text-white px-4 py-2.5 rounded-xl flex items-center justify-center gap-2"
               >
                 <Save size={18} />
                 Simpan
@@ -192,7 +195,7 @@ export default function LaporanRingkas() {
 
               <button
                 onClick={previewPdf}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl flex items-center gap-2"
+                className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl flex items-center justify-center gap-2"
               >
                 <Eye size={18} />
                 Preview PDF
@@ -200,7 +203,7 @@ export default function LaporanRingkas() {
 
               <button
                 onClick={downloadPdf}
-                className="bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-xl flex items-center gap-2"
+                className="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-xl flex items-center justify-center gap-2"
               >
                 <Download size={18} />
                 Download PDF
