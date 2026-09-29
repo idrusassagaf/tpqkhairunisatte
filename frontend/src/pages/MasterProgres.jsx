@@ -43,7 +43,12 @@ export default function MasterProgres() {
 
     if (savedData) {
       try {
-        setProgresData(JSON.parse(savedData));
+        const parsedData = JSON.parse(savedData);
+
+        setProgresData((prev) => ({
+          ...prev,
+          ...parsedData,
+        }));
       } catch (error) {
         console.error("Gagal membaca data localStorage:", error);
       }
@@ -61,10 +66,91 @@ export default function MasterProgres() {
   // ================= FETCH DATA =================
   const fetchData = async () => {
     try {
-      const res = await api.get("/master-data");
+      // ================= MASTER DATA =================
+      const masterRes = await api.get("/master-data");
 
-      setSantri(res?.data?.data?.santri || []);
-      setGuru(res?.data?.data?.guru || []);
+      setSantri(masterRes?.data?.data?.santri || []);
+      setGuru(masterRes?.data?.data?.guru || []);
+
+      // ================= PROGRES IQRA =================
+      let progresIqraData = {};
+
+      try {
+        const iqraRes = await api.get("/progres-iqra");
+
+        const iqraRows = iqraRes?.data?.data || [];
+
+        iqraRows.forEach((row) => {
+          if (!row?.nis) return;
+
+          progresIqraData[row.nis] = row.progres || "";
+          progresIqraData[`guru_${row.nis}`] = row.nama_guru || "";
+          progresIqraData[`jilid_${row.nis}`] = row.jilid || "";
+          progresIqraData[`hal_${row.nis}`] = row.halaman || "";
+        });
+      } catch (err) {
+        console.error("Gagal ambil data Progres Iqra:", err);
+      }
+
+      // ================= PROGRES AL-QUR'AN =================
+      let progresQuranData = {};
+
+      try {
+        const quranRes = await api.get("/progres-quran");
+
+        const quranRows = quranRes?.data?.data || [];
+
+        quranRows.forEach((row) => {
+          if (!row?.nis) return;
+
+          progresQuranData[`quran_guru_${row.nis}`] = row.nama_guru || "";
+
+          progresQuranData[`quran_juz_${row.nis}`] = row.juz || "";
+
+          progresQuranData[`quran_surah_${row.nis}`] = row.surah || "";
+
+          progresQuranData[`quran_ayat_${row.nis}`] = row.ayat || "";
+
+          progresQuranData[`quran_hal_${row.nis}`] = row.halaman || "";
+
+          progresQuranData[`quran_progres_${row.nis}`] = row.progres || "";
+        });
+      } catch (err) {
+        console.error("Gagal ambil data Progres Al-Qur'an:", err);
+      }
+
+      // ================= GABUNG DATA BACKEND =================
+      const backendData = {
+        ...progresIqraData,
+        ...progresQuranData,
+      };
+
+      // ================= GABUNG DENGAN LOCAL STORAGE =================
+      const savedData = localStorage.getItem(STORAGE_KEY);
+
+      let localData = {};
+
+      if (savedData) {
+        try {
+          localData = JSON.parse(savedData);
+        } catch (error) {
+          console.error("Gagal membaca data localStorage:", error);
+        }
+      }
+
+      // Backend menjadi sumber data utama.
+      // Data localStorage yang sudah ada tetap dipertahankan
+      // sebagai override agar data localhost tidak hilang.
+      const mergedData = {
+        ...backendData,
+        ...localData,
+      };
+
+      setProgresData(mergedData);
+
+      // Simpan hasil gabungan agar data backend yang baru dimuat
+      // juga tersedia di localStorage browser.
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(mergedData));
     } catch (err) {
       console.error("Gagal ambil master data:", err);
     }
