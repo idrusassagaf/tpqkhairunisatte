@@ -73,62 +73,324 @@ export default function ProgresHafalanSantri() {
     "Bacaan salam kepada Rasulullah SAW dan Keluarga",
   ];
 
-  // ================= HITUNG JUMLAH =================
+  // =========================================================
+  // NORMALISASI NAMA JENIS HAFALAN
+  // =========================================================
+
+  const normalizeJenis = (value) => {
+    return String(value || "")
+      .trim()
+      .toLowerCase();
+  };
+
+  // =========================================================
+  // NORMALISASI DATA LAMA LOCALSTORAGE
+  // =========================================================
+
+  const normalizeHafalanData = (savedData) => {
+    if (!savedData || typeof savedData !== "object") {
+      return {};
+    }
+
+    const entries = Object.entries(savedData);
+
+    if (entries.length === 0) {
+      return {};
+    }
+
+    const normalized = {};
+
+    const hasZeroIndex = Object.prototype.hasOwnProperty.call(savedData, "0");
+
+    const hasFortySixIndex = Object.prototype.hasOwnProperty.call(
+      savedData,
+      "46",
+    );
+
+    const isOneBased = !hasZeroIndex && hasFortySixIndex;
+
+    entries.forEach(([key, item]) => {
+      if (!item || typeof item !== "object") {
+        return;
+      }
+
+      let targetIndex = -1;
+
+      if (item.jenis) {
+        const jenisItem = normalizeJenis(item.jenis);
+
+        targetIndex = jenisHafalan.findIndex(
+          (jenis) => normalizeJenis(jenis) === jenisItem,
+        );
+      }
+
+      if (targetIndex === -1) {
+        const numericKey = Number(key);
+
+        if (Number.isInteger(numericKey)) {
+          if (isOneBased) {
+            targetIndex = numericKey - 1;
+          } else {
+            targetIndex = numericKey;
+          }
+        }
+      }
+
+      if (targetIndex < 0 || targetIndex >= jenisHafalan.length) {
+        return;
+      }
+
+      normalized[targetIndex] = {
+        ...item,
+        jenis: jenisHafalan[targetIndex],
+      };
+    });
+
+    return normalized;
+  };
+
+  // =========================================================
+  // FORMAT TANGGAL DATABASE
+  // =========================================================
+
+  const formatTanggal = (value) => {
+    if (!value) {
+      return "-";
+    }
+
+    try {
+      const date = new Date(value);
+
+      if (Number.isNaN(date.getTime())) {
+        return String(value);
+      }
+
+      return date.toLocaleDateString("id-ID");
+    } catch {
+      return String(value);
+    }
+  };
+
+  // =========================================================
+  // HITUNG JUMLAH
+  // =========================================================
 
   const getJumlah = (status) => {
     return Object.values(dataHafalan).filter((item) => item?.progres === status)
       .length;
   };
 
-  // ================= LOAD DATA =================
+  // =========================================================
+  // LOAD DATA DARI DATABASE
+  //
+  // DATABASE = SUMBER UTAMA
+  //
+  // Jika ada beberapa record untuk jenis hafalan yang sama,
+  // data TERBARU yang dipakai.
+  // =========================================================
 
-  useEffect(() => {
-    fetchGuru();
-    fetchSantri();
+  const loadHafalan = async () => {
+    try {
+      const [masterRes, hafalanRes] = await Promise.all([
+        api.get("/master-data"),
+        api.get("/progres-hafalan"),
+      ]);
 
-    const saved = localStorage.getItem(`hafalan_${nis}`);
+      // -------------------------------------------------------
+      // DATA GURU
+      // -------------------------------------------------------
 
-    if (saved) {
+      const dataGuru = masterRes?.data?.data?.guru || [];
+
+      setGuru(dataGuru);
+
+      // -------------------------------------------------------
+      // DATA SANTRI
+      // -------------------------------------------------------
+
+      const dataSantri = masterRes?.data?.data?.santri || [];
+
+      const found = dataSantri.find((s) => String(s.nis) === String(nis));
+
+      setSantri(found || null);
+
+      // -------------------------------------------------------
+      // DATA HAFALAN DARI DATABASE
+      // -------------------------------------------------------
+
+      const dataDatabase = hafalanRes?.data?.data || [];
+
+      const normalizedDatabase = {};
+
+      if (Array.isArray(dataDatabase)) {
+        dataDatabase.forEach((item) => {
+          if (String(item?.nis || "") !== String(nis || "")) {
+            return;
+          }
+
+          const jenisDatabase = normalizeJenis(item?.jenis_hafalan);
+
+          if (!jenisDatabase) {
+            return;
+          }
+
+          const index = jenisHafalan.findIndex(
+            (jenis) => normalizeJenis(jenis) === jenisDatabase,
+          );
+
+          if (index === -1) {
+            return;
+          }
+
+          const existing = normalizedDatabase[index];
+
+          // ---------------------------------------------------
+          // Jika jenis hafalan belum ada, langsung simpan.
+          // ---------------------------------------------------
+
+          if (!existing) {
+            normalizedDatabase[index] = {
+              jenis: jenisHafalan[index],
+              guru: item?.nama_guru || "",
+              progres: item?.progres || "",
+              prestasi: item?.prestasi || "",
+              update: formatTanggal(item?.updated_at || item?.created_at),
+              updated_at: item?.updated_at || "",
+              record_id: item?.id || 0,
+            };
+
+            return;
+          }
+
+          // ---------------------------------------------------
+          // Jika jenis sama muncul lebih dari sekali,
+          // pilih record yang paling baru.
+          // ---------------------------------------------------
+
+          const existingDate = new Date(existing?.updated_at || 0).getTime();
+
+          const currentDate = new Date(
+            item?.updated_at || item?.created_at || 0,
+          ).getTime();
+
+          let useCurrent = false;
+
+          if (!Number.isNaN(currentDate) && !Number.isNaN(existingDate)) {
+            useCurrent = currentDate >= existingDate;
+          } else {
+            useCurrent =
+              Number(item?.id || 0) >= Number(existing?.record_id || 0);
+          }
+
+          if (useCurrent) {
+            normalizedDatabase[index] = {
+              jenis: jenisHafalan[index],
+              guru: item?.nama_guru || "",
+              progres: item?.progres || "",
+              prestasi: item?.prestasi || "",
+              update: formatTanggal(item?.updated_at || item?.created_at),
+              updated_at: item?.updated_at || "",
+              record_id: item?.id || 0,
+            };
+          }
+        });
+      }
+
+      // -------------------------------------------------------
+      // DATA LOCALSTORAGE LAMA
+      // -------------------------------------------------------
+
+      let normalizedLocal = {};
+
+      const saved = localStorage.getItem(`hafalan_${nis}`);
+
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+
+          normalizedLocal = normalizeHafalanData(parsed);
+        } catch (error) {
+          console.error("Data hafalan localStorage tidak valid:", error);
+        }
+      }
+
+      // -------------------------------------------------------
+      // GABUNGKAN DATA
+      //
+      // DATABASE MENANG.
+      //
+      // localStorage hanya dipakai jika jenis hafalan tersebut
+      // belum mempunyai data di database.
+      // -------------------------------------------------------
+
+      const merged = {};
+
+      for (let i = 0; i < jenisHafalan.length; i++) {
+        if (normalizedDatabase[i]) {
+          merged[i] = normalizedDatabase[i];
+        } else if (normalizedLocal[i]) {
+          merged[i] = {
+            ...normalizedLocal[i],
+            jenis: jenisHafalan[i],
+          };
+        }
+      }
+
+      setDataHafalan(merged);
+    } catch (error) {
+      console.error("Gagal mengambil data hafalan dari database:", error);
+
+      // -------------------------------------------------------
+      // FALLBACK LOCALSTORAGE
+      // -------------------------------------------------------
+
       try {
-        setDataHafalan(JSON.parse(saved));
-      } catch (error) {
-        console.error("Data hafalan tidak valid:", error);
+        const saved = localStorage.getItem(`hafalan_${nis}`);
+
+        if (saved) {
+          const parsed = JSON.parse(saved);
+
+          const normalized = normalizeHafalanData(parsed);
+
+          setDataHafalan(normalized);
+        } else {
+          setDataHafalan({});
+        }
+      } catch (localError) {
+        console.error("Gagal membaca fallback localStorage:", localError);
+
         setDataHafalan({});
       }
     }
+  };
+
+  // =========================================================
+  // LOAD SEMUA DATA
+  // =========================================================
+
+  useEffect(() => {
+    loadHafalan();
   }, [nis]);
 
-  // ================= AMBIL DATA GURU =================
+  // =========================================================
+  // REFRESH SAAT HALAMAN KEMBALI AKTIF
+  // =========================================================
 
-  const fetchGuru = async () => {
-    try {
-      const res = await api.get("/master-data");
+  useEffect(() => {
+    const handleFocus = () => {
+      loadHafalan();
+    };
 
-      const dataGuru = res?.data?.data?.guru || [];
+    window.addEventListener("focus", handleFocus);
 
-      setGuru(dataGuru);
-    } catch (err) {
-      console.error("Gagal ambil guru:", err);
-    }
-  };
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [nis]);
 
-  // ================= AMBIL DATA SANTRI =================
-
-  const fetchSantri = async () => {
-    try {
-      const res = await api.get("/master-data");
-
-      const dataSantri = res?.data?.data?.santri || [];
-
-      const found = dataSantri.find((s) => s.nis === nis);
-
-      setSantri(found || null);
-    } catch (err) {
-      console.error("Gagal ambil santri:", err);
-    }
-  };
-
-  // ================= HANDLE CHANGE =================
+  // =========================================================
+  // HANDLE CHANGE
+  // =========================================================
 
   const handleChange = async (index, field, value) => {
     const updated = {
@@ -145,20 +407,46 @@ export default function ProgresHafalanSantri() {
       },
     };
 
-    localStorage.setItem(`hafalan_${nis}`, JSON.stringify(updated));
+    // -------------------------------------------------------
+    // UPDATE UI SEGERA
+    // -------------------------------------------------------
 
     setDataHafalan(updated);
+
+    // -------------------------------------------------------
+    // localStorage BACKUP
+    // -------------------------------------------------------
+
+    try {
+      localStorage.setItem(`hafalan_${nis}`, JSON.stringify(updated));
+    } catch (error) {
+      console.error("Gagal menyimpan backup localStorage:", error);
+    }
+
+    // -------------------------------------------------------
+    // DATA UNTUK DATABASE
+    // -------------------------------------------------------
 
     try {
       const item = updated[index];
 
-      const namaGuru = item.guru || "";
+      const namaGuru = String(item?.guru || "").trim();
 
-      const dataGuru = guru.find(
-        (g) => (g.nama || g.nama_guru || g.name) === namaGuru,
-      );
+      const progres = String(item?.progres || "").trim();
 
-      const progres = item.progres || "";
+      if (!namaGuru) {
+        if (field === "progres" && value) {
+          alert("Silakan pilih Guru terlebih dahulu.");
+        }
+
+        return;
+      }
+
+      const dataGuru = guru.find((g) => {
+        const nama = g.nama || g.nama_guru || g.name || "";
+
+        return String(nama).trim().toLowerCase() === namaGuru.toLowerCase();
+      });
 
       const prestasi =
         progres === "Lancar"
@@ -168,22 +456,24 @@ export default function ProgresHafalanSantri() {
             : "";
 
       await api.post("/progres-hafalan", {
-        nama_santri: santri?.nama,
-
-        nis: santri?.nis,
-
+        nama_santri: santri?.nama || "",
+        nis: santri?.nis || nis,
         nama_guru: namaGuru,
-
         nig: dataGuru?.nig || "",
-
-        jenis_hafalan: item.jenis,
-
-        progres: progres,
-
-        prestasi: prestasi,
+        jenis_hafalan: jenisHafalan[index],
+        progres,
+        prestasi,
       });
+
+      // -------------------------------------------------------
+      // SETELAH BERHASIL, AMBIL ULANG DARI DATABASE
+      // -------------------------------------------------------
+
+      await loadHafalan();
     } catch (err) {
-      console.error("Gagal simpan hafalan", err);
+      console.error("Gagal simpan hafalan ke database:", err);
+
+      await loadHafalan();
     }
   };
 
@@ -311,7 +601,6 @@ export default function ProgresHafalanSantri() {
   const handleDownloadPDF = () => {
     if (!santri) {
       alert("Data santri belum tersedia.");
-
       return;
     }
 
@@ -338,10 +627,6 @@ export default function ProgresHafalanSantri() {
 
       const centerX = pageWidth / 2;
 
-      // =====================================================
-      // HEADER
-      // =====================================================
-
       doc.setFont("helvetica", "bold");
 
       doc.setFontSize(16);
@@ -350,10 +635,6 @@ export default function ProgresHafalanSantri() {
         align: "center",
       });
 
-      // =====================================================
-      // SUB JUDUL
-      // =====================================================
-
       doc.setFont("helvetica", "normal");
 
       doc.setFontSize(10);
@@ -361,10 +642,6 @@ export default function ProgresHafalanSantri() {
       doc.text("TPQ Khairunissa Ternate", centerX, 21, {
         align: "center",
       });
-
-      // =====================================================
-      // IDENTITAS SANTRI
-      // =====================================================
 
       doc.setFontSize(9);
 
@@ -377,10 +654,6 @@ export default function ProgresHafalanSantri() {
         align: "center",
       });
 
-      // =====================================================
-      // JUMLAH HAFALAN
-      // =====================================================
-
       const jumlahHafalan =
         `Sudah Lancar : ${getJumlah("Lancar")}-Hafalan | ` +
         `Belum Lancar : ${getJumlah("Belum")}-Hafalan`;
@@ -388,10 +661,6 @@ export default function ProgresHafalanSantri() {
       doc.text(jumlahHafalan, centerX, 34, {
         align: "center",
       });
-
-      // =====================================================
-      // DATA TABEL
-      // =====================================================
 
       const tableData = downloadData.map((d) => [
         d.no,
@@ -401,10 +670,6 @@ export default function ProgresHafalanSantri() {
         d.prestasi,
         d.update,
       ]);
-
-      // =====================================================
-      // TABEL
-      // =====================================================
 
       autoTable(doc, {
         startY: 40,
@@ -475,10 +740,6 @@ export default function ProgresHafalanSantri() {
           right: 36,
         },
 
-        // ===================================================
-        // FOOTER PDF
-        // ===================================================
-
         didDrawPage: () => {
           const nomorHalaman = doc.internal.getNumberOfPages();
 
@@ -496,10 +757,6 @@ export default function ProgresHafalanSantri() {
           );
         },
       });
-
-      // =====================================================
-      // NAMA FILE
-      // =====================================================
 
       const fileName = `progres-hafalan-${nis}.pdf`;
 
@@ -522,14 +779,8 @@ export default function ProgresHafalanSantri() {
       {/* ================= HEADER ================= */}
 
       <div className="bg-gray-200 rounded-2xl shadow p-4 mb-4">
-        {/* TOP */}
-
         <div className="flex items-start justify-between mb-3">
-          {/* KIRI */}
-
           <div>
-            {/* JUDUL DESKTOP */}
-
             <h1
               className="
                 hidden md:block
@@ -543,8 +794,6 @@ export default function ProgresHafalanSantri() {
             >
               HAFALAN SANTRI
             </h1>
-
-            {/* DESKTOP */}
 
             <div
               className="
@@ -582,12 +831,8 @@ export default function ProgresHafalanSantri() {
             </div>
           </div>
 
-          {/* KANAN */}
-
           <div className="flex items-center gap-2">
-            {/* DOWNLOAD */}
-
-            <div className="relative hidden md:block">
+            <div className="relative">
               <button
                 type="button"
                 onClick={() => setShowDownload((prev) => !prev)}
@@ -627,8 +872,6 @@ export default function ProgresHafalanSantri() {
                     overflow-hidden
                   "
                 >
-                  {/* EXCEL */}
-
                   <button
                     type="button"
                     onClick={handleDownloadExcel}
@@ -653,8 +896,6 @@ export default function ProgresHafalanSantri() {
                       <div className="text-xs text-gray-400">.xlsx</div>
                     </div>
                   </button>
-
-                  {/* PDF */}
 
                   <button
                     type="button"
@@ -685,8 +926,6 @@ export default function ProgresHafalanSantri() {
               )}
             </div>
 
-            {/* KEMBALI */}
-
             <Link
               to={backLink}
               className="
@@ -705,8 +944,6 @@ export default function ProgresHafalanSantri() {
         {/* ================= MOBILE ================= */}
 
         <div className="md:hidden text-center text-black">
-          {/* JUDUL */}
-
           <h1
             className="
               text-lg
@@ -719,31 +956,21 @@ export default function ProgresHafalanSantri() {
             HAFALAN SANTRI
           </h1>
 
-          {/* NAMA */}
-
           <div className="font-bold text-lg uppercase">
             {santri?.nama || "-"}
           </div>
-
-          {/* NIS + KELAS */}
 
           <div className="text-xs text-gray-700 mt-1">
             {nis} | Kelas {santri?.kelas || "-"}
           </div>
 
-          {/* SUDAH LANCAR */}
-
           <div className="text-xs text-green-700 mt-3">
             Sudah Lancar : {getJumlah("Lancar")}-Hafalan
           </div>
 
-          {/* BELUM LANCAR */}
-
           <div className="text-xs text-red-600 mt-1">
             Belum Lancar : {getJumlah("Belum")}-Hafalan
           </div>
-
-          {/* DOWNLOAD MOBILE */}
 
           <div className="relative flex justify-center mt-4">
             <button
@@ -785,8 +1012,6 @@ export default function ProgresHafalanSantri() {
                   overflow-hidden
                 "
               >
-                {/* EXCEL */}
-
                 <button
                   type="button"
                   onClick={handleDownloadExcel}
@@ -811,8 +1036,6 @@ export default function ProgresHafalanSantri() {
                     <div className="text-xs text-gray-400">.xlsx</div>
                   </div>
                 </button>
-
-                {/* PDF */}
 
                 <button
                   type="button"
@@ -878,15 +1101,9 @@ export default function ProgresHafalanSantri() {
 
               return (
                 <tr key={i} className="hover:bg-gray-50">
-                  {/* NO */}
-
                   <td className="p-2 border text-center">{i + 1}</td>
 
-                  {/* JENIS */}
-
                   <td className="p-2 border">{item}</td>
-
-                  {/* GURU */}
 
                   <td className="p-2 border">
                     <select
@@ -915,8 +1132,6 @@ export default function ProgresHafalanSantri() {
                     </select>
                   </td>
 
-                  {/* PROGRES */}
-
                   <td className="p-2 border">
                     <select
                       disabled={isReadonly}
@@ -939,13 +1154,9 @@ export default function ProgresHafalanSantri() {
                     </select>
                   </td>
 
-                  {/* PRESTASI */}
-
                   <td className="p-2 border text-center font-medium">
                     {prestasi}
                   </td>
-
-                  {/* UPDATE */}
 
                   <td className="p-2 border text-center text-xs">
                     {dataHafalan[i]?.update || "-"}
@@ -959,7 +1170,7 @@ export default function ProgresHafalanSantri() {
 
       {/* ================= MOBILE CARD ================= */}
 
-      <div className="md:hidden space-y-3">
+      <div className="md:hidden space-y-4">
         {jenisHafalan.map((item, i) => {
           const progres = dataHafalan[i]?.progres || "";
 
@@ -974,124 +1185,38 @@ export default function ProgresHafalanSantri() {
             <div
               key={i}
               className="
-                w-full
-                max-w-full
                 bg-white
-                rounded-xl
+                rounded-2xl
                 shadow
                 border
                 overflow-hidden
               "
             >
-              {/* NAMA DOA */}
-
               <div
                 className="
-                  bg-gray-300
-                  text-black
-                  px-3
-                  py-2.5
+                  bg-purple-600
+                  text-white
+                  px-4 py-3
                   font-semibold
                   text-sm
-                  leading-5
                 "
               >
                 {i + 1}. {item}
               </div>
 
-              {/* DETAIL */}
-
-              <div
-                className="
-                  px-3
-                  py-3
-                  text-sm
-                  text-black
-                  space-y-2
-                "
-              >
-                {/* PROGRES */}
-
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="w-16 shrink-0 font-medium">Progres</span>
-
-                  <span className="text-gray-400 shrink-0">|</span>
-
-                  <select
-                    disabled={isReadonly}
-                    value={progres}
-                    onChange={(e) => handleChange(i, "progres", e.target.value)}
-                    className="
-                      flex-1
-                      min-w-0
-                      border-0
-                      border-b
-                      border-gray-300
-                      rounded-none
-                      px-1
-                      py-1
-                      text-xs
-                      bg-transparent
-                      focus:ring-0
-                    "
-                  >
-                    <option value="">Pilih</option>
-
-                    <option value="Belum">Belum</option>
-
-                    <option value="Lancar">Lancar</option>
-                  </select>
-
-                  <span className="text-gray-400 shrink-0">|</span>
-                </div>
-
-                {/* PRESTASI */}
-
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="w-16 shrink-0 font-medium">Prestasi</span>
-
-                  <span className="text-gray-400 shrink-0">|</span>
-
-                  <span
-                    className="
-                      flex-1
-                      min-w-0
-                      border-b
-                      border-gray-300
-                      px-1
-                      py-1
-                      text-xs
-                    "
-                  >
-                    {prestasi}
-                  </span>
-
-                  <span className="text-gray-400 shrink-0">|</span>
-                </div>
-
-                {/* GURU */}
-
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="w-16 shrink-0 font-medium">Guru</span>
-
-                  <span className="text-gray-400 shrink-0">|</span>
+              <div className="p-4 space-y-4 text-sm text-black">
+                <div>
+                  <div className="mb-1 font-medium">Guru</div>
 
                   <select
                     disabled={isReadonly}
                     value={dataHafalan[i]?.guru || ""}
                     onChange={(e) => handleChange(i, "guru", e.target.value)}
                     className="
-                      flex-1
-                      min-w-0
-                      border-0
-                      border-b
-                      border-gray-300
-                      rounded-none
-                      px-1
-                      py-1
+                      border rounded-lg
+                      px-3 py-2
+                      w-full
                       text-xs
-                      bg-transparent
-                      focus:ring-0
                     "
                   >
                     <option value="">Pilih Guru</option>
@@ -1107,24 +1232,39 @@ export default function ProgresHafalanSantri() {
                       );
                     })}
                   </select>
+                </div>
 
-                  <span className="text-gray-400 shrink-0">|</span>
+                <div>
+                  <div className="mb-1 font-medium">Progres</div>
+
+                  <select
+                    disabled={isReadonly}
+                    value={progres}
+                    onChange={(e) => handleChange(i, "progres", e.target.value)}
+                    className="
+                      border rounded-lg
+                      px-3 py-2
+                      w-full
+                      text-xs
+                    "
+                  >
+                    <option value="">Pilih</option>
+
+                    <option value="Belum">Belum</option>
+
+                    <option value="Lancar">Lancar</option>
+                  </select>
+                </div>
+
+                <div className="text-sm">
+                  <span className="font-medium">Prestasi :</span> {prestasi}
                 </div>
               </div>
 
-              {/* HASIL UPDATE */}
-
-              <div
-                className="
-                  bg-gray-100
-                  px-3
-                  py-2
-                  border-t
-                  text-xs
-                  text-gray-600
-                "
-              >
-                Hasil update {dataHafalan[i]?.update || "-"}
+              <div className="bg-gray-100 px-4 py-2 border-t">
+                <div className="text-xs text-gray-600">
+                  Update : {dataHafalan[i]?.update || "-"}
+                </div>
               </div>
             </div>
           );

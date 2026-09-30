@@ -22,6 +22,7 @@ import {
   User,
   ClipboardCheck,
   QrCode,
+  CreditCard,
 } from "lucide-react";
 
 import { useEffect, useState } from "react";
@@ -32,6 +33,7 @@ export default function Sidebar({ open, setOpen }) {
   // =========================================================
   // ROLE USER LOGIN
   // =========================================================
+
   const [user, setUser] = useState(() => {
     try {
       const savedUser = localStorage.getItem("user");
@@ -48,6 +50,7 @@ export default function Sidebar({ open, setOpen }) {
   // =========================================================
   // MENU UTAMA
   // =========================================================
+
   const menu = [
     {
       items: [
@@ -60,6 +63,7 @@ export default function Sidebar({ open, setOpen }) {
         // =====================================================
         // MASTER MENU — HANYA ADMIN
         // =====================================================
+
         ...(isAdmin
           ? [
               {
@@ -133,6 +137,7 @@ export default function Sidebar({ open, setOpen }) {
   // =========================================================
   // STATE DROPDOWN
   // =========================================================
+
   const [openSantri, setOpenSantri] = useState(true);
   const [openGuru, setOpenGuru] = useState(true);
   const [openAbsensi, setOpenAbsensi] = useState(true);
@@ -143,6 +148,7 @@ export default function Sidebar({ open, setOpen }) {
   // =========================================================
   // JUMLAH DATA
   // =========================================================
+
   const [countSantri, setCountSantri] = useState(0);
   const [countGuru, setCountGuru] = useState(0);
 
@@ -153,6 +159,7 @@ export default function Sidebar({ open, setOpen }) {
   // =========================================================
   // REFRESH USER ROLE
   // =========================================================
+
   useEffect(() => {
     const refreshUser = () => {
       try {
@@ -174,6 +181,7 @@ export default function Sidebar({ open, setOpen }) {
   // =========================================================
   // AMBIL JUMLAH SANTRI & GURU
   // =========================================================
+
   const fetchCounts = async () => {
     try {
       const res = await api.get("/master-data");
@@ -191,6 +199,7 @@ export default function Sidebar({ open, setOpen }) {
   // =========================================================
   // FOTO USER
   // =========================================================
+
   const getUserPhoto = () => {
     if (!user?.foto) {
       return null;
@@ -202,7 +211,10 @@ export default function Sidebar({ open, setOpen }) {
     }
 
     // Jika hanya path foto dari backend
-    return `${api.defaults.baseURL.replace(/\/api\/?$/, "")}/storage/${user.foto.replace(/^\/+/, "")}`;
+    return `${api.defaults.baseURL.replace(
+      /\/api\/?$/,
+      "",
+    )}/storage/${user.foto.replace(/^\/+/, "")}`;
   };
 
   const userPhoto = getUserPhoto();
@@ -216,12 +228,14 @@ export default function Sidebar({ open, setOpen }) {
   // =========================================================
   // TOOLTIP
   // =========================================================
+
   const tooltipClass =
     "absolute left-14 bg-gray-200 text-black text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition shadow z-50";
 
   // =========================================================
   // STYLE MENU
   // =========================================================
+
   const navItemClass = ({ isActive }, sidebarOpen) => {
     return `
       group relative flex items-center
@@ -250,6 +264,7 @@ export default function Sidebar({ open, setOpen }) {
   // =========================================================
   // RETURN
   // =========================================================
+
   return (
     <div
       className={`
@@ -266,11 +281,13 @@ export default function Sidebar({ open, setOpen }) {
       {/* =====================================================
           OVERLAY
       ====================================================== */}
+
       <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px]" />
 
       {/* =====================================================
           ISI SIDEBAR
       ====================================================== */}
+
       <div
         className={`
           relative z-10 h-full overflow-y-auto
@@ -280,6 +297,7 @@ export default function Sidebar({ open, setOpen }) {
         {/* ===================================================
             HEADER
         ==================================================== */}
+
         <div className="p-4 font-semibold border-b text-center text-gray-800">
           {open ? "TPQ SYSTEM" : "TPQ"}
         </div>
@@ -287,6 +305,7 @@ export default function Sidebar({ open, setOpen }) {
         {/* ===================================================
             INFO USER LOGIN
         ==================================================== */}
+
         {open && user && (
           <div className="px-4 pt-3 pb-2">
             <div
@@ -306,6 +325,7 @@ export default function Sidebar({ open, setOpen }) {
 
               <div className="relative flex items-center gap-3">
                 {/* FOTO USER */}
+
                 <div
                   className="
                     w-12
@@ -337,6 +357,7 @@ export default function Sidebar({ open, setOpen }) {
                 </div>
 
                 {/* DATA USER */}
+
                 <div className="min-w-0">
                   <div className="text-[11px] text-gray-600">Login sebagai</div>
 
@@ -371,10 +392,12 @@ export default function Sidebar({ open, setOpen }) {
         {/* ===================================================
             MENU
         ==================================================== */}
+
         <nav className="flex flex-col gap-1 p-4" onClick={handleMenuClick}>
           {/* =================================================
               DASHBOARD + MASTER
           ================================================== */}
+
           {menu[0].items.map((item, i) => {
             const Icon = item.icon;
 
@@ -398,6 +421,7 @@ export default function Sidebar({ open, setOpen }) {
           {/* =================================================
               DATA SANTRI
           ================================================== */}
+
           <button
             type="button"
             onClick={() => setOpenSantri(!openSantri)}
@@ -458,6 +482,7 @@ export default function Sidebar({ open, setOpen }) {
           {/* =================================================
               DATA GURU
           ================================================== */}
+
           <button
             type="button"
             onClick={() => setOpenGuru(!openGuru)}
@@ -519,6 +544,7 @@ export default function Sidebar({ open, setOpen }) {
               ABSENSI
               HANYA UNTUK ADMIN
           ================================================== */}
+
           {isAdmin && (
             <>
               <button
@@ -545,6 +571,8 @@ export default function Sidebar({ open, setOpen }) {
 
               {openAbsensi && (
                 <>
+                  {/* KEHADIRAN SANTRI */}
+
                   <NavLink
                     to="/kehadiran-santri"
                     className={(props) => navItemClass(props, open)}
@@ -557,6 +585,8 @@ export default function Sidebar({ open, setOpen }) {
                       <span className={tooltipClass}>Kehadiran Santri</span>
                     )}
                   </NavLink>
+
+                  {/* KEHADIRAN GURU */}
 
                   <NavLink
                     to="/kehadiran-guru"
@@ -572,6 +602,7 @@ export default function Sidebar({ open, setOpen }) {
                   </NavLink>
 
                   {/* SCAN QR */}
+
                   <NavLink
                     to="/scan-absensi"
                     className={(props) => navItemClass(props, open)}
@@ -584,6 +615,21 @@ export default function Sidebar({ open, setOpen }) {
                       <span className={tooltipClass}>Scan QR</span>
                     )}
                   </NavLink>
+
+                  {/* KARTU QR */}
+
+                  <NavLink
+                    to="/kartu-qr-santri"
+                    className={(props) => navItemClass(props, open)}
+                  >
+                    <CreditCard size={16} />
+
+                    {open ? (
+                      <span>Kartu QR</span>
+                    ) : (
+                      <span className={tooltipClass}>Kartu QR</span>
+                    )}
+                  </NavLink>
                 </>
               )}
             </>
@@ -592,6 +638,7 @@ export default function Sidebar({ open, setOpen }) {
           {/* =================================================
               INFORMASI
           ================================================== */}
+
           <button
             type="button"
             onClick={() => setOpenInformasi(!openInformasi)}
@@ -673,6 +720,7 @@ export default function Sidebar({ open, setOpen }) {
           {/* =================================================
               LAPORAN
           ================================================== */}
+
           <button
             type="button"
             onClick={() => setOpenLaporan(!openLaporan)}
@@ -714,6 +762,7 @@ export default function Sidebar({ open, setOpen }) {
               MANAGEMENT DATA
               HANYA UNTUK ADMIN
           ================================================== */}
+
           {isAdmin && (
             <>
               <button
@@ -741,6 +790,7 @@ export default function Sidebar({ open, setOpen }) {
               {openManagement && (
                 <>
                   {/* MANAGEMENT USER */}
+
                   <NavLink
                     to="/management-user"
                     className={(props) => navItemClass(props, open)}
@@ -755,6 +805,7 @@ export default function Sidebar({ open, setOpen }) {
                   </NavLink>
 
                   {/* MANAGEMENT PASSWORD */}
+
                   <NavLink
                     to="/management-password"
                     className={(props) => navItemClass(props, open)}
@@ -769,6 +820,7 @@ export default function Sidebar({ open, setOpen }) {
                   </NavLink>
 
                   {/* PENGATURAN SISTEM */}
+
                   <NavLink
                     to="/pengaturan-sistem"
                     className={(props) => navItemClass(props, open)}

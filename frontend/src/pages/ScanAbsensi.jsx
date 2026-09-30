@@ -137,7 +137,7 @@ export default function ScanAbsensi() {
       <div className="max-w-4xl mx-auto">
         {/* HEADER */}
         <div className="mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+          <h1 className="text-sm md:text-3xl font-extralight text-gray-800">
             Scan QR Absensi
           </h1>
 
@@ -150,7 +150,7 @@ export default function ScanAbsensi() {
         <div className="bg-white rounded-xl shadow p-4 md:p-5 mb-5">
           <div className="flex items-center gap-2 mb-3">
             <Users size={20} className="text-purple-600" />
-            <h2 className="font-semibold text-gray-800">Jenis Absensi</h2>
+            <h2 className="font-extralight text-gray-800">Jenis Absensi</h2>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -159,7 +159,7 @@ export default function ScanAbsensi() {
               onClick={() => handleTipeChange("santri")}
               className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border transition ${
                 tipe === "santri"
-                  ? "bg-purple-600 text-white border-purple-600"
+                  ? "bg-gray-500 text-white border-gray-600"
                   : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
               }`}
             >
@@ -172,7 +172,7 @@ export default function ScanAbsensi() {
               onClick={() => handleTipeChange("guru")}
               className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border transition ${
                 tipe === "guru"
-                  ? "bg-purple-600 text-white border-purple-600"
+                  ? "bg-gray-500 text-white border-gray-600"
                   : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
               }`}
             >
@@ -186,7 +186,7 @@ export default function ScanAbsensi() {
         <div className="bg-white rounded-xl shadow p-4 md:p-6">
           <div className="flex items-center gap-2 mb-4">
             <Camera size={21} className="text-purple-600" />
-            <h2 className="font-semibold text-gray-800">Kamera</h2>
+            <h2 className="font-extralight text-gray-800">Kamera</h2>
           </div>
 
           <div
@@ -206,7 +206,7 @@ export default function ScanAbsensi() {
                 type="button"
                 onClick={startScanner}
                 disabled={loading}
-                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition disabled:opacity-50"
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-green-600 text-white hover:bg-gray-600 transition disabled:opacity-50"
               >
                 <Camera size={18} />
                 Mulai Kamera

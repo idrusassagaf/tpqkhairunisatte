@@ -1253,7 +1253,7 @@ export default function RaportSantri() {
             </div>
 
             <div>
-              <h1 className="text-xl md:text-2xl font-bold text-gray-800">
+              <h1 className="text-ms md:text-2xl font-extralight text-gray-800">
                 Raport Santri
               </h1>
 
@@ -1417,7 +1417,9 @@ export default function RaportSantri() {
             <div className="flex items-center gap-2 mb-4">
               <UserRound size={20} className="text-green-700" />
 
-              <h2 className="font-bold text-gray-800">A. Biodata Santri</h2>
+              <h2 className="font-extralight text-gray-800">
+                A. Biodata Santri
+              </h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-sm">
@@ -1524,13 +1526,13 @@ export default function RaportSantri() {
               PERIODE
           ================================================== */}
 
-          <div className="bg-green-700 text-white rounded-2xl p-5 flex items-center gap-3">
+          <div className="bg-gray-400 text-white rounded-0xl p-5 flex items-center gap-3">
             <CalendarDays size={24} />
 
             <div>
               <p className="text-sm opacity-90">Periode Raport</p>
 
-              <p className="font-bold text-lg">
+              <p className="font-extralight text-lg">
                 {namaBulan[bulan - 1]} {tahun}
               </p>
             </div>
@@ -1544,7 +1546,9 @@ export default function RaportSantri() {
             <div className="flex items-center gap-2 mb-4">
               <BookOpen size={20} className="text-green-700" />
 
-              <h2 className="font-bold text-gray-800">B. Perkembangan Iqra</h2>
+              <h2 className="font-extralight text-gray-800">
+                B. Perkembangan Iqra
+              </h2>
             </div>
 
             <div className="overflow-x-auto">
@@ -1598,7 +1602,7 @@ export default function RaportSantri() {
             <div className="flex items-center gap-2 mb-4">
               <BookMarked size={20} className="text-green-700" />
 
-              <h2 className="font-bold text-gray-800">
+              <h2 className="font-extralight text-gray-800">
                 C. Perkembangan Al-Qur'an
               </h2>
             </div>
@@ -1666,7 +1670,7 @@ export default function RaportSantri() {
             <div className="flex items-center gap-2 mb-4">
               <Award size={20} className="text-green-700" />
 
-              <h2 className="font-bold text-gray-800">
+              <h2 className="font-extralight text-gray-800">
                 D. Perkembangan Hafalan
               </h2>
             </div>
@@ -1780,7 +1784,7 @@ export default function RaportSantri() {
             <div className="flex items-center gap-2 mb-4">
               <ClipboardCheck size={20} className="text-green-700" />
 
-              <h2 className="font-bold text-gray-800">E. Kehadiran</h2>
+              <h2 className="font-extralight text-gray-800">E. Kehadiran</h2>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -1814,7 +1818,7 @@ export default function RaportSantri() {
             <div className="flex items-center gap-2 mb-4">
               <Award size={20} className="text-green-700" />
 
-              <h2 className="font-bold text-gray-800">
+              <h2 className="font-extralight text-gray-800">
                 F. Prestasi / Pencapaian Bulanan
               </h2>
             </div>
@@ -1841,7 +1845,7 @@ export default function RaportSantri() {
             <div className="flex items-center gap-2 mb-4">
               <FileText size={20} className="text-green-700" />
 
-              <h2 className="font-bold text-gray-800">G. Catatan Guru</h2>
+              <h2 className="font-extralight text-gray-800">G. Catatan Guru</h2>
             </div>
 
             <textarea
@@ -1863,7 +1867,9 @@ export default function RaportSantri() {
           ================================================== */}
 
           <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-            <h2 className="font-bold text-gray-800 mb-3">H. Kesimpulan</h2>
+            <h2 className="font-extralight text-gray-800 mb-3">
+              H. Kesimpulan
+            </h2>
 
             <p className="text-sm text-gray-600 leading-7 text-justify">
               Perkembangan santri pada periode{" "}

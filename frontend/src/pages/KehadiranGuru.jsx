@@ -323,7 +323,7 @@ export default function KehadiranGuru() {
       <div className="bg-white rounded-xl shadow p-4 md:p-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-xl md:text-2xl font-bold text-gray-800">
+            <h1 className="text-sm md:text-2xl font-extralight text-gray-800">
               DAFTAR HADIR GURU TPQ KHAIRUNNISSA
             </h1>
 

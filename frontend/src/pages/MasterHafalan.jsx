@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { api } from "../api";
 import { Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export default function MasterHafalan() {
   const [santri, setSantri] = useState([]);
+  const [progresHafalan, setProgresHafalan] = useState([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -12,28 +13,176 @@ export default function MasterHafalan() {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchData();
+  // =========================================================
+  // 46 JENIS HAFALAN
+  //
+  // HARUS SAMA DENGAN ProgresHafalanSantri.jsx
+  // =========================================================
+
+  const jenisHafalan = [
+    "Doa sebelum belajar mengaji",
+    "Doa sesudah belajar mengaji",
+    "Doa berwudhu",
+    "Doa sesudah berwudhu",
+    "Doa sesudah Azan",
+    "Doa menjawab iqamah",
+    "Niat shalat Dhuhur",
+    "Niat shalat Ashar",
+    "Niat shalat Maghrib",
+    "Niat shalat Isya",
+    "Niat shalat Subuh",
+    "Doa Doa Iftitah",
+    "Doa ketika ruku",
+    "Doa ketika i'tidal",
+    "Doa ketika sujud",
+    "Doa duduk diantara dua sujud",
+    "Doa tahyatul awal",
+    "Doa tahyatul akhir",
+    "Doa Qunut",
+    "Doa sebelum tidur",
+    "Doa bangun tidur",
+    "Doa masuk kamar mandi",
+    "Doa keluar kamar mandi",
+    "Doa bersuci dari hadast kecil",
+    "Doa mandi janabah",
+    "Doa mandi hari jumat",
+    "Doa ketika bercermin",
+    "Doa ketika masuk rumah",
+    "Doa keluar rumah",
+    "Doa masuk masjid",
+    "Doa keluar masjid",
+    "Doa naik kendaraan bepergian",
+    "Doa sebelum makan",
+    "Doa sesudah makan",
+    "Doa untuk orangtua",
+    "Doa selamat dunia dan akhirat",
+    "Doa memohon ampunan",
+    "Doa syifa (kesembuhan)",
+    "Niat berpuasa Ramadhan",
+    "Niat membayar hutang puasa Ramadhan",
+    "Doa berbuka puasa",
+    "Ayat Kursi",
+    "Niat shalat witir",
+    "Niat shalat tarawih",
+    "Dzikir tauhid",
+    "Bacaan salam kepada Rasulullah SAW dan Keluarga",
+  ];
+
+  // =========================================================
+  // NORMALISASI NAMA JENIS HAFALAN
+  //
+  // Sama seperti pencocokan di ProgresHafalanSantri.jsx:
+  // huruf besar/kecil dan spasi awal/akhir diabaikan.
+  // =========================================================
+
+  const normalizeJenisHafalan = (value) => {
+    return String(value || "")
+      .trim()
+      .toLowerCase();
+  };
+
+  // =========================================================
+  // AMBIL DATA MASTER + PROGRES HAFALAN DARI DATABASE
+  // =========================================================
+
+  const fetchData = useCallback(async () => {
+    try {
+      const [masterRes, hafalanRes] = await Promise.all([
+        api.get("/master-data"),
+        api.get("/progres-hafalan"),
+      ]);
+
+      const dataSantri = masterRes?.data?.data?.santri || [];
+      const dataHafalan = hafalanRes?.data?.data || [];
+
+      setSantri(dataSantri);
+      setProgresHafalan(Array.isArray(dataHafalan) ? dataHafalan : []);
+    } catch (err) {
+      console.error("Gagal ambil data master hafalan:", err);
+    }
   }, []);
 
-  const fetchData = async () => {
-    try {
-      const res = await api.get("/master-data");
-      const dataSantri = res?.data?.data?.santri || [];
-      setSantri(dataSantri);
-    } catch (err) {
-      console.error("Gagal ambil data santri:", err);
-    }
+  useEffect(() => {
+    fetchData();
+
+    // =======================================================
+    // Jika kembali ke halaman ini dari halaman detail,
+    // refresh data agar jumlah selalu mengikuti database.
+    // =======================================================
+
+    const handleFocus = () => {
+      fetchData();
+    };
+
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [fetchData]);
+
+  // =========================================================
+  // BENTUKKAN DATA HAFALAN PER SANTRI
+  //
+  // SATU NIS + SATU JENIS HAFALAN = SATU DATA
+  //
+  // Ini mengikuti konsep ProgresHafalanSantri.jsx yang
+  // menempatkan setiap jenis hafalan ke satu index dari 46.
+  //
+  // API /progres-hafalan menggunakan latest(), sehingga data
+  // yang datang lebih baru berada di depan.
+  // Karena itu data pertama untuk jenis yang sama dipakai.
+  // =========================================================
+
+  const getHafalanSantri = (nis) => {
+    const hasil = {};
+
+    const dataSantri = progresHafalan.filter(
+      (item) => String(item?.nis || "") === String(nis || ""),
+    );
+
+    dataSantri.forEach((item) => {
+      const jenisDatabase = normalizeJenisHafalan(item?.jenis_hafalan);
+
+      if (!jenisDatabase) {
+        return;
+      }
+
+      const index = jenisHafalan.findIndex(
+        (jenis) => normalizeJenisHafalan(jenis) === jenisDatabase,
+      );
+
+      if (index === -1) {
+        return;
+      }
+
+      // Jangan menimpa data yang sudah ditemukan.
+      // Endpoint backend menggunakan latest(), sehingga
+      // item pertama adalah data terbaru.
+      if (!hasil[index]) {
+        hasil[index] = item;
+      }
+    });
+
+    return hasil;
   };
+
+  // =========================================================
+  // HITUNG HAFALAN
+  //
+  // HANYA MENGHITUNG HAFALAN UNIK DARI 46 JENIS.
+  // =========================================================
 
   const getJumlahHafalan = (nis, status) => {
-    const saved = localStorage.getItem(`hafalan_${nis}`);
-    if (!saved) return 0;
+    const dataSantri = getHafalanSantri(nis);
 
-    const data = JSON.parse(saved);
-
-    return Object.values(data).filter((item) => item.progres === status).length;
+    return Object.values(dataSantri).filter((item) => item?.progres === status)
+      .length;
   };
+
+  // =========================================================
+  // SEARCH
+  // =========================================================
 
   const filteredSantri = santri.filter((s) => {
     const keyword = search.toLowerCase();
@@ -51,6 +200,10 @@ export default function MasterHafalan() {
     setCurrentPage(1);
   }, [search]);
 
+  // =========================================================
+  // PAGINATION
+  // =========================================================
+
   const totalPages = Math.ceil(filteredSantri.length / ITEMS_PER_PAGE);
 
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -60,15 +213,21 @@ export default function MasterHafalan() {
     startIndex + ITEMS_PER_PAGE,
   );
 
+  // =========================================================
+  // RETURN
+  // =========================================================
+
   return (
     <div className="space-y-4 p-4">
       <div className="bg-white rounded-2xl shadow p-0 overflow-x-auto">
         {/* TITLE */}
+
         <h1 className="text-lg font-light tracking-wide text-black ml-2 mb-4">
           MASTER HAFALAN
         </h1>
 
         {/* SEARCH */}
+
         <div className="mb-4">
           <input
             type="text"
@@ -76,15 +235,16 @@ export default function MasterHafalan() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="
-      border rounded-lg px-3 py-2
-      text-sm w-full md:w-72
-      focus:outline-none focus:ring-2
-      focus:ring-purple-300
-    "
+              border rounded-lg px-3 py-2
+              text-sm w-full md:w-72
+              focus:outline-none focus:ring-2
+              focus:ring-purple-300
+            "
           />
         </div>
 
-        {/* TABLE */}
+        {/* TABLE DESKTOP */}
+
         <table className="hidden md:table w-full border text-xs text-black">
           <thead className="bg-gray-100 text-black">
             <tr>
@@ -113,34 +273,28 @@ export default function MasterHafalan() {
               </tr>
             ) : (
               currentSantri.map((s, i) => (
-                <tr key={i} className="border-t hover:bg-gray-50">
-                  {/* NO */}
+                <tr key={s.nis || i} className="border-t hover:bg-gray-50">
                   <td className="p-1 border text-center">
                     {startIndex + i + 1}
                   </td>
 
-                  {/* NAMA */}
                   <td className="p-1 border font-medium">{s.nama}</td>
 
-                  {/* NIS */}
                   <td className="p-1 border">{s.nis}</td>
 
-                  {/* KELAS */}
                   <td className="p-1 border">{s.kelas}</td>
 
-                  {/* LANCAR */}
                   <td className="p-1 border text-center font-medium text-green-700">
                     {getJumlahHafalan(s.nis, "Lancar")}-Hafalan
                   </td>
 
-                  {/* BELUM */}
                   <td className="p-1 border text-center font-medium text-red-700">
                     {getJumlahHafalan(s.nis, "Belum")}-Hafalan
                   </td>
 
-                  {/* LIHAT PROGRES */}
                   <td className="p-1 border text-center">
                     <button
+                      type="button"
                       onClick={() => navigate(`/master-hafalan/${s.nis}`)}
                       className="
                         inline-flex items-center justify-center
@@ -158,7 +312,8 @@ export default function MasterHafalan() {
           </tbody>
         </table>
 
-        {/* ================= MOBILE CARD ================= */}
+        {/* MOBILE CARD */}
+
         <div className="md:hidden space-y-3 mt-4">
           {currentSantri.length === 0 ? (
             <div className="text-center text-gray-500 p-4">
@@ -168,31 +323,21 @@ export default function MasterHafalan() {
             </div>
           ) : (
             currentSantri.map((s, i) => {
-              const saved =
-                JSON.parse(localStorage.getItem(`hafalan_${s.nis}`)) || {};
-
-              const lancar = Object.values(saved).filter(
-                (item) => item?.progres === "Lancar",
-              ).length;
-
-              const belum = Object.values(saved).filter(
-                (item) => item?.progres === "Belum",
-              ).length;
+              const lancar = getJumlahHafalan(s.nis, "Lancar");
+              const belum = getJumlahHafalan(s.nis, "Belum");
 
               return (
                 <div
-                  key={i}
+                  key={s.nis || i}
                   className="
-          bg-white
-          border
-          rounded-2xl
-          shadow-sm
-          p-3
-        "
+                    bg-white
+                    border
+                    rounded-2xl
+                    shadow-sm
+                    p-3
+                  "
                 >
-                  {/* BARIS ATAS */}
                   <div className="flex items-start justify-between gap-2">
-                    {/* KIRI */}
                     <div className="flex-1 min-w-0">
                       <div className="flex gap-2">
                         <span className="font-semibold text-black">
@@ -201,10 +346,10 @@ export default function MasterHafalan() {
 
                         <span
                           className="
-                  font-semibold
-                  text-black
-                  truncate
-                "
+                            font-semibold
+                            text-black
+                            truncate
+                          "
                         >
                           {s.nama}
                         </span>
@@ -212,43 +357,41 @@ export default function MasterHafalan() {
 
                       <div
                         className="
-                text-xs
-                text-gray-600
-                mt-1
-                ml-6
-                
-              "
+                          text-xs
+                          text-gray-600
+                          mt-1
+                          ml-6
+                        "
                       >
-                        NIS {s.nis} |K-{s.kelas}
+                        NIS {s.nis} | K-{s.kelas}
                       </div>
                     </div>
 
-                    {/* TENGAH */}
                     <div
                       className="
-              text-center
-              text-xs
-              font-semibold
-              min-w-[50px]
-            "
+                        text-center
+                        text-xs
+                        font-semibold
+                        min-w-[50px]
+                      "
                     >
                       <div className="text-black mt-1">{lancar}- Lcr</div>
 
                       <div className="text-black mt-2">{belum}- Blm</div>
                     </div>
 
-                    {/* KANAN */}
                     <button
+                      type="button"
                       onClick={() => navigate(`/master-hafalan/${s.nis}`)}
                       className="
-              w-9 h-9
-              rounded-full
-              bg-purple-100
-              text-purple-700
-              flex items-center
-              justify-center
-              shrink-0
-            "
+                        w-9 h-9
+                        rounded-full
+                        bg-purple-100
+                        text-purple-700
+                        flex items-center
+                        justify-center
+                        shrink-0
+                      "
                     >
                       <Eye size={15} />
                     </button>
@@ -259,7 +402,8 @@ export default function MasterHafalan() {
           )}
         </div>
 
-        {/* ================= PAGINATION ================= */}
+        {/* PAGINATION */}
+
         {totalPages > 1 && (
           <div className="flex flex-col md:flex-row items-center justify-between gap-3 mt-4 pt-4 border-t p-2">
             <div className="text-xs text-gray-500">
@@ -283,7 +427,14 @@ export default function MasterHafalan() {
                 type="button"
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="px-3 py-2 border rounded-lg text-xs disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                className="
+                  px-3 py-2
+                  border rounded-lg
+                  text-xs
+                  disabled:opacity-40
+                  disabled:cursor-not-allowed
+                  hover:bg-gray-100
+                "
               >
                 Sebelumnya
               </button>
@@ -311,7 +462,14 @@ export default function MasterHafalan() {
                   setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                 }
                 disabled={currentPage === totalPages}
-                className="px-3 py-2 border rounded-lg text-xs disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                className="
+                  px-3 py-2
+                  border rounded-lg
+                  text-xs
+                  disabled:opacity-40
+                  disabled:cursor-not-allowed
+                  hover:bg-gray-100
+                "
               >
                 Berikutnya
               </button>

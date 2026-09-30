@@ -16,6 +16,7 @@ import RaportSantri from "./pages/RaportSantri";
 import KehadiranSantri from "./pages/KehadiranSantri";
 import KehadiranGuru from "./pages/KehadiranGuru";
 import ScanAbsensi from "./pages/ScanAbsensi";
+import KartuQRSantri from "./pages/KartuQRSantri";
 
 import Berita from "./pages/Berita";
 import Pengumuman from "./pages/Pengumuman";
@@ -84,6 +85,7 @@ export default function App() {
         <Route path="kehadiran-santri" element={<KehadiranSantri />} />
         <Route path="kehadiran-guru" element={<KehadiranGuru />} />
         <Route path="scan-absensi" element={<ScanAbsensi />} />
+        <Route path="kartu-qr-santri" element={<KartuQRSantri />} />
 
         <Route path="progres-iqra" element={<ProgresIqra />} />
         <Route path="progres-quran" element={<ProgresQuran />} />
