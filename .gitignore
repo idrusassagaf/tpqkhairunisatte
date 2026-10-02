@@ -16,6 +16,7 @@ backend/.env.*
 
 # SQLite local database
 backend/database/database.sqlite
+backend/database/*.sql
 
 # OS / editor
 .DS_Store

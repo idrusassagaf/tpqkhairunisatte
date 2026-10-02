@@ -79,6 +79,11 @@ Route::get(
     [MasterDataController::class, 'index']
 );
 
+Route::get(
+    '/santri/stats',
+    [SantriController::class, 'stats']
+);
+
 // ====================================================
 // ABSENSI
 // ADMIN ONLY

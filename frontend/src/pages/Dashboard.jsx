@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 import {
   Users,
@@ -13,6 +14,8 @@ import {
 } from "lucide-react";
 
 export default function Dashboard() {
+  const navigate = useNavigate();
+
   const [santri, setSantri] = useState([]);
   const [guru, setGuru] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -329,7 +332,7 @@ export default function Dashboard() {
 
             <button
               type="button"
-              onClick={() => (window.location.href = "/master-data")}
+              onClick={() => navigate("/dashboard/master-data")}
               className="group bg-white rounded-2xl border border-gray-100 shadow-sm p-5 text-left hover:shadow-md hover:border-purple-200 transition-all"
             >
               <div className="flex items-center justify-between">
@@ -354,7 +357,7 @@ export default function Dashboard() {
 
             <button
               type="button"
-              onClick={() => (window.location.href = "/master-progres")}
+              onClick={() => navigate("/dashboard/master-progres")}
               className="group bg-white rounded-2xl border border-gray-100 shadow-sm p-5 text-left hover:shadow-md hover:border-blue-200 transition-all"
             >
               <div className="flex items-center justify-between">
@@ -381,7 +384,7 @@ export default function Dashboard() {
 
             <button
               type="button"
-              onClick={() => (window.location.href = "/master-hafalan")}
+              onClick={() => navigate("/dashboard/master-hafalan")}
               className="group bg-white rounded-2xl border border-gray-100 shadow-sm p-5 text-left hover:shadow-md hover:border-emerald-200 transition-all"
             >
               <div className="flex items-center justify-between">
@@ -408,7 +411,7 @@ export default function Dashboard() {
 
             <button
               type="button"
-              onClick={() => (window.location.href = "/data-santri")}
+              onClick={() => navigate("/dashboard/data-santri")}
               className="group bg-white rounded-2xl border border-gray-100 shadow-sm p-5 text-left hover:shadow-md hover:border-amber-200 transition-all"
             >
               <div className="flex items-center justify-between">

@@ -186,7 +186,11 @@ export default function Home() {
     },
   };
 
-  const [santri, setSantri] = useState([]);
+  const [santriStats, setSantriStats] = useState({
+    total: 0,
+    total_iqra: 0,
+    total_quran: 0,
+  });
 
   const [guru, setGuru] = useState([]);
 
@@ -213,9 +217,11 @@ export default function Home() {
 
   const loadSantri = async () => {
     try {
-      const res = await api.get("/santri");
+      const res = await api.get("/santri/stats");
 
-      setSantri(res.data.data || []);
+      setSantriStats(
+        res.data.data || { total: 0, total_iqra: 0, total_quran: 0 },
+      );
     } catch (err) {
       console.error("Gagal mengambil data santri:", err);
     }
@@ -303,11 +309,11 @@ export default function Home() {
   // STATISTIK
   // =========================================================
 
-  const totalSantri = santri.length;
+  const totalSantri = santriStats.total;
 
-  const totalIqra = santri.filter((s) => s.kelas === "Iqra").length;
+  const totalIqra = santriStats.total_iqra;
 
-  const totalQuran = santri.filter((s) => s.kelas === "Al Quran").length;
+  const totalQuran = santriStats.total_quran;
 
   const totalGuru = guru.length;
 

@@ -450,7 +450,7 @@ export default function Sidebar({ open, setOpen }) {
 
               let badge = null;
 
-              if (item.to === "/data-santri") {
+              if (item.to === "/dashboard/data-santri") {
                 badge = countSantri;
               }
 
@@ -511,7 +511,7 @@ export default function Sidebar({ open, setOpen }) {
 
               let badge = null;
 
-              if (item.to === "/data-guru") {
+              if (item.to === "/dashboard/data-guru") {
                 badge = countGuru;
               }
 

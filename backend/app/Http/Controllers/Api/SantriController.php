@@ -17,6 +17,20 @@ class SantriController extends Controller
         ]);
     }
 
+    // STATISTIK PUBLIK
+    // Hanya jumlah, tanpa data pribadi santri.
+    public function stats()
+    {
+        return response()->json([
+            'message' => 'success',
+            'data' => [
+                'total' => Santri::count(),
+                'total_iqra' => Santri::where('kelas', 'Iqra')->count(),
+                'total_quran' => Santri::where('kelas', 'Al Quran')->count(),
+            ],
+        ]);
+    }
+
     // SIMPAN DATA
     public function store(Request $request)
     {
