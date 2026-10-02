@@ -5,7 +5,6 @@ frontend/.env.*
 
 # Node
 frontend/node_modules/
-frontend/dist/
 
 # Temporary / accidental files
 frontend/npm
