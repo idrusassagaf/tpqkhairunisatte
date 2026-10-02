@@ -31,15 +31,26 @@ export default function ProgresQuran() {
   // ================= FETCH =================
   const fetchData = async () => {
     try {
-      // Ambil data santri
-      const res = await api.get("/master-data");
+      // Ambil data santri + progres Al-Qur'an dari backend
+      const [masterRes, quranRes] = await Promise.all([
+        api.get("/master-data"),
+        api.get("/progres-quran"),
+      ]);
 
-      const santri = res?.data?.data?.santri || [];
+      const santri = masterRes?.data?.data?.santri || [];
 
-      // Ambil progres dari localStorage
-      const saved = localStorage.getItem("tpq_progres_iqra");
+      const progresData = {};
 
-      const progresData = saved ? JSON.parse(saved) : {};
+      (quranRes?.data?.data || []).forEach((row) => {
+        if (!row?.nis) return;
+
+        progresData[`quran_guru_${row.nis}`] = row.nama_guru || "";
+        progresData[`quran_juz_${row.nis}`] = row.juz || "";
+        progresData[`quran_surah_${row.nis}`] = row.surah || "";
+        progresData[`quran_ayat_${row.nis}`] = row.ayat || "";
+        progresData[`quran_hal_${row.nis}`] = row.halaman || "";
+        progresData[`quran_progres_${row.nis}`] = row.progres || "";
+      });
 
       // Filter khusus kelas Al Quran
       const santriQuran = santri.filter((s) => {

@@ -8,6 +8,7 @@ import autoTable from "jspdf-autotable";
 
 export default function ProgresHafalan() {
   const [santri, setSantri] = useState([]);
+  const [hafalanByNis, setHafalanByNis] = useState({});
   const [search, setSearch] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -32,11 +33,28 @@ export default function ProgresHafalan() {
 
   const fetchData = async () => {
     try {
-      const res = await api.get("/master-data");
+      const [masterRes, hafalanRes] = await Promise.all([
+        api.get("/master-data"),
+        api.get("/progres-hafalan"),
+      ]);
 
-      const dataSantri = res?.data?.data?.santri || [];
+      const dataSantri = masterRes?.data?.data?.santri || [];
 
       setSantri(dataSantri);
+
+      const grouped = {};
+
+      (hafalanRes?.data?.data || []).forEach((row) => {
+        if (!row?.nis) return;
+
+        if (!grouped[row.nis]) {
+          grouped[row.nis] = [];
+        }
+
+        grouped[row.nis].push(row);
+      });
+
+      setHafalanByNis(grouped);
     } catch (err) {
       console.error("Gagal ambil data santri:", err);
     }
@@ -47,20 +65,9 @@ export default function ProgresHafalan() {
   // =========================================================
 
   const getJumlahHafalan = (nis, status) => {
-    const saved = localStorage.getItem(`hafalan_${nis}`);
+    const rows = hafalanByNis[nis] || [];
 
-    if (!saved) return 0;
-
-    try {
-      const data = JSON.parse(saved);
-
-      return Object.values(data).filter((item) => item?.progres === status)
-        .length;
-    } catch (error) {
-      console.error(`Gagal membaca hafalan ${nis}:`, error);
-
-      return 0;
-    }
+    return rows.filter((item) => item?.progres === status).length;
   };
 
   // =========================================================
@@ -589,22 +596,9 @@ export default function ProgresHafalan() {
 
         <div className="md:hidden space-y-3 mt-4">
           {paginatedSantri.map((s, i) => {
-            let saved = {};
+            const lancar = getJumlahHafalan(s.nis, "Lancar");
 
-            try {
-              saved =
-                JSON.parse(localStorage.getItem(`hafalan_${s.nis}`)) || {};
-            } catch (error) {
-              saved = {};
-            }
-
-            const lancar = Object.values(saved).filter(
-              (item) => item?.progres === "Lancar",
-            ).length;
-
-            const belum = Object.values(saved).filter(
-              (item) => item?.progres === "Belum",
-            ).length;
+            const belum = getJumlahHafalan(s.nis, "Belum");
 
             return (
               <div

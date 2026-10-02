@@ -35,6 +35,30 @@ export default function RaportSantri() {
   const [quranData, setQuranData] = useState({});
   const [hafalanData, setHafalanData] = useState([]);
   const [catatanGuru, setCatatanGuru] = useState("");
+  const [rekapKehadiran, setRekapKehadiran] = useState({
+    hadir: 0,
+    izin: 0,
+    sakit: 0,
+    alpa: 0,
+  });
+
+  // ============================================================
+  // FORMAT TANGGAL INDONESIA
+  // ============================================================
+
+  const formatTanggalIndo = (value) => {
+    if (!value) return "";
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) return "";
+
+    return date.toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+  };
 
   // ============================================================
   // NAMA BULAN
@@ -133,91 +157,87 @@ export default function RaportSantri() {
     loadProgressData(selectedNis);
   }, [selectedNis, bulan, tahun]);
 
-  const loadProgressData = (nis) => {
+  const loadProgressData = async (nis) => {
     try {
       // --------------------------------------------------------
-      // PROGRES IQRA + AL-QUR'AN
+      // PROGRES IQRA + AL-QUR'AN + HAFALAN (DARI BACKEND)
       // --------------------------------------------------------
 
-      const savedProgress = localStorage.getItem("tpq_progres_iqra");
+      const [iqraRes, quranRes, hafalanRes] = await Promise.all([
+        api.get("/progres-iqra"),
+        api.get("/progres-quran"),
+        api.get("/progres-hafalan"),
+      ]);
 
-      if (savedProgress) {
-        const parsedProgress = JSON.parse(savedProgress);
+      const iqraRow = (iqraRes?.data?.data || []).find(
+        (row) => String(row?.nis) === String(nis),
+      );
 
-        // ---------------- IQRA ----------------
+      setIqraData({
+        guru: iqraRow?.nama_guru || "",
+        jilid: iqraRow?.jilid || "",
+        hal: iqraRow?.halaman || "",
+        progres: iqraRow?.progres || "",
+      });
 
-        setIqraData({
-          guru:
-            parsedProgress[`guru_${nis}`] || parsedProgress[`guru_NIS`] || "",
+      const quranRow = (quranRes?.data?.data || []).find(
+        (row) => String(row?.nis) === String(nis),
+      );
 
-          jilid:
-            parsedProgress[`jilid_${nis}`] || parsedProgress[`jilid_NIS`] || "",
+      setQuranData({
+        quran_guru: quranRow?.nama_guru || "",
+        quran_juz: quranRow?.juz || "",
+        quran_surah: quranRow?.surah || "",
+        quran_ayat: quranRow?.ayat || "",
+        quran_hal: quranRow?.halaman || "",
+        quran_progres: quranRow?.progres || "",
+      });
 
-          hal: parsedProgress[`hal_${nis}`] || parsedProgress[`hal_NIS`] || "",
+      const hafalanRows = (hafalanRes?.data?.data || [])
+        .filter((row) => String(row?.nis) === String(nis))
+        .map((row) => ({
+          jenis: row?.jenis_hafalan || "",
+          guru: row?.nama_guru || "",
+          progres: row?.progres || "",
+          update: formatTanggalIndo(row?.updated_at || row?.created_at),
+        }));
 
-          progres: parsedProgress[nis] || parsedProgress[`NIS`] || "",
+      setHafalanData(hafalanRows);
+
+      // --------------------------------------------------------
+      // KEHADIRAN
+      // --------------------------------------------------------
+
+      try {
+        const santriRow = santri.find(
+          (item) => String(item.nis) === String(nis),
+        );
+
+        const bulanParam = `${tahun}-${String(bulan).padStart(2, "0")}`;
+
+        const absensiRes = await api.get("/absensi", {
+          params: { tipe: "santri", bulan: bulanParam },
         });
 
-        // ---------------- AL-QUR'AN ----------------
+        const absensiRows = (absensiRes?.data?.absensi || []).filter(
+          (row) => String(row?.person_id) === String(santriRow?.id),
+        );
 
-        setQuranData({
-          quran_guru:
-            parsedProgress[`quran_guru_${nis}`] ||
-            parsedProgress[`quran_guru_NIS`] ||
-            "",
-
-          quran_juz:
-            parsedProgress[`quran_juz_${nis}`] ||
-            parsedProgress[`quran_juz_NIS`] ||
-            "",
-
-          quran_surah:
-            parsedProgress[`quran_surah_${nis}`] ||
-            parsedProgress[`quran_surah_NIS`] ||
-            "",
-
-          quran_ayat:
-            parsedProgress[`quran_ayat_${nis}`] ||
-            parsedProgress[`quran_ayat_NIS`] ||
-            "",
-
-          quran_hal:
-            parsedProgress[`quran_hal_${nis}`] ||
-            parsedProgress[`quran_hal_NIS`] ||
-            "",
-
-          quran_progres:
-            parsedProgress[`quran_progres_${nis}`] ||
-            parsedProgress[`quran_progres_NIS`] ||
-            "",
+        setRekapKehadiran({
+          hadir: absensiRows.filter((row) => row?.status === "H").length,
+          izin: absensiRows.filter((row) => row?.status === "I").length,
+          sakit: absensiRows.filter((row) => row?.status === "S").length,
+          alpa: absensiRows.filter((row) => row?.status === "A").length,
         });
-      } else {
-        setIqraData({});
-        setQuranData({});
-      }
+      } catch (absensiErr) {
+        console.error("Gagal membaca data kehadiran:", absensiErr);
 
-      // --------------------------------------------------------
-      // PROGRES HAFALAN
-      // --------------------------------------------------------
-
-      const savedHafalan = localStorage.getItem(`hafalan_${nis}`);
-
-      if (savedHafalan) {
-        const parsedHafalan = JSON.parse(savedHafalan);
-
-        if (Array.isArray(parsedHafalan)) {
-          setHafalanData(parsedHafalan);
-        } else if (parsedHafalan && typeof parsedHafalan === "object") {
-          setHafalanData(Object.values(parsedHafalan));
-        } else {
-          setHafalanData([]);
-        }
-      } else {
-        setHafalanData([]);
+        setRekapKehadiran({ hadir: 0, izin: 0, sakit: 0, alpa: 0 });
       }
 
       // --------------------------------------------------------
       // CATATAN GURU
+      // (belum ada tabel khusus di backend, tetap pakai localStorage)
       // --------------------------------------------------------
 
       const noteKey = `raport_catatan_${nis}_${tahun}_${bulan}`;
@@ -231,6 +251,7 @@ export default function RaportSantri() {
       setQuranData({});
       setHafalanData([]);
       setCatatanGuru("");
+      setRekapKehadiran({ hadir: 0, izin: 0, sakit: 0, alpa: 0 });
     }
   };
 
@@ -408,6 +429,28 @@ export default function RaportSantri() {
     pencapaianQuran,
     rekapHafalan,
   ]);
+
+  // ============================================================
+  // RINGKASAN KEHADIRAN
+  // ============================================================
+
+  const kehadiranText = useMemo(() => {
+    const total =
+      rekapKehadiran.hadir +
+      rekapKehadiran.izin +
+      rekapKehadiran.sakit +
+      rekapKehadiran.alpa;
+
+    if (total === 0) {
+      return "Belum ada data kehadiran pada periode ini.";
+    }
+
+    return (
+      `Hadir ${rekapKehadiran.hadir} hari, Izin ${rekapKehadiran.izin} hari, ` +
+      `Sakit ${rekapKehadiran.sakit} hari, Alpa ${rekapKehadiran.alpa} hari ` +
+      `dari total ${total} hari tercatat.`
+    );
+  }, [rekapKehadiran]);
 
   // ============================================================
   // FORMAT DATA
@@ -921,7 +964,14 @@ export default function RaportSantri() {
 
         head: [["Hadir", "Izin", "Sakit", "Alpa"]],
 
-        body: [["-", "-", "-", "-"]],
+        body: [
+          [
+            String(rekapKehadiran.hadir),
+            String(rekapKehadiran.izin),
+            String(rekapKehadiran.sakit),
+            String(rekapKehadiran.alpa),
+          ],
+        ],
 
         styles: {
           font: "helvetica",
@@ -942,7 +992,7 @@ export default function RaportSantri() {
       doc.setFontSize(7.5);
 
       doc.text(
-        "Data kehadiran akan terisi otomatis setelah sistem kehadiran santri tersedia.",
+        `Rekap kehadiran periode ${namaBulan[bulan - 1]} ${tahun}.`,
         marginLeft,
         currentY,
       );
@@ -967,7 +1017,7 @@ export default function RaportSantri() {
 
       pencapaianRows.push([
         pencapaianRows.length + 1,
-        "Kehadiran: Belum tersedia.",
+        `Kehadiran: ${kehadiranText}`,
       ]);
 
       autoTable(doc, {
@@ -1056,8 +1106,8 @@ export default function RaportSantri() {
       const kesimpulan =
         `Perkembangan santri pada periode ${namaBulan[bulan - 1]} ${tahun} ` +
         `ditampilkan berdasarkan data pembelajaran yang tersedia pada sistem, ` +
-        `meliputi perkembangan Iqra, Al-Qur'an, dan hafalan. ` +
-        `Data kehadiran akan terisi otomatis setelah modul kehadiran santri tersedia.`;
+        `meliputi perkembangan Iqra, Al-Qur'an, hafalan, dan kehadiran. ` +
+        `${kehadiranText}`;
 
       autoTable(doc, {
         startY: currentY,
@@ -1789,10 +1839,10 @@ export default function RaportSantri() {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {[
-                ["Hadir", "-"],
-                ["Izin", "-"],
-                ["Sakit", "-"],
-                ["Alpa", "-"],
+                ["Hadir", rekapKehadiran.hadir],
+                ["Izin", rekapKehadiran.izin],
+                ["Sakit", rekapKehadiran.sakit],
+                ["Alpa", rekapKehadiran.alpa],
               ].map(([label, jumlah]) => (
                 <div key={label} className="border rounded-xl p-4 text-center">
                   <p className="text-sm text-gray-500">{label}</p>
@@ -1805,8 +1855,7 @@ export default function RaportSantri() {
             </div>
 
             <p className="text-xs text-gray-500 mt-4">
-              Data kehadiran akan terisi otomatis setelah sistem kehadiran
-              santri tersedia.
+              Rekap kehadiran periode {namaBulan[bulan - 1]} {tahun}.
             </p>
           </section>
 
@@ -1831,8 +1880,8 @@ export default function RaportSantri() {
               ))}
 
               <div className="border rounded-xl p-4">
-                <span className="font-semibold">Kehadiran:</span> Belum
-                tersedia.
+                <span className="font-semibold">Kehadiran:</span>{" "}
+                {kehadiranText}
               </div>
             </div>
           </section>
@@ -1877,9 +1926,8 @@ export default function RaportSantri() {
                 {namaBulan[bulan - 1]} {tahun}
               </strong>{" "}
               ditampilkan berdasarkan data pembelajaran yang tersedia pada
-              sistem, meliputi perkembangan Iqra, Al-Qur'an, dan hafalan. Data
-              kehadiran akan terisi otomatis setelah modul kehadiran santri
-              tersedia.
+              sistem, meliputi perkembangan Iqra, Al-Qur'an, hafalan, dan
+              kehadiran. {kehadiranText}
             </p>
           </section>
         </div>

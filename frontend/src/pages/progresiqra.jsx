@@ -24,29 +24,37 @@ export default function ProgresIqra() {
 
   const ITEMS_PER_PAGE = 10;
 
-  const STORAGE_KEY = "tpq_progres_iqra";
-
   // ================= DOWNLOAD =================
   const [showDownload, setShowDownload] = useState(false);
 
   // ================= LOAD DATA =================
   useEffect(() => {
     fetchData();
-
-    const saved = localStorage.getItem(STORAGE_KEY);
-
-    if (saved) {
-      setProgresData(JSON.parse(saved));
-    }
   }, []);
 
   // ================= FETCH =================
   const fetchData = async () => {
     try {
-      const res = await api.get("/master-data");
+      const [masterRes, iqraRes] = await Promise.all([
+        api.get("/master-data"),
+        api.get("/progres-iqra"),
+      ]);
 
-      setSantri(res?.data?.data?.santri || []);
-      setGuru(res?.data?.data?.guru || []);
+      setSantri(masterRes?.data?.data?.santri || []);
+      setGuru(masterRes?.data?.data?.guru || []);
+
+      const progresIqraData = {};
+
+      (iqraRes?.data?.data || []).forEach((row) => {
+        if (!row?.nis) return;
+
+        progresIqraData[row.nis] = row.progres || "";
+        progresIqraData[`guru_${row.nis}`] = row.nama_guru || "";
+        progresIqraData[`jilid_${row.nis}`] = row.jilid || "";
+        progresIqraData[`hal_${row.nis}`] = row.halaman || "";
+      });
+
+      setProgresData(progresIqraData);
     } catch (err) {
       console.error(err);
     }
