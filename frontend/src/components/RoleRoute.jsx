@@ -8,7 +8,7 @@ export default function RoleRoute({ children, allowedRoles = [] }) {
 
   // Belum login
   if (!token || !userData) {
-    return <Navigate to="/web/login" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   let user;
@@ -21,12 +21,12 @@ export default function RoleRoute({ children, allowedRoles = [] }) {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
 
-    return <Navigate to="/web/login" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   // Cek role
   if (allowedRoles.length > 0 && !allowedRoles.includes(user?.role)) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return children;

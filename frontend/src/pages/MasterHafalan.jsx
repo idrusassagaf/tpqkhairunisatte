@@ -295,7 +295,7 @@ export default function MasterHafalan() {
                   <td className="p-1 border text-center">
                     <button
                       type="button"
-                      onClick={() => navigate(`/master-hafalan/${s.nis}`)}
+                      onClick={() => navigate(`/dashboard/master-hafalan/${s.nis}`)}
                       className="
                         inline-flex items-center justify-center
                         w-7 h-7 rounded-full
@@ -382,7 +382,7 @@ export default function MasterHafalan() {
 
                     <button
                       type="button"
-                      onClick={() => navigate(`/master-hafalan/${s.nis}`)}
+                      onClick={() => navigate(`/dashboard/master-hafalan/${s.nis}`)}
                       className="
                         w-9 h-9
                         rounded-full

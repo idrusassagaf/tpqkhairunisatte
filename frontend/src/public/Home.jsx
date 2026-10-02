@@ -974,14 +974,14 @@ export default function Home() {
 
             <div className="flex flex-wrap gap-4 mt-12 md:mt-28 justify-center md:justify-start">
               <Link
-                to="/web/login"
+                to="/login"
                 className="bg-green-600 hover:bg-green-700 px-5 md:px-8 py-3 md:py-4 rounded-xl font-extralight inline-flex items-center"
               >
                 {t.register}
               </Link>
 
               <Link
-                to="/web/kontak"
+                to="/kontak"
                 className="bg-green-600 hover:bg-green-700 px-5 md:px-8 py-3 md:py-4 rounded-xl font-extralight inline-flex items-center"
               >
                 {t.contact}

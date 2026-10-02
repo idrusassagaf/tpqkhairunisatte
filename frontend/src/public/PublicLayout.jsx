@@ -96,7 +96,7 @@ export default function PublicLayout() {
     },
   };
 
-  const isHome = location.pathname === "/web";
+  const isHome = location.pathname === "/";
 
   return (
     <div className="min-h-screen bg-white">
@@ -117,7 +117,7 @@ export default function PublicLayout() {
           {/* =================================================
               LOGO + NAMA TPQ
           ================================================== */}
-          <Link to="/web" className="flex items-center gap-3 flex-shrink-0">
+          <Link to="/" className="flex items-center gap-3 flex-shrink-0">
             {/* LOGO BULAT */}
             <img
               src={logoTPQ}
@@ -161,7 +161,7 @@ export default function PublicLayout() {
           <nav className="hidden md:flex items-center gap-2 lg:gap-3">
             {/* HOME */}
             <Link
-              to="/web"
+              to="/"
               title="Home"
               className="
                 group
@@ -206,7 +206,7 @@ export default function PublicLayout() {
 
             {/* PROFIL */}
             <Link
-              to="/web/profil"
+              to="/profil"
               title="Profil"
               className="
                 group
@@ -251,7 +251,7 @@ export default function PublicLayout() {
 
             {/* BERITA */}
             <Link
-              to="/web/berita"
+              to="/berita"
               title="Berita"
               className="
                 group
@@ -296,7 +296,7 @@ export default function PublicLayout() {
 
             {/* PENGUMUMAN */}
             <Link
-              to="/web/pengumuman"
+              to="/pengumuman"
               title="Pengumuman"
               className="
                 group
@@ -341,7 +341,7 @@ export default function PublicLayout() {
 
             {/* KALENDER */}
             <Link
-              to="/web/kalender"
+              to="/kalender"
               title="Kalender"
               className="
                 group
@@ -386,7 +386,7 @@ export default function PublicLayout() {
 
             {/* GALERI */}
             <Link
-              to="/web/galeri"
+              to="/galeri"
               title="Galeri"
               className="
                 group
@@ -431,7 +431,7 @@ export default function PublicLayout() {
 
             {/* LAPORAN */}
             <Link
-              to="/web/laporan"
+              to="/laporan"
               title="Laporan"
               className="
                 group
@@ -476,7 +476,7 @@ export default function PublicLayout() {
 
             {/* KONTAK */}
             <Link
-              to="/web/kontak"
+              to="/kontak"
               title="Kontak"
               className="
                 group
@@ -552,7 +552,7 @@ export default function PublicLayout() {
 
             {/* LOGIN ADMIN */}
             <Link
-              to="/web/login"
+              to="/login"
               title="Login Admin"
               className="
                 ml-1
@@ -670,7 +670,7 @@ export default function PublicLayout() {
               <div className="grid grid-cols-4 gap-x-3 gap-y-6">
                 {/* HOME */}
                 <Link
-                  to="/web"
+                  to="/"
                   onClick={() => setMobileMenu(false)}
                   aria-label="Home"
                   className="flex flex-col items-center gap-2"
@@ -704,7 +704,7 @@ export default function PublicLayout() {
 
                 {/* PROFIL */}
                 <Link
-                  to="/web/profil"
+                  to="/profil"
                   onClick={() => setMobileMenu(false)}
                   aria-label="Profil TPQ"
                   className="flex flex-col items-center gap-2"
@@ -738,7 +738,7 @@ export default function PublicLayout() {
 
                 {/* BERITA */}
                 <Link
-                  to="/web/berita"
+                  to="/berita"
                   onClick={() => setMobileMenu(false)}
                   aria-label="Berita"
                   className="flex flex-col items-center gap-2"
@@ -772,7 +772,7 @@ export default function PublicLayout() {
 
                 {/* PENGUMUMAN */}
                 <Link
-                  to="/web/pengumuman"
+                  to="/pengumuman"
                   onClick={() => setMobileMenu(false)}
                   aria-label="Pengumuman"
                   className="flex flex-col items-center gap-2"
@@ -806,7 +806,7 @@ export default function PublicLayout() {
 
                 {/* KALENDER */}
                 <Link
-                  to="/web/kalender"
+                  to="/kalender"
                   onClick={() => setMobileMenu(false)}
                   aria-label="Kalender"
                   className="flex flex-col items-center gap-2"
@@ -840,7 +840,7 @@ export default function PublicLayout() {
 
                 {/* GALERI */}
                 <Link
-                  to="/web/galeri"
+                  to="/galeri"
                   onClick={() => setMobileMenu(false)}
                   aria-label="Galeri"
                   className="flex flex-col items-center gap-2"
@@ -874,7 +874,7 @@ export default function PublicLayout() {
 
                 {/* LAPORAN */}
                 <Link
-                  to="/web/laporan"
+                  to="/laporan"
                   onClick={() => setMobileMenu(false)}
                   aria-label="Laporan"
                   className="flex flex-col items-center gap-2"
@@ -908,7 +908,7 @@ export default function PublicLayout() {
 
                 {/* KONTAK */}
                 <Link
-                  to="/web/kontak"
+                  to="/kontak"
                   onClick={() => setMobileMenu(false)}
                   aria-label="Kontak"
                   className="flex flex-col items-center gap-2"
@@ -945,7 +945,7 @@ export default function PublicLayout() {
                   LOGIN ADMIN MOBILE
               ================================================== */}
               <Link
-                to="/web/login"
+                to="/login"
                 onClick={() => setMobileMenu(false)}
                 className="
                   mt-7
@@ -1011,7 +1011,7 @@ export default function PublicLayout() {
               <ul className="space-y-2 text-gray-300">
                 <li>
                   <Link
-                    to="/web"
+                    to="/"
                     className="hover:text-white hover:translate-x-1 inline-block transition-all"
                   >
                     o {translations[language].home}
@@ -1020,7 +1020,7 @@ export default function PublicLayout() {
 
                 <li>
                   <Link
-                    to="/web/profil"
+                    to="/profil"
                     className="hover:text-white hover:translate-x-1 inline-block transition-all"
                   >
                     o {translations[language].profile}
@@ -1029,7 +1029,7 @@ export default function PublicLayout() {
 
                 <li>
                   <Link
-                    to="/web/berita"
+                    to="/berita"
                     className="hover:text-white hover:translate-x-1 inline-block transition-all"
                   >
                     o {translations[language].news}
@@ -1038,7 +1038,7 @@ export default function PublicLayout() {
 
                 <li>
                   <Link
-                    to="/web/pengumuman"
+                    to="/pengumuman"
                     className="hover:text-white hover:translate-x-1 inline-block transition-all"
                   >
                     o {translations[language].announcement}
@@ -1047,7 +1047,7 @@ export default function PublicLayout() {
 
                 <li>
                   <Link
-                    to="/web/kalender"
+                    to="/kalender"
                     className="hover:text-white hover:translate-x-1 inline-block transition-all"
                   >
                     o {translations[language].calendar}
@@ -1056,7 +1056,7 @@ export default function PublicLayout() {
 
                 <li>
                   <Link
-                    to="/web/galeri"
+                    to="/galeri"
                     className="hover:text-white hover:translate-x-1 inline-block transition-all"
                   >
                     o {translations[language].gallery}
@@ -1065,7 +1065,7 @@ export default function PublicLayout() {
 
                 <li>
                   <Link
-                    to="/web/laporan"
+                    to="/laporan"
                     className="hover:text-white hover:translate-x-1 inline-block transition-all"
                   >
                     o {translations[language].reports}
@@ -1074,7 +1074,7 @@ export default function PublicLayout() {
 
                 <li>
                   <Link
-                    to="/web/kontak"
+                    to="/kontak"
                     className="hover:text-white hover:translate-x-1 inline-block transition-all"
                   >
                     o {translations[language].contact}

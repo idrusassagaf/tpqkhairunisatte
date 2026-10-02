@@ -57,7 +57,7 @@ export default function Sidebar({ open, setOpen }) {
         {
           name: "Dashboard",
           icon: LayoutDashboard,
-          to: "/",
+          to: "/dashboard",
         },
 
         // =====================================================
@@ -69,17 +69,17 @@ export default function Sidebar({ open, setOpen }) {
               {
                 name: "Master Data",
                 icon: Database,
-                to: "/master-data",
+                to: "/dashboard/master-data",
               },
               {
                 name: "Master Progres",
                 icon: Database,
-                to: "/master-progres",
+                to: "/dashboard/master-progres",
               },
               {
                 name: "Master Hafalan",
                 icon: Database,
-                to: "/master-hafalan",
+                to: "/dashboard/master-hafalan",
               },
             ]
           : []),
@@ -92,27 +92,27 @@ export default function Sidebar({ open, setOpen }) {
         {
           name: "Database Santri",
           icon: Users,
-          to: "/data-santri",
+          to: "/dashboard/data-santri",
         },
         {
           name: "Raport Santri",
           icon: FileText,
-          to: "/raport-santri",
+          to: "/dashboard/raport-santri",
         },
         {
           name: "Progres Iqra",
           icon: BookOpen,
-          to: "/progres-iqra",
+          to: "/dashboard/progres-iqra",
         },
         {
           name: "Progres Qur'an",
           icon: BookMarked,
-          to: "/progres-quran",
+          to: "/dashboard/progres-quran",
         },
         {
           name: "Progres Hafalan",
           icon: BarChart3,
-          to: "/progres-hafalan",
+          to: "/dashboard/progres-hafalan",
         },
       ],
     },
@@ -123,12 +123,12 @@ export default function Sidebar({ open, setOpen }) {
         {
           name: "Database Guru",
           icon: UserRound,
-          to: "/data-guru",
+          to: "/dashboard/data-guru",
         },
         {
           name: "Status & Gaji Guru",
           icon: CircleUser,
-          to: "/status-guru",
+          to: "/dashboard/status-guru",
         },
       ],
     },
@@ -574,7 +574,7 @@ export default function Sidebar({ open, setOpen }) {
                   {/* KEHADIRAN SANTRI */}
 
                   <NavLink
-                    to="/kehadiran-santri"
+                    to="/dashboard/kehadiran-santri"
                     className={(props) => navItemClass(props, open)}
                   >
                     <ClipboardCheck size={16} />
@@ -589,7 +589,7 @@ export default function Sidebar({ open, setOpen }) {
                   {/* KEHADIRAN GURU */}
 
                   <NavLink
-                    to="/kehadiran-guru"
+                    to="/dashboard/kehadiran-guru"
                     className={(props) => navItemClass(props, open)}
                   >
                     <ClipboardCheck size={16} />
@@ -604,7 +604,7 @@ export default function Sidebar({ open, setOpen }) {
                   {/* SCAN QR */}
 
                   <NavLink
-                    to="/scan-absensi"
+                    to="/dashboard/scan-absensi"
                     className={(props) => navItemClass(props, open)}
                   >
                     <QrCode size={16} />
@@ -619,7 +619,7 @@ export default function Sidebar({ open, setOpen }) {
                   {/* KARTU QR */}
 
                   <NavLink
-                    to="/kartu-qr-santri"
+                    to="/dashboard/kartu-qr-santri"
                     className={(props) => navItemClass(props, open)}
                   >
                     <CreditCard size={16} />
@@ -664,7 +664,7 @@ export default function Sidebar({ open, setOpen }) {
           {openInformasi && (
             <>
               <NavLink
-                to="/berita"
+                to="/dashboard/berita"
                 className={(props) => navItemClass(props, open)}
               >
                 <Newspaper size={16} />
@@ -677,7 +677,7 @@ export default function Sidebar({ open, setOpen }) {
               </NavLink>
 
               <NavLink
-                to="/pengumuman"
+                to="/dashboard/pengumuman"
                 className={(props) => navItemClass(props, open)}
               >
                 <Bell size={16} />
@@ -690,7 +690,7 @@ export default function Sidebar({ open, setOpen }) {
               </NavLink>
 
               <NavLink
-                to="/kalender-pengajian"
+                to="/dashboard/kalender-pengajian"
                 className={(props) => navItemClass(props, open)}
               >
                 <CalendarDays size={16} />
@@ -703,7 +703,7 @@ export default function Sidebar({ open, setOpen }) {
               </NavLink>
 
               <NavLink
-                to="/galeri"
+                to="/dashboard/galeri"
                 className={(props) => navItemClass(props, open)}
               >
                 <Images size={16} />
@@ -745,7 +745,7 @@ export default function Sidebar({ open, setOpen }) {
 
           {openLaporan && (
             <NavLink
-              to="/laporan-ringkas"
+              to="/dashboard/laporan-ringkas"
               className={(props) => navItemClass(props, open)}
             >
               <BarChart3 size={16} />
@@ -792,7 +792,7 @@ export default function Sidebar({ open, setOpen }) {
                   {/* MANAGEMENT USER */}
 
                   <NavLink
-                    to="/management-user"
+                    to="/dashboard/management-user"
                     className={(props) => navItemClass(props, open)}
                   >
                     <UserCog size={16} />
@@ -807,7 +807,7 @@ export default function Sidebar({ open, setOpen }) {
                   {/* MANAGEMENT PASSWORD */}
 
                   <NavLink
-                    to="/management-password"
+                    to="/dashboard/management-password"
                     className={(props) => navItemClass(props, open)}
                   >
                     <KeyRound size={16} />
@@ -822,7 +822,7 @@ export default function Sidebar({ open, setOpen }) {
                   {/* PENGATURAN SISTEM */}
 
                   <NavLink
-                    to="/pengaturan-sistem"
+                    to="/dashboard/pengaturan-sistem"
                     className={(props) => navItemClass(props, open)}
                   >
                     <Settings size={16} />

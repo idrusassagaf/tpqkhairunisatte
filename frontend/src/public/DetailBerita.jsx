@@ -486,7 +486,7 @@ ${getBeritaUrl()}`;
 
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Link
-                    to="/web/berita"
+                    to="/berita"
                     className="
                       inline-flex
                       items-center

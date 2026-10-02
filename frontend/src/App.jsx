@@ -1,5 +1,6 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "./components/Layout";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import MasterData from "./pages/MasterData";
 import DataSantri from "./pages/datasantri";
@@ -48,7 +49,7 @@ export default function App() {
       {/* =====================================================
           WEBSITE PUBLIC
       ====================================================== */}
-      <Route path="/web" element={<PublicLayout />}>
+      <Route path="/" element={<PublicLayout />}>
         <Route index element={<Home />} />
         <Route path="profil" element={<ProfilTPQ />} />
         <Route path="berita" element={<BeritaPublic />} />
@@ -64,11 +65,17 @@ export default function App() {
 
       {/* =====================================================
           ADMIN / VIEWER AREA
+          WAJIB LOGIN
       ====================================================== */}
-      <Route path="/" element={<Layout />}>
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Layout />
+          </ProtectedRoute>
+        }
+      >
         <Route index element={<Dashboard />} />
-
-        <Route path="dashboard" element={<Dashboard />} />
 
         <Route path="master-data" element={<MasterData />} />
         <Route path="master-progres" element={<MasterProgres />} />
@@ -131,6 +138,12 @@ export default function App() {
 
         <Route path="pengaturan-sistem" element={<PengaturanSistem />} />
       </Route>
+
+      {/* =====================================================
+          FALLBACK
+          URL yang tidak dikenal dilempar ke beranda
+      ====================================================== */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

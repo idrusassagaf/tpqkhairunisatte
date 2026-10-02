@@ -153,7 +153,7 @@ export default function PengumumanPublic() {
               {pengumuman.map((item) => (
                 <Link
                   key={item.id}
-                  to={`/web/pengumuman/${item.id}`}
+                  to={`/pengumuman/${item.id}`}
                   className="
 bg-white/35
 backdrop-blur-xs

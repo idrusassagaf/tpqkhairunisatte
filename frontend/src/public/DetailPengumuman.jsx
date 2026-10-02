@@ -450,7 +450,7 @@ export default function DetailPengumuman() {
             "
           >
             <Link
-              to="/web/pengumuman"
+              to="/pengumuman"
               className="
                 inline-flex
                 items-center

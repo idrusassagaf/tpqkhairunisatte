@@ -237,7 +237,7 @@ export default function BeritaPublic() {
           ) : (
             <>
               <Link
-                to={`/web/berita/${displayBerita[0].id}`}
+                to={`/berita/${displayBerita[0].id}`}
                 className="block bg-white/20 backdrop-blur-xs border border-white rounded-3xl overflow-hidden shadow-lg hover:bg-white/30 transition"
               >
                 <div className="grid md:grid-cols-2">
@@ -309,7 +309,7 @@ export default function BeritaPublic() {
               {displayBerita.slice(1).map((item) => (
                 <Link
                   key={item.id}
-                  to={`/web/berita/${item.id}`}
+                  to={`/berita/${item.id}`}
                   className="bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-1 transition"
                 >
                   {item.foto && (

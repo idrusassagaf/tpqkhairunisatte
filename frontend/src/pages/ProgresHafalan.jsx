@@ -561,7 +561,7 @@ export default function ProgresHafalan() {
 
                   <td className="p-1 border text-center">
                     <button
-                      onClick={() => navigate(`/progres-hafalan/${s.nis}`)}
+                      onClick={() => navigate(`/dashboard/progres-hafalan/${s.nis}`)}
                       className="
                         inline-flex
                         items-center
@@ -667,7 +667,7 @@ export default function ProgresHafalan() {
                   {/* KANAN */}
 
                   <button
-                    onClick={() => navigate(`/progres-hafalan/${s.nis}`)}
+                    onClick={() => navigate(`/dashboard/progres-hafalan/${s.nis}`)}
                     className="
                       w-9 h-9
                       rounded-full
