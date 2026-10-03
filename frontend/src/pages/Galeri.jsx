@@ -5,6 +5,7 @@ export default function Galeri() {
   const [judul, setJudul] = useState("");
   const [foto, setFoto] = useState(null);
   const [data, setData] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     loadGaleri();
@@ -19,8 +20,15 @@ export default function Galeri() {
     }
   };
 
+  const notify = window.__tpqNotify;
+
   const simpanGaleri = async (e) => {
     e.preventDefault();
+
+    if (!judul || !foto || isSubmitting) return;
+
+    setIsSubmitting(true);
+    window.__tpqLoading?.show("Mengupload foto galeri...");
 
     try {
       const formData = new FormData();
@@ -39,21 +47,54 @@ export default function Galeri() {
 
       loadGaleri();
 
-      alert("Foto berhasil ditambahkan");
+      notify?.toast({
+        type: "success",
+        title: "Foto berhasil ditambahkan",
+        message: "Galeri TPQ berhasil diperbarui.",
+        duration: 2800,
+      });
     } catch (err) {
       console.error(err);
-      alert("Gagal upload foto");
+      notify?.toast({
+        type: "error",
+        title: "Gagal upload foto",
+        message: "Pastikan file foto valid dan tidak terlalu besar.",
+        duration: 3400,
+      });
+    } finally {
+      setIsSubmitting(false);
+      window.__tpqLoading?.hide();
     }
   };
 
   const hapusGaleri = async (id) => {
-    if (!confirm("Hapus foto ini?")) return;
+    const yakin = await notify?.confirm({
+      title: "Hapus foto",
+      message: "Yakin ingin menghapus foto ini dari galeri?",
+      confirmText: "Ya, hapus",
+      cancelText: "Batal",
+      variant: "danger",
+    });
+
+    if (!yakin) return;
 
     try {
       await api.delete(`/galeri/${id}`);
       loadGaleri();
+      notify?.toast({
+        type: "success",
+        title: "Foto dihapus",
+        message: "Foto galeri berhasil dihapus.",
+        duration: 2800,
+      });
     } catch (err) {
       console.error(err);
+      notify?.toast({
+        type: "error",
+        title: "Gagal menghapus",
+        message: "Terjadi kesalahan saat menghapus foto.",
+        duration: 3400,
+      });
     }
   };
 
@@ -64,28 +105,40 @@ export default function Galeri() {
       {/* FORM */}
       <div className="bg-white rounded-2xl shadow p-6 mb-8">
         <form onSubmit={simpanGaleri} className="space-y-4">
+          {isSubmitting && (
+            <div className="rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700">
+              <div className="flex items-center gap-2">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+                <span>Mengupload foto galeri...</span>
+              </div>
+            </div>
+          )}
+
           <input
             type="text"
             placeholder="Judul Foto"
             value={judul}
             onChange={(e) => setJudul(e.target.value)}
-            className="w-full border rounded-xl p-3"
+            className="w-full border rounded-xl p-3 disabled:cursor-not-allowed disabled:bg-slate-100"
             required
+            disabled={isSubmitting}
           />
 
           <input
             type="file"
             accept="image/*"
             onChange={(e) => setFoto(e.target.files[0])}
-            className="w-full border rounded-xl p-3"
+            className="w-full border rounded-xl p-3 disabled:cursor-not-allowed disabled:bg-slate-100"
             required
+            disabled={isSubmitting}
           />
 
           <button
             type="submit"
-            className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl"
+            disabled={isSubmitting}
+            className="bg-green-600 hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl"
           >
-            Upload Foto
+            {isSubmitting ? "Mengupload..." : "Upload Foto"}
           </button>
         </form>
       </div>

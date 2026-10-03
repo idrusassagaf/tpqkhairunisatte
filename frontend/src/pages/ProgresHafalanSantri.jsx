@@ -436,9 +436,12 @@ export default function ProgresHafalanSantri() {
 
       if (!namaGuru) {
         if (field === "progres" && value) {
-          alert("Silakan pilih Guru terlebih dahulu.");
+          window.__tpqNotify?.toast({
+            type: "warning",
+            title: "Guru belum dipilih",
+            message: "Silakan pilih Guru terlebih dahulu.",
+          });
         }
-
         return;
       }
 
@@ -509,7 +512,11 @@ export default function ProgresHafalanSantri() {
 
   const handleDownloadExcel = () => {
     if (!santri) {
-      alert("Data santri belum tersedia.");
+      window.__tpqNotify?.toast({
+        type: "warning",
+        title: "Data belum tersedia",
+        message: "Data santri belum tersedia.",
+      });
       return;
     }
 
@@ -600,7 +607,11 @@ export default function ProgresHafalanSantri() {
 
   const handleDownloadPDF = () => {
     if (!santri) {
-      alert("Data santri belum tersedia.");
+      window.__tpqNotify?.toast({
+        type: "warning",
+        title: "Data belum tersedia",
+        message: "Data santri belum tersedia.",
+      });
       return;
     }
 
@@ -764,9 +775,12 @@ export default function ProgresHafalanSantri() {
 
       setShowDownload(false);
     } catch (error) {
-      console.error("Gagal membuat PDF:", error);
-
-      alert("PDF gagal dibuat. Silakan cek Console browser.");
+      console.error("Gagal membuat PDF hafalan santri:", error);
+      window.__tpqNotify?.toast({
+        type: "error",
+        title: "Download gagal",
+        message: "PDF gagal dibuat. Silakan cek Console browser.",
+      });
     }
   };
 

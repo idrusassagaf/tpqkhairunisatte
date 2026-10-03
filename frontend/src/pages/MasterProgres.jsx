@@ -10,6 +10,8 @@ export default function MasterProgres() {
   const [santri, setSantri] = useState([]);
   const [guru, setGuru] = useState([]);
   const [progresData, setProgresData] = useState({});
+  const [saving, setSaving] = useState(false);
+  const notify = window.__tpqNotify;
 
   // ================= SEARCH & FILTER IQRA =================
   const [searchIqra, setSearchIqra] = useState("");
@@ -287,6 +289,9 @@ export default function MasterProgres() {
 
   // ================= SIMPAN DATA =================
   const handleSave = async () => {
+    setSaving(true);
+    window.__tpqLoading?.show("Menyimpan progres...");
+
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(progresData));
 
@@ -413,21 +418,26 @@ export default function MasterProgres() {
       // HASIL
       // =====================================================
       if (berhasil === 0 && dilewati > 0) {
-        alert(
-          "Tidak ada data yang disimpan.\n\n" +
-            "Pastikan Guru sudah dipilih pada data yang ingin disimpan.",
-        );
+        notify?.toast({
+          type: "warning",
+          title: "Tidak ada data yang disimpan",
+          message: "Pastikan Guru sudah dipilih pada data yang ingin disimpan.",
+        });
         return;
       }
 
       if (dilewati > 0) {
-        alert(
-          `Data berhasil disimpan ke database.\n\n` +
-            `Berhasil: ${berhasil} data\n` +
-            `Dilewati: ${dilewati} data karena Guru belum dipilih atau NIG tidak ditemukan.`,
-        );
+        notify?.toast({
+          type: "success",
+          title: "Data berhasil disimpan",
+          message: `Berhasil: ${berhasil} data. Dilewati: ${dilewati} data karena Guru belum dipilih atau NIG tidak ditemukan.`,
+        });
       } else {
-        alert(`Data berhasil disimpan ke database (${berhasil} data).`);
+        notify?.toast({
+          type: "success",
+          title: "Data berhasil disimpan",
+          message: `Berhasil menyimpan ${berhasil} data.`,
+        });
       }
     } catch (err) {
       console.error("Gagal menyimpan Master Progres:", err);
@@ -437,7 +447,14 @@ export default function MasterProgres() {
         err?.response?.data?.error ||
         "Gagal menyimpan data";
 
-      alert(message);
+      notify?.toast({
+        type: "error",
+        title: "Gagal menyimpan",
+        message,
+      });
+    } finally {
+      setSaving(false);
+      window.__tpqLoading?.hide();
     }
   };
 

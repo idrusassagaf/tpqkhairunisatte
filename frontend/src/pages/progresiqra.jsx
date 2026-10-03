@@ -149,7 +149,11 @@ export default function ProgresIqra() {
 
   const handleDownloadExcel = () => {
     if (santriIqra.length === 0) {
-      alert("Tidak ada data progres Iqra yang dapat di-download.");
+      window.__tpqNotify?.toast({
+        type: "warning",
+        title: "Tidak ada data",
+        message: "Tidak ada data progres Iqra yang dapat di-download.",
+      });
       return;
     }
 
@@ -204,7 +208,11 @@ export default function ProgresIqra() {
 
   const handleDownloadPDF = () => {
     if (santriIqra.length === 0) {
-      alert("Tidak ada data progres Iqra yang dapat di-download.");
+      window.__tpqNotify?.toast({
+        type: "warning",
+        title: "Tidak ada data",
+        message: "Tidak ada data progres Iqra yang dapat di-download.",
+      });
       return;
     }
 
@@ -399,9 +407,12 @@ export default function ProgresIqra() {
 
       setShowDownload(false);
     } catch (error) {
-      console.error("Gagal membuat PDF Progres Iqra:", error);
-
-      alert("PDF gagal dibuat. Silakan cek Console browser.");
+      console.error("Gagal membuat PDF Iqra:", error);
+      window.__tpqNotify?.toast({
+        type: "error",
+        title: "Download gagal",
+        message: "PDF gagal dibuat. Silakan cek Console browser.",
+      });
     }
   };
 

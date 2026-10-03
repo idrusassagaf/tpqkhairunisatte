@@ -43,6 +43,7 @@ import GaleriPublic from "./public/GaleriPublic";
 import LaporanPublic from "./public/LaporanPublic";
 import KontakPublic from "./public/KontakPublic";
 import LoginAdmin from "./public/LoginAdmin";
+import NotificationCenter from "./components/NotificationCenter";
 
 const SITE_URL = "https://tpq-hairunnisa.site";
 const DEFAULT_OG_IMAGE = `${SITE_URL}/logo-tpq.png`;
@@ -197,6 +198,7 @@ export default function App() {
   return (
     <>
       <SeoUpdater />
+      <NotificationCenter />
       <Routes>
         {/* =====================================================
             WEBSITE PUBLIC

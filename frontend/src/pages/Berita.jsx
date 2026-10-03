@@ -27,6 +27,7 @@ export default function Berita() {
   const [preview, setPreview] = useState(null);
   const [dataBerita, setDataBerita] = useState([]);
   const [search, setSearch] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const totalBerita = dataBerita.length;
 
@@ -85,8 +86,12 @@ export default function Berita() {
     };
   }, []);
 
+  const notify = window.__tpqNotify;
+
   const handleSimpan = async () => {
     try {
+      setSubmitting(true);
+
       const formData = new FormData();
 
       formData.append("judul", form.judul);
@@ -107,24 +112,21 @@ export default function Berita() {
           },
         });
       } else {
-        if (editId) {
-          formData.append("_method", "PUT");
-
-          await api.post(`/berita/${editId}`, formData, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          });
-        } else {
-          await api.post("/berita", formData, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          });
-        }
+        await api.post("/berita", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
       }
 
-      alert("Berita berhasil disimpan");
+      notify?.toast({
+        type: "success",
+        title: "Berhasil disimpan",
+        message: editId
+          ? "Berita berhasil diperbarui dan terjemahan telah diperbarui."
+          : "Berita berhasil ditambahkan dan sedang diproses untuk terjemahan.",
+        duration: 3500,
+      });
 
       setForm({
         judul: "",
@@ -139,28 +141,55 @@ export default function Berita() {
 
       loadBerita();
     } catch (err) {
-      console.log(err);
-      console.log(err.response);
-      console.log(err.response?.data);
+      const errorMessage =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        JSON.stringify(err.response?.data || {});
 
-      alert(JSON.stringify(err.response?.data));
+      notify?.toast({
+        type: "error",
+        title: "Gagal menyimpan",
+        message:
+          typeof errorMessage === "string"
+            ? errorMessage
+            : "Terjadi kesalahan saat menyimpan data.",
+        duration: 4200,
+      });
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const handleHapus = async (id) => {
-    const konfirmasi = window.confirm("Yakin ingin menghapus berita ini?");
+    const konfirmasi = await notify?.confirm({
+      title: "Hapus berita",
+      message:
+        "Yakin ingin menghapus berita ini? Data yang terhapus tidak bisa dikembalikan.",
+      confirmText: "Ya, hapus",
+      cancelText: "Batal",
+      variant: "danger",
+    });
 
     if (!konfirmasi) return;
 
     try {
       await api.delete(`/berita/${id}`);
 
-      alert("Berita berhasil dihapus");
+      notify?.toast({
+        type: "success",
+        title: "Berhasil dihapus",
+        message: "Berita telah berhasil dihapus dari sistem.",
+        duration: 3200,
+      });
 
       loadBerita();
     } catch (err) {
-      console.error(err);
-      alert("Gagal menghapus berita");
+      notify?.toast({
+        type: "error",
+        title: "Gagal menghapus",
+        message: "Terjadi kesalahan saat menghapus berita.",
+        duration: 3500,
+      });
     }
   };
 
@@ -477,6 +506,15 @@ export default function Berita() {
               </div>
 
               <div className="space-y-4">
+                {submitting && (
+                  <div className="mb-4 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+                    <div className="flex items-center gap-2">
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+                      <span>Menyimpan berita dan menerjemahkan konten...</span>
+                    </div>
+                  </div>
+                )}
+
                 <input
                   type="text"
                   placeholder="Judul Berita"
@@ -488,6 +526,7 @@ export default function Berita() {
                       judul: e.target.value,
                     })
                   }
+                  disabled={submitting}
                 />
 
                 <input
@@ -501,6 +540,7 @@ export default function Berita() {
                       penulis: e.target.value,
                     })
                   }
+                  disabled={submitting}
                 />
 
                 <textarea
@@ -514,6 +554,7 @@ export default function Berita() {
                       isi: e.target.value,
                     })
                   }
+                  disabled={submitting}
                 />
 
                 <select
@@ -525,6 +566,7 @@ export default function Berita() {
                       status: e.target.value,
                     })
                   }
+                  disabled={submitting}
                 >
                   <option value="Draft">Draft</option>
                   <option value="Publish">Publish</option>
@@ -546,6 +588,7 @@ export default function Berita() {
 
                     setPreview(URL.createObjectURL(file));
                   }}
+                  disabled={submitting}
                 />
 
                 {preview && (
@@ -569,16 +612,24 @@ export default function Berita() {
                       setShowModal(false);
                       setPreview(null);
                     }}
-                    className="px-4 py-2 border rounded-lg"
+                    className="px-4 py-2 border rounded-lg disabled:opacity-50"
+                    disabled={submitting}
                   >
                     Batal
                   </button>
 
                   <button
                     onClick={handleSimpan}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-60 disabled:cursor-not-allowed"
+                    disabled={submitting}
                   >
-                    {editId ? "Update" : "Simpan"}
+                    {submitting
+                      ? editId
+                        ? "Menyimpan..."
+                        : "Menyimpan..."
+                      : editId
+                        ? "Update"
+                        : "Simpan"}
                   </button>
                 </div>
               </div>

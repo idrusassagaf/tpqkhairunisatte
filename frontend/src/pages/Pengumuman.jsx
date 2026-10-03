@@ -4,6 +4,7 @@ import { api } from "../api";
 export default function Pengumuman() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   const [form, setForm] = useState({
     id: null,
@@ -105,7 +106,12 @@ export default function Pengumuman() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (submitting) return;
+
     try {
+      setSubmitting(true);
+      window.__tpqLoading?.show("Menyimpan data dan menerjemahkan konten...");
+
       const dataKirim = {
         ...form,
         isi: normalisasiIsi(form.isi),
@@ -117,10 +123,26 @@ export default function Pengumuman() {
         await api.post("/pengumuman", dataKirim);
       }
 
+      window.__tpqNotify?.toast({
+        type: "success",
+        title: isEdit ? "Pengumuman diperbarui" : "Pengumuman ditambahkan",
+        message: "Data berhasil disimpan dan diterjemahkan.",
+      });
+
       resetForm();
       await loadData();
     } catch (error) {
       console.error("Gagal menyimpan pengumuman:", error);
+      window.__tpqNotify?.toast({
+        type: "error",
+        title: "Gagal menyimpan",
+        message:
+          error?.response?.data?.message ||
+          "Terjadi kesalahan saat menyimpan data.",
+      });
+    } finally {
+      setSubmitting(false);
+      window.__tpqLoading?.hide();
     }
   };
 
@@ -150,16 +172,40 @@ export default function Pengumuman() {
   // =========================================================
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Yakin hapus pengumuman ini?")) {
+    const confirmed = await window.__tpqNotify?.confirm({
+      title: "Hapus pengumuman",
+      message: "Yakin ingin menghapus pengumuman ini?",
+      confirmText: "Ya, hapus",
+      cancelText: "Batal",
+      variant: "danger",
+    });
+
+    if (!confirmed) {
       return;
     }
 
     try {
+      window.__tpqLoading?.show("Menghapus pengumuman...");
       await api.delete(`/pengumuman/${id}`);
+
+      window.__tpqNotify?.toast({
+        type: "success",
+        title: "Pengumuman dihapus",
+        message: "Data pengumuman berhasil dihapus.",
+      });
 
       await loadData();
     } catch (error) {
       console.error("Gagal menghapus pengumuman:", error);
+      window.__tpqNotify?.toast({
+        type: "error",
+        title: "Gagal menghapus",
+        message:
+          error?.response?.data?.message ||
+          "Terjadi kesalahan saat menghapus data.",
+      });
+    } finally {
+      window.__tpqLoading?.hide();
     }
   };
 
@@ -230,15 +276,21 @@ export default function Pengumuman() {
           space-y-3
         "
       >
-        {/* ===================================================
-            JUDUL
-        =================================================== */}
+        {submitting && (
+          <div className="rounded border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700">
+            <div className="flex items-center gap-2">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+              <span>Menyimpan data dan menerjemahkan konten...</span>
+            </div>
+          </div>
+        )}
 
         <input
           name="judul"
           value={form.judul}
           onChange={handleChange}
           placeholder="Judul"
+          disabled={submitting}
           className="
             border
             border-gray-300
@@ -248,6 +300,7 @@ export default function Pengumuman() {
             focus:outline-none
             focus:ring-2
             focus:ring-blue-300
+            disabled:opacity-60
           "
         />
 
@@ -261,6 +314,7 @@ export default function Pengumuman() {
           onChange={handleChange}
           placeholder="Isi pengumuman"
           rows={12}
+          disabled={submitting}
           className="
             border
             border-gray-300
@@ -272,6 +326,7 @@ export default function Pengumuman() {
             focus:outline-none
             focus:ring-2
             focus:ring-blue-300
+            disabled:opacity-60
           "
         />
 
@@ -288,6 +343,7 @@ export default function Pengumuman() {
           name="tanggal_berakhir"
           value={form.tanggal_berakhir}
           onChange={handleChange}
+          disabled={submitting}
           className="
             border
             border-gray-300
@@ -297,6 +353,7 @@ export default function Pengumuman() {
             focus:outline-none
             focus:ring-2
             focus:ring-blue-300
+            disabled:opacity-60
           "
         />
 
@@ -308,6 +365,7 @@ export default function Pengumuman() {
           name="status"
           value={form.status}
           onChange={handleChange}
+          disabled={submitting}
           className="
             border
             border-gray-300
@@ -317,6 +375,7 @@ export default function Pengumuman() {
             focus:outline-none
             focus:ring-2
             focus:ring-blue-300
+            disabled:opacity-60
           "
         >
           <option value="Aktif">Aktif</option>
@@ -331,6 +390,7 @@ export default function Pengumuman() {
         <div className="flex gap-2">
           <button
             type="submit"
+            disabled={submitting}
             className="
               bg-blue-500
               hover:bg-blue-600
@@ -339,15 +399,18 @@ export default function Pengumuman() {
               py-2
               rounded
               transition
+              disabled:opacity-60
+              disabled:cursor-not-allowed
             "
           >
-            {isEdit ? "Update" : "Simpan"}
+            {submitting ? "Menyimpan..." : isEdit ? "Update" : "Simpan"}
           </button>
 
           {isEdit && (
             <button
               type="button"
               onClick={resetForm}
+              disabled={submitting}
               className="
                 bg-gray-400
                 hover:bg-gray-500
@@ -356,6 +419,8 @@ export default function Pengumuman() {
                 py-2
                 rounded
                 transition
+                disabled:opacity-60
+                disabled:cursor-not-allowed
               "
             >
               Batal

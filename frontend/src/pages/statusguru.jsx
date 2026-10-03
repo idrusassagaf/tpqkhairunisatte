@@ -16,6 +16,10 @@ export default function StatusGuru() {
   const [filterPeriode, setFilterPeriode] = useState("");
   const [statusData, setStatusData] = useState({});
   const [showDownload, setShowDownload] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+
+  const notify = window.__tpqNotify;
 
   // ================= PAGINATION =================
   const [currentPage, setCurrentPage] = useState(1);
@@ -97,9 +101,27 @@ export default function StatusGuru() {
 
   // ================= SIMPAN =================
   const handleSave = () => {
-    localStorage.setItem("status_guru", JSON.stringify(statusData));
+    setSaving(true);
+    window.__tpqLoading?.show("Menyimpan status guru...");
 
-    alert("Data berhasil disimpan");
+    try {
+      localStorage.setItem("status_guru", JSON.stringify(statusData));
+      notify?.toast({
+        type: "success",
+        title: "Data tersimpan",
+        message: "Status guru berhasil disimpan.",
+      });
+    } catch (error) {
+      console.error("Gagal menyimpan status guru:", error);
+      notify?.toast({
+        type: "error",
+        title: "Gagal menyimpan",
+        message: "Status guru gagal disimpan.",
+      });
+    } finally {
+      setSaving(false);
+      window.__tpqLoading?.hide();
+    }
   };
 
   // ================= HITUNG GAJI =================
@@ -198,67 +220,90 @@ export default function StatusGuru() {
   // =========================================================
   const downloadExcel = () => {
     if (filteredGuru.length === 0) {
-      alert("Tidak ada data status guru untuk di-download.");
+      notify?.toast({
+        type: "warning",
+        title: "Tidak ada data",
+        message: "Tidak ada data status guru untuk di-download.",
+      });
       return;
     }
 
-    const periodeAktif = filterPeriode || getCurrentPeriode();
+    setDownloading(true);
+    window.__tpqLoading?.show("Membuat file Excel status guru...");
 
-    const [tahun, bulan] = periodeAktif.split("-");
+    try {
+      const periodeAktif = filterPeriode || getCurrentPeriode();
 
-    const excelData = filteredGuru.map((g, index) => {
-      const dataPeriode = statusData[g.nig]?.[periodeAktif] || {};
+      const [tahun, bulan] = periodeAktif.split("-");
 
-      const kehadiran = dataPeriode.kehadiran || "";
+      const excelData = filteredGuru.map((g, index) => {
+        const dataPeriode = statusData[g.nig]?.[periodeAktif] || {};
 
-      const status = getStatusGuru(kehadiran);
+        const kehadiran = dataPeriode.kehadiran || "";
 
-      const gaji = getGajiGuru(status);
+        const status = getStatusGuru(kehadiran);
 
-      return {
-        No: index + 1,
+        const gaji = getGajiGuru(status);
 
-        "Nama Guru": g.nama_guru || "-",
+        return {
+          No: index + 1,
 
-        NIG: g.nig || "-",
+          "Nama Guru": g.nama_guru || "-",
 
-        "Total Santri": dataPeriode.totalSantri || "-",
+          NIG: g.nig || "-",
 
-        "Kehadiran & Absensi": kehadiran || "-",
+          "Total Santri": dataPeriode.totalSantri || "-",
 
-        Status: status,
+          "Kehadiran & Absensi": kehadiran || "-",
 
-        "Gaji Per-Guru": gaji,
+          Status: status,
 
-        Update: dataPeriode.update || "-",
-      };
-    });
+          "Gaji Per-Guru": gaji,
 
-    const worksheet = XLSX.utils.json_to_sheet(excelData);
+          Update: dataPeriode.update || "-",
+        };
+      });
 
-    const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet(excelData);
 
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Status Guru");
+      const workbook = XLSX.utils.book_new();
 
-    // ================= LEBAR KOLOM =================
-    worksheet["!cols"] = [
-      { wch: 6 },
-      { wch: 28 },
-      { wch: 15 },
-      { wch: 16 },
-      { wch: 24 },
-      { wch: 18 },
-      { wch: 20 },
-      { wch: 18 },
-    ];
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Status Guru");
 
-    const namaFile = search.trim()
-      ? `status-guru-${tahun}-${bulan}-hasil-pencarian.xlsx`
-      : `status-guru-${tahun}-${bulan}.xlsx`;
+      // ================= LEBAR KOLOM =================
+      worksheet["!cols"] = [
+        { wch: 6 },
+        { wch: 28 },
+        { wch: 15 },
+        { wch: 16 },
+        { wch: 24 },
+        { wch: 18 },
+        { wch: 20 },
+        { wch: 18 },
+      ];
 
-    XLSX.writeFile(workbook, namaFile);
+      const namaFile = search.trim()
+        ? `status-guru-${tahun}-${bulan}-hasil-pencarian.xlsx`
+        : `status-guru-${tahun}-${bulan}.xlsx`;
 
-    setShowDownload(false);
+      XLSX.writeFile(workbook, namaFile);
+      setShowDownload(false);
+      notify?.toast({
+        type: "success",
+        title: "Excel siap diunduh",
+        message: "File Excel status guru berhasil dibuat.",
+      });
+    } catch (error) {
+      console.error("Gagal download Excel status guru:", error);
+      notify?.toast({
+        type: "error",
+        title: "Download gagal",
+        message: "Excel status guru gagal dibuat.",
+      });
+    } finally {
+      setDownloading(false);
+      window.__tpqLoading?.hide();
+    }
   };
 
   // =========================================================
@@ -266,248 +311,271 @@ export default function StatusGuru() {
   // =========================================================
   const downloadPDF = () => {
     if (filteredGuru.length === 0) {
-      alert("Tidak ada data status guru untuk di-download.");
+      notify?.toast({
+        type: "warning",
+        title: "Tidak ada data",
+        message: "Tidak ada data status guru untuk di-download.",
+      });
       return;
     }
 
-    const periodeAktif = filterPeriode || getCurrentPeriode();
+    setDownloading(true);
+    window.__tpqLoading?.show("Membuat file PDF status guru...");
 
-    const [tahun, bulan] = periodeAktif.split("-");
+    try {
+      const periodeAktif = filterPeriode || getCurrentPeriode();
 
-    const namaBulan = bulanList[Number(bulan) - 1] || bulan;
+      const [tahun, bulan] = periodeAktif.split("-");
 
-    // =====================================================
-    // TANGGAL REALTIME SAAT PDF DI-DOWNLOAD
-    // =====================================================
-    const tanggalDownload = new Date().toLocaleDateString("id-ID", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    });
+      const namaBulan = bulanList[Number(bulan) - 1] || bulan;
 
-    // =====================================================
-    // PDF A4 LANDSCAPE
-    // =====================================================
-    const doc = new jsPDF({
-      orientation: "landscape",
-      unit: "mm",
-      format: "a4",
-    });
+      // =====================================================
+      // TANGGAL REALTIME SAAT PDF DI-DOWNLOAD
+      // =====================================================
+      const tanggalDownload = new Date().toLocaleDateString("id-ID", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      });
 
-    // =====================================================
-    // UKURAN HALAMAN
-    // =====================================================
-    const pageWidth = doc.internal.pageSize.getWidth();
+      // =====================================================
+      // PDF A4 LANDSCAPE
+      // =====================================================
+      const doc = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a4",
+      });
 
-    const pageHeight = doc.internal.pageSize.getHeight();
+      // =====================================================
+      // UKURAN HALAMAN
+      // =====================================================
+      const pageWidth = doc.internal.pageSize.getWidth();
 
-    // =====================================================
-    // AREA KONTEN TENGAH
-    // =====================================================
-    const contentWidth = 270;
+      const pageHeight = doc.internal.pageSize.getHeight();
 
-    const contentLeft = (pageWidth - contentWidth) / 2;
+      // =====================================================
+      // AREA KONTEN TENGAH
+      // =====================================================
+      const contentWidth = 270;
 
-    const contentRight = pageWidth - contentLeft;
+      const contentLeft = (pageWidth - contentWidth) / 2;
 
-    const contentCenter = pageWidth / 2;
+      const contentRight = pageWidth - contentLeft;
 
-    // =====================================================
-    // JUDUL
-    // =====================================================
-    doc.setFontSize(16);
+      const contentCenter = pageWidth / 2;
 
-    doc.setFont("helvetica", "bold");
+      // =====================================================
+      // JUDUL
+      // =====================================================
+      doc.setFontSize(16);
 
-    doc.text("STATUS DAN GAJI GURU", contentCenter, 15, {
-      align: "center",
-    });
+      doc.setFont("helvetica", "bold");
 
-    // =====================================================
-    // SUB JUDUL
-    // =====================================================
-    doc.setFontSize(10);
-
-    doc.setFont("helvetica", "normal");
-
-    doc.text("TPQ Hairunissa Ternate", contentCenter, 21, {
-      align: "center",
-    });
-
-    // =====================================================
-    // PERIODE
-    // =====================================================
-    doc.setFontSize(9);
-
-    doc.text(
-      `Periode: ${namaBulan.toUpperCase()} ${tahun}`,
-      contentCenter,
-      27,
-      {
+      doc.text("STATUS DAN GAJI GURU", contentCenter, 15, {
         align: "center",
-      },
-    );
+      });
 
-    // =====================================================
-    // INFO PENCARIAN
-    // =====================================================
-    let tableStartY = 33;
+      // =====================================================
+      // SUB JUDUL
+      // =====================================================
+      doc.setFontSize(10);
 
-    if (search.trim()) {
-      doc.setFontSize(8);
+      doc.setFont("helvetica", "normal");
 
-      doc.text(`Hasil pencarian: "${search}"`, contentLeft, 32);
+      doc.text("TPQ Hairunissa Ternate", contentCenter, 21, {
+        align: "center",
+      });
 
-      tableStartY = 38;
-    }
+      // =====================================================
+      // PERIODE
+      // =====================================================
+      doc.setFontSize(9);
 
-    // =====================================================
-    // DATA TABEL
-    // =====================================================
-    const rows = filteredGuru.map((g, index) => {
-      const dataPeriode = statusData[g.nig]?.[periodeAktif] || {};
-
-      const kehadiran = dataPeriode.kehadiran || "";
-
-      const status = getStatusGuru(kehadiran);
-
-      const gaji = getGajiGuru(status);
-
-      return [
-        index + 1,
-
-        g.nama_guru || "-",
-
-        g.nig || "-",
-
-        dataPeriode.totalSantri || "-",
-
-        kehadiran || "-",
-
-        status,
-
-        formatRupiah(gaji),
-
-        dataPeriode.update || "-",
-      ];
-    });
-
-    // =====================================================
-    // TABEL
-    // =====================================================
-    const tableWidth = 230;
-
-    const tableLeft = (pageWidth - tableWidth) / 2;
-
-    autoTable(doc, {
-      startY: tableStartY,
-
-      head: [
-        [
-          "No",
-          "Nama Guru",
-          "NIG",
-          "Total Santri",
-          "Kehadiran",
-          "Status",
-          "Gaji Per-Guru",
-          "Update",
-        ],
-      ],
-
-      body: rows,
-
-      theme: "grid",
-
-      tableWidth: tableWidth,
-
-      margin: {
-        left: tableLeft,
-        right: tableLeft,
-      },
-
-      styles: {
-        fontSize: 8,
-
-        cellPadding: 2,
-
-        overflow: "linebreak",
-
-        valign: "middle",
-
-        halign: "center",
-      },
-
-      headStyles: {
-        fontStyle: "bold",
-      },
-
-      columnStyles: {
-        0: {
-          cellWidth: 10,
-        },
-
-        1: {
-          cellWidth: 45,
-
-          halign: "left",
-        },
-
-        2: {
-          cellWidth: 25,
-        },
-
-        3: {
-          cellWidth: 25,
-        },
-
-        4: {
-          cellWidth: 35,
-        },
-
-        5: {
-          cellWidth: 30,
-        },
-
-        6: {
-          cellWidth: 35,
-        },
-
-        7: {
-          cellWidth: 25,
-        },
-      },
-
-      // ===================================================
-      // FOOTER PDF
-      // SATU BARIS PENUH
-      // TANGGAL REALTIME SAAT DOWNLOAD
-      // ===================================================
-      didDrawPage: () => {
-        const nomorHalaman = doc.internal.getNumberOfPages();
-
-        const footerText = `TPQ Hairunissa • Progres Al'Quran • Update ${tanggalDownload} • Halaman ${nomorHalaman}`;
-
-        doc.setFont("helvetica", "normal");
-
-        doc.setFontSize(7);
-
-        doc.text(footerText, contentCenter, pageHeight - 7, {
+      doc.text(
+        `Periode: ${namaBulan.toUpperCase()} ${tahun}`,
+        contentCenter,
+        27,
+        {
           align: "center",
-        });
-      },
-    });
+        },
+      );
 
-    // =====================================================
-    // NAMA FILE
-    // =====================================================
-    const namaFile = search.trim()
-      ? `status-guru-${tahun}-${bulan}-hasil-pencarian.pdf`
-      : `status-guru-${tahun}-${bulan}.pdf`;
+      // =====================================================
+      // INFO PENCARIAN
+      // =====================================================
+      let tableStartY = 33;
 
-    doc.save(namaFile);
+      if (search.trim()) {
+        doc.setFontSize(8);
 
-    setShowDownload(false);
+        doc.text(`Hasil pencarian: "${search}"`, contentLeft, 32);
+
+        tableStartY = 38;
+      }
+
+      // =====================================================
+      // DATA TABEL
+      // =====================================================
+      const rows = filteredGuru.map((g, index) => {
+        const dataPeriode = statusData[g.nig]?.[periodeAktif] || {};
+
+        const kehadiran = dataPeriode.kehadiran || "";
+
+        const status = getStatusGuru(kehadiran);
+
+        const gaji = getGajiGuru(status);
+
+        return [
+          index + 1,
+
+          g.nama_guru || "-",
+
+          g.nig || "-",
+
+          dataPeriode.totalSantri || "-",
+
+          kehadiran || "-",
+
+          status,
+
+          formatRupiah(gaji),
+
+          dataPeriode.update || "-",
+        ];
+      });
+
+      // =====================================================
+      // TABEL
+      // =====================================================
+      const tableWidth = 230;
+
+      const tableLeft = (pageWidth - tableWidth) / 2;
+
+      autoTable(doc, {
+        startY: tableStartY,
+
+        head: [
+          [
+            "No",
+            "Nama Guru",
+            "NIG",
+            "Total Santri",
+            "Kehadiran",
+            "Status",
+            "Gaji Per-Guru",
+            "Update",
+          ],
+        ],
+
+        body: rows,
+
+        theme: "grid",
+
+        tableWidth: tableWidth,
+
+        margin: {
+          left: tableLeft,
+          right: tableLeft,
+        },
+
+        styles: {
+          fontSize: 8,
+
+          cellPadding: 2,
+
+          overflow: "linebreak",
+
+          valign: "middle",
+
+          halign: "center",
+        },
+
+        headStyles: {
+          fontStyle: "bold",
+        },
+
+        columnStyles: {
+          0: {
+            cellWidth: 10,
+          },
+
+          1: {
+            cellWidth: 45,
+
+            halign: "left",
+          },
+
+          2: {
+            cellWidth: 25,
+          },
+
+          3: {
+            cellWidth: 25,
+          },
+
+          4: {
+            cellWidth: 35,
+          },
+
+          5: {
+            cellWidth: 30,
+          },
+
+          6: {
+            cellWidth: 35,
+          },
+
+          7: {
+            cellWidth: 25,
+          },
+        },
+
+        // ===================================================
+        // FOOTER PDF
+        // SATU BARIS PENUH
+        // TANGGAL REALTIME SAAT DOWNLOAD
+        // ===================================================
+        didDrawPage: () => {
+          const nomorHalaman = doc.internal.getNumberOfPages();
+
+          const footerText = `TPQ Hairunissa • Progres Al'Quran • Update ${tanggalDownload} • Halaman ${nomorHalaman}`;
+
+          doc.setFont("helvetica", "normal");
+
+          doc.setFontSize(7);
+
+          doc.text(footerText, contentCenter, pageHeight - 7, {
+            align: "center",
+          });
+        },
+      });
+
+      // =====================================================
+      // NAMA FILE
+      // =====================================================
+      const namaFile = search.trim()
+        ? `status-guru-${tahun}-${bulan}-hasil-pencarian.pdf`
+        : `status-guru-${tahun}-${bulan}.pdf`;
+
+      doc.save(namaFile);
+      setShowDownload(false);
+      notify?.toast({
+        type: "success",
+        title: "PDF siap diunduh",
+        message: "File PDF status guru berhasil dibuat.",
+      });
+    } catch (error) {
+      console.error("Gagal download PDF status guru:", error);
+      notify?.toast({
+        type: "error",
+        title: "Download gagal",
+        message: "PDF status guru gagal dibuat.",
+      });
+    } finally {
+      setDownloading(false);
+      window.__tpqLoading?.hide();
+    }
   };
 
   return (

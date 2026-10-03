@@ -109,8 +109,11 @@ export default function DataSantri() {
 
   const downloadExcel = () => {
     if (filteredData.length === 0) {
-      alert("Tidak ada data santri untuk di-download.");
-
+      window.__tpqNotify?.toast({
+        type: "warning",
+        title: "Tidak ada data",
+        message: "Tidak ada data santri untuk di-download.",
+      });
       return;
     }
 
@@ -187,203 +190,215 @@ export default function DataSantri() {
 
   const downloadPDF = () => {
     if (filteredData.length === 0) {
-      alert("Tidak ada data santri untuk di-download.");
-
+      window.__tpqNotify?.toast({
+        type: "warning",
+        title: "Tidak ada data",
+        message: "Tidak ada data santri untuk di-download.",
+      });
       return;
     }
 
-    const doc = new jsPDF({
-      orientation: "landscape",
+    try {
+      const doc = new jsPDF({
+        orientation: "landscape",
 
-      unit: "mm",
+        unit: "mm",
 
-      format: "a4",
-    });
+        format: "a4",
+      });
 
-    // =====================================================
-    // TANGGAL REALTIME
-    // Diambil tepat saat tombol Download PDF ditekan
-    // =====================================================
+      // =====================================================
+      // TANGGAL REALTIME
+      // Diambil tepat saat tombol Download PDF ditekan
+      // =====================================================
 
-    const tanggalRealtime = new Date().toLocaleDateString("id-ID", {
-      day: "2-digit",
+      const tanggalRealtime = new Date().toLocaleDateString("id-ID", {
+        day: "2-digit",
 
-      month: "long",
+        month: "long",
 
-      year: "numeric",
-    });
+        year: "numeric",
+      });
 
-    // ================= JUDUL =================
+      // ================= JUDUL =================
 
-    doc.setFontSize(16);
+      doc.setFontSize(16);
 
-    doc.setFont("helvetica", "bold");
+      doc.setFont("helvetica", "bold");
 
-    doc.text("DATA BASE SANTRI", 148, 15, {
-      align: "center",
-    });
+      doc.text("DATA BASE SANTRI", 148, 15, {
+        align: "center",
+      });
 
-    doc.setFontSize(10);
+      doc.setFontSize(10);
 
-    doc.setFont("helvetica", "normal");
+      doc.setFont("helvetica", "normal");
 
-    doc.text("TPQ Hairunissa Ternate", 148, 21, {
-      align: "center",
-    });
+      doc.text("TPQ Hairunissa Ternate", 148, 21, {
+        align: "center",
+      });
 
-    // ================= INFO PENCARIAN =================
+      // ================= INFO PENCARIAN =================
 
-    if (search.trim()) {
-      doc.setFontSize(8);
+      if (search.trim()) {
+        doc.setFontSize(8);
 
-      doc.text(`Hasil pencarian: "${search}"`, 14, 29);
-    }
+        doc.text(`Hasil pencarian: "${search}"`, 14, 29);
+      }
 
-    // ================= DATA TABEL =================
+      // ================= DATA TABEL =================
 
-    const rows = filteredData.map((d, index) => [
-      index + 1,
+      const rows = filteredData.map((d, index) => [
+        index + 1,
 
-      d.nama || "-",
+        d.nama || "-",
 
-      d.nis || "-",
+        d.nis || "-",
 
-      d.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan",
+        d.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan",
 
-      d.usia ?? "-",
+        d.usia ?? "-",
 
-      d.tanggal_lahir || "-",
+        d.tanggal_lahir || "-",
 
-      d.kelas || "-",
+        d.kelas || "-",
 
-      d.alamat || "-",
+        d.alamat || "-",
 
-      d.kontak || "-",
+        d.kontak || "-",
 
-      d.orang_tua?.nama_ayah || "-",
+        d.orang_tua?.nama_ayah || "-",
 
-      d.orang_tua?.nama_ibu || "-",
+        d.orang_tua?.nama_ibu || "-",
 
-      d.status_orangtua || "-",
+        d.status_orangtua || "-",
 
-      d.status_anak || "-",
-    ]);
+        d.status_anak || "-",
+      ]);
 
-    autoTable(doc, {
-      startY: search.trim() ? 34 : 28,
+      autoTable(doc, {
+        startY: search.trim() ? 34 : 28,
 
-      head: [
-        [
-          "No",
+        head: [
+          [
+            "No",
 
-          "Nama",
+            "Nama",
 
-          "NIS",
+            "NIS",
 
-          "JK",
+            "JK",
 
-          "Usia",
+            "Usia",
 
-          "Tgl Lahir",
+            "Tgl Lahir",
 
-          "Kelas",
+            "Kelas",
 
-          "Alamat",
+            "Alamat",
 
-          "Kontak",
+            "Kontak",
 
-          "Ayah",
+            "Ayah",
 
-          "Ibu",
+            "Ibu",
 
-          "Status Ortu",
+            "Status Ortu",
 
-          "Status Anak",
+            "Status Anak",
+          ],
         ],
-      ],
 
-      body: rows,
+        body: rows,
 
-      theme: "grid",
+        theme: "grid",
 
-      styles: {
-        fontSize: 7,
+        styles: {
+          fontSize: 7,
 
-        cellPadding: 2,
+          cellPadding: 2,
 
-        overflow: "linebreak",
+          overflow: "linebreak",
 
-        valign: "middle",
-      },
+          valign: "middle",
+        },
 
-      headStyles: {
-        fontStyle: "bold",
-      },
+        headStyles: {
+          fontStyle: "bold",
+        },
 
-      columnStyles: {
-        0: { cellWidth: 9 },
+        columnStyles: {
+          0: { cellWidth: 9 },
 
-        1: { cellWidth: 30 },
+          1: { cellWidth: 30 },
 
-        2: { cellWidth: 18 },
+          2: { cellWidth: 18 },
 
-        3: { cellWidth: 20 },
+          3: { cellWidth: 20 },
 
-        4: { cellWidth: 10 },
+          4: { cellWidth: 10 },
 
-        5: { cellWidth: 20 },
+          5: { cellWidth: 20 },
 
-        6: { cellWidth: 18 },
+          6: { cellWidth: 18 },
 
-        7: { cellWidth: 32 },
+          7: { cellWidth: 32 },
 
-        8: { cellWidth: 22 },
+          8: { cellWidth: 22 },
 
-        9: { cellWidth: 28 },
+          9: { cellWidth: 28 },
 
-        10: { cellWidth: 28 },
+          10: { cellWidth: 28 },
 
-        11: { cellWidth: 23 },
+          11: { cellWidth: 23 },
 
-        12: { cellWidth: 23 },
-      },
+          12: { cellWidth: 23 },
+        },
 
-      margin: {
-        left: 8,
+        margin: {
+          left: 8,
 
-        right: 8,
-      },
+          right: 8,
+        },
 
-      // =====================================================
-      // FOOTER PDF
-      // TANGGAL REALTIME TGL-BULAN-TAHUN
-      // =====================================================
+        // =====================================================
+        // FOOTER PDF
+        // TANGGAL REALTIME TGL-BULAN-TAHUN
+        // =====================================================
 
-      didDrawPage: (data) => {
-        const pageHeight = doc.internal.pageSize.getHeight();
+        didDrawPage: (data) => {
+          const pageHeight = doc.internal.pageSize.getHeight();
 
-        doc.setFontSize(7);
+          doc.setFontSize(7);
 
-        doc.setFont("helvetica", "normal");
+          doc.setFont("helvetica", "normal");
 
-        doc.text(
-          `TPQ Hairunissa • Database Santri • Update ${tanggalRealtime} • Halaman ${doc.internal.getNumberOfPages()}`,
-          148,
-          pageHeight - 7,
-          {
-            align: "center",
-          },
-        );
-      },
-    });
+          doc.text(
+            `TPQ Hairunissa • Database Santri • Update ${tanggalRealtime} • Halaman ${doc.internal.getNumberOfPages()}`,
+            148,
+            pageHeight - 7,
+            {
+              align: "center",
+            },
+          );
+        },
+      });
 
-    const namaFile = search.trim()
-      ? "data-santri-hasil-pencarian.pdf"
-      : "data-santri.pdf";
+      const namaFile = search.trim()
+        ? "data-santri-hasil-pencarian.pdf"
+        : "data-santri.pdf";
 
-    doc.save(namaFile);
+      doc.save(namaFile);
 
-    setShowDownload(false);
+      setShowDownload(false);
+    } catch (error) {
+      console.error("Gagal membuat PDF santri:", error);
+      window.__tpqNotify?.toast({
+        type: "error",
+        title: "Download gagal",
+        message: "PDF gagal dibuat. Silakan cek Console browser.",
+      });
+    }
   };
 
   // =========================================================

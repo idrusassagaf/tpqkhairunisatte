@@ -166,7 +166,11 @@ export default function ProgresQuran() {
 
   const handleDownloadExcel = () => {
     if (filteredData.length === 0) {
-      alert("Tidak ada data progres Al-Qur'an yang dapat di-download.");
+      window.__tpqNotify?.toast({
+        type: "warning",
+        title: "Tidak ada data",
+        message: "Tidak ada data progres Al-Qur'an yang dapat di-download.",
+      });
       return;
     }
 
@@ -225,7 +229,11 @@ export default function ProgresQuran() {
 
   const handleDownloadPDF = () => {
     if (filteredData.length === 0) {
-      alert("Tidak ada data progres Al-Qur'an yang dapat di-download.");
+      window.__tpqNotify?.toast({
+        type: "warning",
+        title: "Tidak ada data",
+        message: "Tidak ada data progres Al-Qur'an yang dapat di-download.",
+      });
       return;
     }
 
@@ -497,9 +505,12 @@ export default function ProgresQuran() {
 
       setShowDownload(false);
     } catch (error) {
-      console.error("Gagal membuat PDF Progres Al-Qur'an:", error);
-
-      alert("PDF gagal dibuat. Silakan cek Console browser.");
+      console.error("Gagal membuat PDF Quran:", error);
+      window.__tpqNotify?.toast({
+        type: "error",
+        title: "Download gagal",
+        message: "PDF gagal dibuat. Silakan cek Console browser.",
+      });
     }
   };
 

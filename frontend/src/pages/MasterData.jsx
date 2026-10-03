@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { PencilLine, Trash2 } from "lucide-react";
 import { api } from "../api";
 
 export default function MasterData() {
@@ -117,9 +118,15 @@ export default function MasterData() {
     console.log("EDIT ID:", editSantriId);
 
     if (!form.nama || !form.tanggal_lahir || !form.status_orangtua) {
-      alert("Isi data wajib dulu bro!");
+      window.__tpqNotify?.toast({
+        type: "warning",
+        title: "Data belum lengkap",
+        message: "Isi data wajib dulu bro!",
+      });
       return;
     }
+
+    window.__tpqLoading?.show("Menyimpan data santri...");
 
     const formData = new FormData();
 
@@ -159,7 +166,11 @@ export default function MasterData() {
       .then((res) => {
         console.log("HASIL SIMPAN:", res.data);
 
-        alert("Alhamdulillah... Data santri berhasil");
+        window.__tpqNotify?.toast({
+          type: "success",
+          title: "Data santri berhasil",
+          message: "Data santri berhasil disimpan.",
+        });
 
         setEditSantriId(null);
 
@@ -191,7 +202,14 @@ export default function MasterData() {
         console.error("ERROR DATA:", err.response?.data);
         console.error("ERROR VALIDATION:", err.response?.data?.errors);
 
-        alert(err.response?.data?.error || "Gagal input santri");
+        window.__tpqNotify?.toast({
+          type: "error",
+          title: "Gagal input santri",
+          message: err.response?.data?.error || "Gagal input santri",
+        });
+      })
+      .finally(() => {
+        window.__tpqLoading?.hide();
       });
   };
 
@@ -243,9 +261,15 @@ export default function MasterData() {
     e.preventDefault();
 
     if (!formGuru.nama_guru || !formGuru.tanggal_lahir) {
-      alert("Isi data guru dulu bro!");
+      window.__tpqNotify?.toast({
+        type: "warning",
+        title: "Data guru belum lengkap",
+        message: "Isi data guru dulu bro!",
+      });
       return;
     }
+
+    window.__tpqLoading?.show("Menyimpan data guru...");
 
     const formData = new FormData();
 
@@ -276,7 +300,11 @@ export default function MasterData() {
 
     request
       .then(() => {
-        alert("Alhamdulillah... Data guru berhasil");
+        window.__tpqNotify?.toast({
+          type: "success",
+          title: "Data guru berhasil",
+          message: "Data guru berhasil disimpan.",
+        });
 
         setEditGuruId(null);
 
@@ -299,7 +327,14 @@ export default function MasterData() {
       })
       .catch((err) => {
         console.error(err);
-        alert("Gagal simpan guru");
+        window.__tpqNotify?.toast({
+          type: "error",
+          title: "Gagal simpan guru",
+          message: err?.response?.data?.message || "Gagal simpan guru",
+        });
+      })
+      .finally(() => {
+        window.__tpqLoading?.hide();
       });
   };
 
@@ -359,16 +394,28 @@ export default function MasterData() {
 
   // ================= DELETE =================
   const handleDeleteSantri = async (id) => {
-    if (!confirm("Yakin mau hapus?")) return;
+    const yakin = await window.__tpqNotify?.confirm({
+      title: "Hapus santri",
+      message: "Yakin mau hapus data santri ini?",
+      confirmText: "Ya, hapus",
+      cancelText: "Batal",
+      variant: "danger",
+    });
+
+    if (!yakin) return;
 
     try {
+      window.__tpqLoading?.show("Menghapus data santri...");
       await api.delete(`/master-data/${id}`);
 
-      alert("Berhasil dihapus");
+      window.__tpqNotify?.toast({
+        type: "success",
+        title: "Data dihapus",
+        message: "Data santri berhasil dihapus.",
+      });
 
       fetchSantri();
 
-      // Pastikan halaman tetap valid setelah data dihapus
       setSantriPage((prev) => {
         const totalAfterDelete = filteredSantri.length - 1;
         const maxPage = Math.max(
@@ -380,17 +427,36 @@ export default function MasterData() {
       });
     } catch (err) {
       console.error(err);
-      alert("Gagal hapus");
+      window.__tpqNotify?.toast({
+        type: "error",
+        title: "Gagal hapus",
+        message: "Gagal hapus data santri.",
+      });
+    } finally {
+      window.__tpqLoading?.hide();
     }
   };
 
   const handleDeleteGuru = async (id) => {
-    if (!confirm("Yakin mau hapus guru?")) return;
+    const yakin = await window.__tpqNotify?.confirm({
+      title: "Hapus guru",
+      message: "Yakin mau hapus guru ini?",
+      confirmText: "Ya, hapus",
+      cancelText: "Batal",
+      variant: "danger",
+    });
+
+    if (!yakin) return;
 
     try {
+      window.__tpqLoading?.show("Menghapus data guru...");
       await api.delete(`/guru/${id}`);
 
-      alert("Guru berhasil dihapus");
+      window.__tpqNotify?.toast({
+        type: "success",
+        title: "Guru dihapus",
+        message: "Data guru berhasil dihapus.",
+      });
 
       fetchGuru();
 
@@ -405,7 +471,13 @@ export default function MasterData() {
       });
     } catch (err) {
       console.error(err);
-      alert("Gagal hapus guru");
+      window.__tpqNotify?.toast({
+        type: "error",
+        title: "Gagal hapus guru",
+        message: "Gagal hapus guru.",
+      });
+    } finally {
+      window.__tpqLoading?.hide();
     }
   };
 
@@ -903,9 +975,11 @@ export default function MasterData() {
                   </div>
 
                   {/* AKSI */}
-                  <div className="flex justify-end gap-5 bg-gray-300 p-2">
+                  <div className="flex justify-end gap-3 bg-gray-300 p-2">
                     <button
-                      className="text-blue-600"
+                      type="button"
+                      aria-label="Edit santri"
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-blue-200 bg-blue-50 text-blue-600 transition hover:bg-blue-100 hover:border-blue-300"
                       onClick={() => {
                         setForm({
                           nama: d.nama,
@@ -929,14 +1003,16 @@ export default function MasterData() {
                         setTab("santri");
                       }}
                     >
-                      ✏️
+                      <PencilLine className="h-4 w-4" />
                     </button>
 
                     <button
-                      className="text-red-600"
+                      type="button"
+                      aria-label="Hapus santri"
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-red-200 bg-red-50 text-red-600 transition hover:bg-red-100 hover:border-red-300"
                       onClick={() => handleDeleteSantri(d.id)}
                     >
-                      🗑️
+                      <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
                 </div>
@@ -1046,7 +1122,9 @@ export default function MasterData() {
                       <td className="p-2 text-center">
                         <div className="flex justify-center gap-2">
                           <button
-                            className="text-blue-600"
+                            type="button"
+                            aria-label="Edit santri"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-blue-200 bg-blue-50 text-blue-600 transition hover:bg-blue-100 hover:border-blue-300"
                             onClick={() => {
                               setForm({
                                 nama: d.nama,
@@ -1071,14 +1149,16 @@ export default function MasterData() {
                               setTab("santri");
                             }}
                           >
-                            ✏️
+                            <PencilLine className="h-4 w-4" />
                           </button>
 
                           <button
-                            className="text-red-600"
+                            type="button"
+                            aria-label="Hapus santri"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-red-200 bg-red-50 text-red-600 transition hover:bg-red-100 hover:border-red-300"
                             onClick={() => handleDeleteSantri(d.id)}
                           >
-                            🗑️
+                            <Trash2 className="h-4 w-4" />
                           </button>
                         </div>
                       </td>
@@ -1217,7 +1297,9 @@ export default function MasterData() {
                   {/* AKSI */}
                   <div className="flex justify-end gap-3 pt-2 bg-gray-300 p-2">
                     <button
-                      className="text-blue-600"
+                      type="button"
+                      aria-label="Edit guru"
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-blue-200 bg-blue-50 text-blue-600 transition hover:bg-blue-100 hover:border-blue-300"
                       onClick={() => {
                         setFormGuru({
                           nama_guru: g.nama_guru,
@@ -1235,14 +1317,16 @@ export default function MasterData() {
                         setTab("guru");
                       }}
                     >
-                      ✏️
+                      <PencilLine className="h-4 w-4" />
                     </button>
 
                     <button
-                      className="text-red-600"
+                      type="button"
+                      aria-label="Hapus guru"
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-red-200 bg-red-50 text-red-600 transition hover:bg-red-100 hover:border-red-300"
                       onClick={() => handleDeleteGuru(g.id)}
                     >
-                      🗑️
+                      <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
                 </div>
@@ -1324,7 +1408,9 @@ export default function MasterData() {
                       <td className="p-2 text-center">
                         <div className="flex justify-center gap-2">
                           <button
-                            className="text-blue-600"
+                            type="button"
+                            aria-label="Edit guru"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-blue-200 bg-blue-50 text-blue-600 transition hover:bg-blue-100 hover:border-blue-300"
                             onClick={() => {
                               setFormGuru({
                                 nama_guru: g.nama_guru,
@@ -1342,14 +1428,16 @@ export default function MasterData() {
                               setTab("guru");
                             }}
                           >
-                            ✏️
+                            <PencilLine className="h-4 w-4" />
                           </button>
 
                           <button
-                            className="text-red-600"
+                            type="button"
+                            aria-label="Hapus guru"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-red-200 bg-red-50 text-red-600 transition hover:bg-red-100 hover:border-red-300"
                             onClick={() => handleDeleteGuru(g.id)}
                           >
-                            🗑️
+                            <Trash2 className="h-4 w-4" />
                           </button>
                         </div>
                       </td>

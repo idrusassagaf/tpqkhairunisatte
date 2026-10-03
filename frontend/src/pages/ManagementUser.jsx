@@ -237,9 +237,13 @@ export default function ManagementUser() {
   // =========================================================
 
   const handleDelete = async (user) => {
-    const yakin = window.confirm(
-      `Hapus user "${user.name}"?\n\nData user yang sudah dihapus tidak dapat dikembalikan.`,
-    );
+    const yakin = await window.__tpqNotify?.confirm({
+      title: "Hapus user",
+      message: `Hapus user "${user.name}"?\n\nData user yang sudah dihapus tidak dapat dikembalikan.`,
+      confirmText: "Ya, hapus",
+      cancelText: "Batal",
+      variant: "danger",
+    });
 
     if (!yakin) return;
 
@@ -247,15 +251,28 @@ export default function ManagementUser() {
     setSuccess("");
 
     try {
+      window.__tpqLoading?.show(`Menghapus user "${user.name}"...`);
       await api.delete(`/users/${user.id}`);
 
       setSuccess(`User "${user.name}" berhasil dihapus.`);
+      window.__tpqNotify?.toast({
+        type: "success",
+        title: "User dihapus",
+        message: `User "${user.name}" berhasil dihapus.`,
+      });
 
       await fetchUsers();
     } catch (err) {
       console.error("Gagal menghapus user:", err);
 
       setError(err?.response?.data?.message || "Gagal menghapus user.");
+      window.__tpqNotify?.toast({
+        type: "error",
+        title: "Gagal menghapus",
+        message: err?.response?.data?.message || "Gagal menghapus user.",
+      });
+    } finally {
+      window.__tpqLoading?.hide();
     }
   };
 

@@ -49,10 +49,17 @@ export default function OrangTua() {
       santri_id: form.santri_id,
     };
 
+    window.__tpqLoading?.show("Menyimpan data orang tua...");
+
     api
       .post("/orangtua", payload)
       .then(() => {
-        alert("Berhasil tambah orang tua");
+        window.__tpqNotify?.toast({
+          type: "success",
+          title: "Berhasil",
+          message: "Data orang tua berhasil ditambahkan.",
+        });
+
         setForm({
           nama_ayah: "",
           nama_ibu: "",
@@ -64,7 +71,14 @@ export default function OrangTua() {
       })
       .catch((err) => {
         console.error(err);
-        alert("Gagal tambah data");
+        window.__tpqNotify?.toast({
+          type: "error",
+          title: "Gagal menambahkan",
+          message: err?.response?.data?.message || "Gagal tambah data.",
+        });
+      })
+      .finally(() => {
+        window.__tpqLoading?.hide();
       });
   };
 

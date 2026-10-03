@@ -48,24 +48,33 @@ export default function LaporanRingkas() {
     }));
   };
 
+  const notify = window.__tpqNotify;
+
   const simpanPengaturan = async () => {
     try {
       await api.put("/laporan-setting", form);
 
-      alert("Pengaturan berhasil disimpan.");
+      notify?.toast({
+        type: "success",
+        title: "Pengaturan berhasil disimpan",
+        message: "Data laporan ringkas telah diperbarui dengan baik.",
+        duration: 3200,
+      });
 
       loadSetting();
     } catch (err) {
       console.error(err);
-      alert("Gagal menyimpan.");
+      notify?.toast({
+        type: "error",
+        title: "Gagal menyimpan",
+        message: "Terjadi kesalahan saat menyimpan pengaturan laporan.",
+        duration: 3600,
+      });
     }
   };
 
   const previewPdf = () => {
-    window.open(
-      `${API_BASE_URL}/laporan-ringkas/view?language=id`,
-      "_blank",
-    );
+    window.open(`${API_BASE_URL}/laporan-ringkas/view?language=id`, "_blank");
   };
 
   const downloadPdf = () => {

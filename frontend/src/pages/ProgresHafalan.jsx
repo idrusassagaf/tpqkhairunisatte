@@ -105,8 +105,11 @@ export default function ProgresHafalan() {
 
   const handleDownloadExcel = () => {
     if (filteredSantri.length === 0) {
-      alert("Tidak ada data santri yang dapat di-download.");
-
+      window.__tpqNotify?.toast({
+        type: "warning",
+        title: "Tidak ada data",
+        message: "Tidak ada data santri yang dapat di-download.",
+      });
       return;
     }
 
@@ -158,8 +161,11 @@ export default function ProgresHafalan() {
 
   const handleDownloadPDF = () => {
     if (filteredSantri.length === 0) {
-      alert("Tidak ada data santri yang dapat di-download.");
-
+      window.__tpqNotify?.toast({
+        type: "warning",
+        title: "Tidak ada data",
+        message: "Tidak ada data santri yang dapat di-download.",
+      });
       return;
     }
 
@@ -363,9 +369,12 @@ export default function ProgresHafalan() {
 
       setShowDownload(false);
     } catch (error) {
-      console.error("Gagal membuat PDF Progres Hafalan:", error);
-
-      alert("PDF gagal dibuat. Silakan cek Console browser.");
+      console.error("Gagal membuat PDF hafalan:", error);
+      window.__tpqNotify?.toast({
+        type: "error",
+        title: "Download gagal",
+        message: "PDF gagal dibuat. Silakan cek Console browser.",
+      });
     }
   };
 
@@ -568,7 +577,9 @@ export default function ProgresHafalan() {
 
                   <td className="p-1 border text-center">
                     <button
-                      onClick={() => navigate(`/dashboard/progres-hafalan/${s.nis}`)}
+                      onClick={() =>
+                        navigate(`/dashboard/progres-hafalan/${s.nis}`)
+                      }
                       className="
                         inline-flex
                         items-center
@@ -661,7 +672,9 @@ export default function ProgresHafalan() {
                   {/* KANAN */}
 
                   <button
-                    onClick={() => navigate(`/dashboard/progres-hafalan/${s.nis}`)}
+                    onClick={() =>
+                      navigate(`/dashboard/progres-hafalan/${s.nis}`)
+                    }
                     className="
                       w-9 h-9
                       rounded-full
