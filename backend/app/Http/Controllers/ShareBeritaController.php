@@ -16,8 +16,8 @@ class ShareBeritaController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $frontendUrl =
-            'http://localhost:5173/web/berita/' .
+        $frontendUrl = rtrim(env('FRONTEND_URL', 'http://localhost:5173'), '/') .
+            '/berita/' .
             $berita->id;
 
         /*
@@ -29,9 +29,7 @@ class ShareBeritaController extends Controller
         $imageUrl = null;
 
         if ($berita->foto) {
-            $imageUrl =
-                'http://127.0.0.1:8000/storage/' .
-                $berita->foto;
+            $imageUrl = asset('storage/' . $berita->foto);
         }
 
         /*
