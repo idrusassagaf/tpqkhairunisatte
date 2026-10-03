@@ -65,5 +65,10 @@ class PengaturanSistem extends Model
         'syarat_form',
         'syarat_kk',
         'syarat_ktp',
+        'translations',
+    ];
+
+    protected $casts = [
+        'translations' => 'array',
     ];
 }

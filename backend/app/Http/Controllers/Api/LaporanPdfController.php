@@ -18,6 +18,7 @@ use App\Models\ProgresQuran;
 use App\Models\Galeri;
 use App\Models\ProgresHafalan;
 use App\Models\PengaturanLaporan;
+use App\Models\LaporanTranslationCache;
 
 use App\Services\Report\ReportEngine;
 
@@ -275,8 +276,18 @@ TEXT;
                 "https://generativelanguage.googleapis.com/v1beta/models/"
                 . "{$model}:generateContent?key={$apiKey}";
 
-            $response = Http::timeout(45)
+            $response = Http::timeout(60)
                 ->connectTimeout(10)
+                // Koneksi ke-3+ berturut-turut ke host yang sama kadang
+                // "menggantung" (stale keep-alive). Paksa koneksi baru
+                // dan retry sekali agar tidak ikut memakai socket lama.
+                ->withOptions([
+                    'curl' => [
+                        CURLOPT_FRESH_CONNECT => true,
+                        CURLOPT_FORBID_REUSE => true,
+                    ],
+                ])
+                ->retry(2, 2000)
                 ->post($url, [
                     'contents' => [
                         [
@@ -404,6 +415,61 @@ TEXT;
      * Terjemahkan seluruh isi laporan menggunakan
      * tiga request Gemini terpisah.
      */
+    /**
+     * Sama seperti translateAll(), tapi dengan cache berbasis hash.
+     *
+     * Isi bab1-8 auto-generate dari data live (jumlah santri, progres,
+     * dll) jadi tidak bisa "translate sekali saat admin simpan"
+     * seperti Profil/Berita/Pengumuman/Galeri -- datanya bisa berubah
+     * kapan saja lewat banyak tempat (CRUD santri, progres, dll).
+     *
+     * Solusinya: hitung hash dari konten Indonesia saat ini. Kalau
+     * hash sama dengan cache terakhir untuk bahasa ini, berarti data
+     * belum berubah sejak terakhir diterjemahkan -- pakai cache,
+     * TANPA panggilan AI sama sekali. Kalau beda, baru panggil Gemini
+     * (translateAll yang asli), lalu simpan hasilnya sebagai cache
+     * baru.
+     */
+    private function translateAllCached(
+        array $settingNarrasi,
+        ?string $settingPenutup,
+        array $laporan,
+        string $language
+    ): array {
+        if ($language === 'id') {
+            return $this->translateAll($settingNarrasi, $settingPenutup, $laporan, $language);
+        }
+
+        $contentHash = md5(json_encode([
+            'narasi' => $settingNarrasi,
+            'penutup' => $settingPenutup,
+            'laporan' => $laporan,
+        ]));
+
+        $cache = LaporanTranslationCache::where('language', $language)->first();
+
+        if ($cache && $cache->content_hash === $contentHash) {
+            return $cache->data;
+        }
+
+        $translated = $this->translateAll($settingNarrasi, $settingPenutup, $laporan, $language);
+
+        $berhasil = $translated['_success'] ?? false;
+        unset($translated['_success']);
+
+        if ($berhasil) {
+            LaporanTranslationCache::updateOrCreate(
+                ['language' => $language],
+                [
+                    'content_hash' => $contentHash,
+                    'data' => $translated,
+                ]
+            );
+        }
+
+        return $translated;
+    }
+
     private function translateAll(
         array $settingNarrasi,
         ?string $settingPenutup,
@@ -577,12 +643,21 @@ TEXT;
             'narasi' => $settingNarrasi,
             'penutup' => $settingPenutup ?? '',
             'laporan' => $laporan,
+
+            // Dipakai translateAllCached() -- hanya cache hasil yang
+            // benar-benar berhasil diterjemahkan, supaya gagal total
+            // (GEMINI_API_KEY kosong, timeout, dll) tidak ikut
+            // tersimpan sebagai "sudah diterjemahkan".
+            '_success' =>
+                is_array($translatedNarasi) &&
+                is_array($translatedBab1Sampai4) &&
+                is_array($translatedBab5Sampai8),
         ];
     }
 
     private function generatePdf(string $language = 'id')
     {
-        set_time_limit(180);
+        set_time_limit(300);
 
         $language = $this->normalizeLanguage($language);
 
@@ -623,7 +698,7 @@ TEXT;
 
         $laporan = $report->generate();
 
-        $translated = $this->translateAll(
+        $translated = $this->translateAllCached(
             $narasiAsli,
             $setting->penutup ?? '',
             $laporan,
@@ -694,16 +769,23 @@ TEXT;
                     return;
                 }
 
-                $font = $fontMetrics->getFont(
-                    'Helvetica',
-                    'italic'
-                );
+                // Helvetica (font standar PDF) tidak punya glyph Arab.
+                // DejaVu Sans PUNYA glyph Arab (terbukti dari body
+                // dokumen yang sudah render benar) -- tapi varian
+                // ITALIC/oblique-nya (DejaVuSans-Oblique.ttf) ternyata
+                // tidak, makanya sebelumnya footer tampil kotak-kotak
+                // walau sudah pakai "DejaVu Sans". Pakai style
+                // "normal" untuk bahasa Arab supaya pakai DejaVuSans.ttf
+                // biasa yang terbukti punya glyph Arab.
+                $font = $language === 'ar'
+                    ? $fontMetrics->getFont('DejaVu Sans', 'normal')
+                    : $fontMetrics->getFont('Helvetica', 'italic');
 
                 $footerText = $language === 'en'
                     ? 'TPQ Khairunissa Summary Report - Update : '
                     : (
                         $language === 'ar'
-                        ? 'Ø§Ù„ØªÙ‚Ø±ÙŠØ± Ø§Ù„Ù…ÙˆØ¬Ø² Ù„Ù€ TPQ Khairunissa - Ø§Ù„ØªØ­Ø¯ÙŠØ« : '
+                        ? 'التقرير الموجز لـ TPQ Khairunissa - التحديث : '
                         : 'Laporan Ringkas TPQ Khairunissa - Update : '
                     );
 
@@ -711,7 +793,7 @@ TEXT;
                     ? "Page {$pageNumber} - {$pageCount}"
                     : (
                         $language === 'ar'
-                        ? "ØµÙÙØ­Ø© {$pageNumber} - {$pageCount}"
+                        ? "صفحة {$pageNumber} - {$pageCount}"
                         : "Hal {$pageNumber} - {$pageCount}"
                     );
 

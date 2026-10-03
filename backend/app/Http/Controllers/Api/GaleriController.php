@@ -4,11 +4,38 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Galeri;
+use App\Services\Translator\GeminiTranslator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class GaleriController extends Controller
 {
+    /**
+     * Terjemahkan judul foto ke EN/AR dan simpan ke kolom
+     * `translations`, supaya halaman publik tidak perlu
+     * memanggil AI setiap kali galeri dibuka.
+     */
+    private function syncTranslations(Galeri $galeri): void
+    {
+        $fields = ['judul' => (string) $galeri->judul];
+
+        $translator = new GeminiTranslator();
+
+        $hasil = $translator->translateToAll($fields, ['en', 'ar']);
+
+        $existing = is_array($galeri->translations) ? $galeri->translations : [];
+
+        foreach ($hasil as $language => $translated) {
+            if ($translated !== null) {
+                $existing[$language] = $translated;
+            }
+        }
+
+        $galeri->translations = $existing;
+
+        $galeri->save();
+    }
+
     // TAMPILKAN SEMUA FOTO
     public function index()
     {
@@ -32,6 +59,8 @@ class GaleriController extends Controller
             'judul' => $request->judul,
             'foto' => $path
         ]);
+
+        $this->syncTranslations($galeri);
 
         return response()->json([
             'message' => 'Foto berhasil ditambahkan',

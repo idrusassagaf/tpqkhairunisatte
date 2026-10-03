@@ -15,5 +15,10 @@ class Berita extends Model
         'foto',
         'status',
         'views',
+        'translations',
+    ];
+
+    protected $casts = [
+        'translations' => 'array',
     ];
 }

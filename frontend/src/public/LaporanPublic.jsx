@@ -3,6 +3,9 @@ import { useOutletContext } from "react-router-dom";
 import heroImage from "../assets/hero-putih04.jpg";
 import { ChevronDown, FileText } from "lucide-react";
 
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
+
 export default function LaporanPublic() {
   const { language } = useOutletContext();
 
@@ -255,7 +258,7 @@ export default function LaporanPublic() {
 
               <div className="flex gap-3">
                 <a
-                  href={`http://127.0.0.1:8000/api/laporan-ringkas/view?language=${pdfLanguage}`}
+                  href={`${API_BASE_URL}/laporan-ringkas/view?language=${pdfLanguage}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl"
@@ -264,7 +267,7 @@ export default function LaporanPublic() {
                 </a>
 
                 <a
-                  href={`http://127.0.0.1:8000/api/laporan-ringkas/pdf?language=${pdfLanguage}`}
+                  href={`${API_BASE_URL}/laporan-ringkas/pdf?language=${pdfLanguage}`}
                   className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-xl"
                 >
                   {t.download}

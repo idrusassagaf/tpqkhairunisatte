@@ -4,8 +4,6 @@ import { api } from "../api";
 import videoTPQ from "../assets/video/clip2tpq.mp4";
 import heroImage from "../assets/hero-putih04.jpg";
 
-const TRANSLATION_CACHE_KEY = "tpq_profil_translation_v1";
-
 export default function ProfilTPQ() {
   const { language } = useOutletContext();
 
@@ -79,11 +77,9 @@ export default function ProfilTPQ() {
 
   const [guru, setGuru] = useState([]);
   const [pengaturan, setPengaturan] = useState(null);
-  const [translatedContent, setTranslatedContent] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [translationLoading, setTranslationLoading] = useState(false);
 
   const loadData = async () => {
     try {
@@ -100,7 +96,6 @@ export default function ProfilTPQ() {
       const dataPengaturan = pengaturanResponse.data?.data || null;
 
       setPengaturan(dataPengaturan);
-      setTranslatedContent(null);
     } catch (err) {
       console.error("Gagal mengambil data Profil TPQ:", err);
 
@@ -116,124 +111,16 @@ export default function ProfilTPQ() {
     loadData();
   }, []);
 
-  useEffect(() => {
-    if (!pengaturan || language === "id") {
-      setTranslatedContent(null);
-      setTranslationLoading(false);
-      return;
-    }
+  // =========================================================
+  // TERJEMAHAN
+  //
+  // Sudah diterjemahkan & disimpan oleh backend saat admin
+  // menyimpan Pengaturan Sistem (lihat PengaturanSistemController).
+  // Di sini tinggal dibaca, tidak ada panggilan AI lagi.
+  // =========================================================
 
-    let cancelled = false;
-
-    const translateContent = async () => {
-      const sourceContent = {
-        profil: pengaturan.profil || "",
-        visi: pengaturan.visi || "",
-        misi: pengaturan.misi || "",
-        nilaiAkhlak: pengaturan.nilai_akhlak || "",
-        nilaiQuran: pengaturan.nilai_quran || "",
-        nilaiDisiplin: pengaturan.nilai_disiplin || "",
-        nilaiPrestasi: pengaturan.nilai_prestasi || "",
-      };
-
-      const sourceKey = JSON.stringify(sourceContent);
-
-      try {
-        setTranslationLoading(true);
-
-        const cachedRaw = sessionStorage.getItem(TRANSLATION_CACHE_KEY);
-
-        if (cachedRaw) {
-          try {
-            const cached = JSON.parse(cachedRaw);
-
-            if (
-              cached?.language === language &&
-              cached?.sourceKey === sourceKey &&
-              cached?.data
-            ) {
-              if (!cancelled) {
-                setTranslatedContent(cached.data);
-                setTranslationLoading(false);
-              }
-
-              return;
-            }
-          } catch (cacheError) {
-            console.warn(
-              "Cache terjemahan Profil TPQ tidak valid:",
-              cacheError,
-            );
-
-            sessionStorage.removeItem(TRANSLATION_CACHE_KEY);
-          }
-        }
-
-        const response = await api.post("/profil/translate", {
-          ...sourceContent,
-          language,
-        });
-
-        if (!response.data?.success) {
-          throw new Error(
-            response.data?.message || "Terjemahan Profil TPQ gagal.",
-          );
-        }
-
-        const result = response.data?.data;
-
-        if (!result) {
-          throw new Error("Data hasil terjemahan Profil TPQ kosong.");
-        }
-
-        const translated = {
-          profil: result.profil ?? sourceContent.profil,
-          visi: result.visi ?? sourceContent.visi,
-          misi: result.misi ?? sourceContent.misi,
-          nilaiAkhlak: result.nilaiAkhlak ?? sourceContent.nilaiAkhlak,
-          nilaiQuran: result.nilaiQuran ?? sourceContent.nilaiQuran,
-          nilaiDisiplin: result.nilaiDisiplin ?? sourceContent.nilaiDisiplin,
-          nilaiPrestasi: result.nilaiPrestasi ?? sourceContent.nilaiPrestasi,
-        };
-
-        if (!cancelled) {
-          setTranslatedContent(translated);
-
-          try {
-            sessionStorage.setItem(
-              TRANSLATION_CACHE_KEY,
-              JSON.stringify({
-                language,
-                sourceKey,
-                data: translated,
-              }),
-            );
-          } catch (cacheError) {
-            console.warn(
-              "Gagal menyimpan cache terjemahan Profil TPQ:",
-              cacheError,
-            );
-          }
-        }
-      } catch (err) {
-        console.error("Gagal menerjemahkan Profil TPQ:", err);
-
-        if (!cancelled) {
-          setTranslatedContent(sourceContent);
-        }
-      } finally {
-        if (!cancelled) {
-          setTranslationLoading(false);
-        }
-      }
-    };
-
-    translateContent();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [language, pengaturan]);
+  const translatedContent =
+    language !== "id" ? pengaturan?.translations?.[language] : null;
 
   if (loading) {
     return (
@@ -312,22 +199,22 @@ export default function ProfilTPQ() {
   const displayedNilaiAkhlak =
     language === "id"
       ? nilaiAkhlak
-      : translatedContent?.nilaiAkhlak || nilaiAkhlak;
+      : translatedContent?.nilai_akhlak || nilaiAkhlak;
 
   const displayedNilaiQuran =
     language === "id"
       ? nilaiQuran
-      : translatedContent?.nilaiQuran || nilaiQuran;
+      : translatedContent?.nilai_quran || nilaiQuran;
 
   const displayedNilaiDisiplin =
     language === "id"
       ? nilaiDisiplin
-      : translatedContent?.nilaiDisiplin || nilaiDisiplin;
+      : translatedContent?.nilai_disiplin || nilaiDisiplin;
 
   const displayedNilaiPrestasi =
     language === "id"
       ? nilaiPrestasi
-      : translatedContent?.nilaiPrestasi || nilaiPrestasi;
+      : translatedContent?.nilai_prestasi || nilaiPrestasi;
 
   const daftarMisi = displayedMisi
     .split(/\r?\n/)
@@ -406,7 +293,7 @@ export default function ProfilTPQ() {
                 "
               >
                 <p dir={isArabic ? "rtl" : "ltr"}>
-                  {translationLoading ? "..." : displayedProfil}
+                  {displayedProfil}
                 </p>
               </div>
             </div>
@@ -526,7 +413,7 @@ export default function ProfilTPQ() {
                     "
                     dir={isArabic ? "rtl" : "ltr"}
                   >
-                    {translationLoading ? "..." : displayedVisi}
+                    {displayedVisi}
                   </p>
                 </div>
 
@@ -618,7 +505,7 @@ export default function ProfilTPQ() {
                     "
                     dir={isArabic ? "rtl" : "ltr"}
                   >
-                    {translationLoading ? "..." : displayedNilaiAkhlak}
+                    {displayedNilaiAkhlak}
                   </p>
                 </div>
 
@@ -641,7 +528,7 @@ export default function ProfilTPQ() {
                     "
                     dir={isArabic ? "rtl" : "ltr"}
                   >
-                    {translationLoading ? "..." : displayedNilaiQuran}
+                    {displayedNilaiQuran}
                   </p>
                 </div>
 
@@ -664,7 +551,7 @@ export default function ProfilTPQ() {
                     "
                     dir={isArabic ? "rtl" : "ltr"}
                   >
-                    {translationLoading ? "..." : displayedNilaiDisiplin}
+                    {displayedNilaiDisiplin}
                   </p>
                 </div>
 
@@ -687,7 +574,7 @@ export default function ProfilTPQ() {
                     "
                     dir={isArabic ? "rtl" : "ltr"}
                   >
-                    {translationLoading ? "..." : displayedNilaiPrestasi}
+                    {displayedNilaiPrestasi}
                   </p>
                 </div>
               </div>

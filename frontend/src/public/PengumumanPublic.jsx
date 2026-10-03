@@ -36,7 +36,7 @@ export default function PengumumanPublic() {
   const [pengumuman, setPengumuman] = useState([]);
   useEffect(() => {
     loadPengumuman();
-  }, [language]);
+  }, []);
 
   const loadPengumuman = async () => {
     try {
@@ -46,72 +46,31 @@ export default function PengumumanPublic() {
 
       const aktif = data.filter((item) => item.status === "Aktif");
 
-      if (language === "id") {
-        setPengumuman(aktif);
-        return;
-      }
-
-      const translated = [];
-
-      for (const item of aktif) {
-        const cacheKey = `tpq_pengumuman_translation_${item.id}_${language}`;
-        const cached = sessionStorage.getItem(cacheKey);
-
-        if (cached) {
-          try {
-            const parsed = JSON.parse(cached);
-
-            translated.push({
-              ...item,
-              judul: parsed.judul,
-              isi: parsed.isi,
-            });
-
-            continue;
-          } catch {
-            sessionStorage.removeItem(cacheKey);
-          }
-        }
-
-        try {
-          const translationRes = await api.post("/pengumuman/translate", {
-            judul: item.judul,
-            isi: item.isi,
-            language,
-          });
-
-          const result = translationRes.data?.data;
-
-          if (result?.judul && result?.isi) {
-            sessionStorage.setItem(
-              cacheKey,
-              JSON.stringify({
-                judul: result.judul,
-                isi: result.isi,
-              }),
-            );
-
-            translated.push({
-              ...item,
-              judul: result.judul,
-              isi: result.isi,
-            });
-          } else {
-            translated.push(item);
-          }
-        } catch (err) {
-          console.error(`Gagal menerjemahkan pengumuman ${item.id}:`, err);
-
-          translated.push(item);
-        }
-      }
-
-      setPengumuman(translated);
+      setPengumuman(aktif);
     } catch (err) {
       console.error("Gagal mengambil pengumuman:", err);
       setPengumuman([]);
     }
   };
+
+  // =========================================================
+  // TERJEMAHAN
+  //
+  // Sudah diterjemahkan & disimpan backend saat Admin menyimpan
+  // pengumuman (lihat PengumumanController). Di sini tinggal
+  // dibaca, tidak ada panggilan AI per item lagi.
+  // =========================================================
+
+  const displayPengumuman =
+    language === "id"
+      ? pengumuman
+      : pengumuman.map((item) => {
+          const translated = item.translations?.[language];
+
+          return translated
+            ? { ...item, judul: translated.judul, isi: translated.isi }
+            : item;
+        });
 
   return (
     <div className="bg-[#f8faf8]">
@@ -144,13 +103,13 @@ export default function PengumumanPublic() {
 
           {/* List */}
 
-          {pengumuman.length === 0 ? (
+          {displayPengumuman.length === 0 ? (
             <div className="bg-white rounded-3xl shadow-xl p-10 text-center">
               <p className="text-gray-500">{t.empty}</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {pengumuman.map((item) => (
+              {displayPengumuman.map((item) => (
                 <Link
                   key={item.id}
                   to={`/pengumuman/${item.id}`}

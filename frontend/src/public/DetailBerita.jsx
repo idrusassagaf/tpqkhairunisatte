@@ -2,6 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, Link, useOutletContext } from "react-router-dom";
 import { api } from "../api";
 import heroImage from "../assets/hero-putih04.jpg";
+
+const API_ROOT_URL = (
+  import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api"
+).replace(/\/api\/?$/, "");
 import {
   User,
   CalendarDays,
@@ -9,17 +13,37 @@ import {
   ArrowLeft,
   ChevronDown,
   Share2,
+  MoreHorizontal,
   X,
 } from "lucide-react";
+
+const WhatsAppIcon = (props) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+    <path d="M17.472 14.382c-.297-.149-1.758-.868-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.149-.15.3-.347.449-.52.15-.174.2-.3.3-.498.099-.198.05-.374-.05-.523-.099-.149-.57-1.378-.783-1.885-.207-.496-.418-.43-.573-.438-.149-.008-.32-.01-.49-.01-.172 0-.448.064-.681.313-.238.248-1.237 1.209-1.237 2.952s1.265 3.433 1.44 3.67c.173.236 2.427 3.709 5.885 5.057 3.456 1.347 3.456.898 4.08.84.625-.057 2.03-.826 2.317-1.627.287-.8.287-1.487.198-1.627-.09-.139-.336-.2-.633-.35" />
+    <path d="M12.04 2c-5.526 0-10.004 4.478-10.004 10.004 0 1.767.46 3.427 1.265 4.868L2 22l5.29-1.388a9.95 9.95 0 0 0 4.75 1.206h.004c5.526 0 10.004-4.478 10.004-10.004S17.566 2 12.04 2zm0 18.28h-.003a8.26 8.26 0 0 1-4.207-1.152l-.302-.18-3.14.823.838-3.06-.197-.314a8.25 8.25 0 0 1-1.265-4.393c0-4.567 3.716-8.283 8.28-8.283 2.212 0 4.29.862 5.853 2.428a8.22 8.22 0 0 1 2.425 5.858c0 4.566-3.715 8.273-8.282 8.273z" />
+  </svg>
+);
+
+const FacebookIcon = (props) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" {...props}>
+    <path d="M22 12.06C22 6.505 17.523 2 12 2S2 6.505 2 12.06c0 5.02 3.657 9.184 8.438 9.94v-7.03H7.898v-2.91h2.54V9.845c0-2.507 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.774-1.63 1.567v1.882h2.773l-.443 2.91h-2.33V22c4.78-.756 8.437-4.92 8.437-9.94z" />
+  </svg>
+);
+
+const InstagramIcon = (props) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" {...props}>
+    <rect x="3" y="3" width="18" height="18" rx="5" />
+    <circle cx="12" cy="12" r="4" />
+    <circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none" />
+  </svg>
+);
 
 export default function DetailBerita() {
   const { id } = useParams();
   const { language } = useOutletContext();
 
   const [berita, setBerita] = useState(null);
-  const [translatedBerita, setTranslatedBerita] = useState(null);
   const [showShare, setShowShare] = useState(false);
-  const [loadingTranslation, setLoadingTranslation] = useState(false);
 
   const isArabic = language === "ar";
 
@@ -67,10 +91,6 @@ export default function DetailBerita() {
         const item = data.find((b) => String(b.id) === String(id));
 
         setBerita(item || null);
-
-        if (item && language === "id") {
-          setTranslatedBerita(item);
-        }
       })
       .catch((err) => {
         if (!mounted) return;
@@ -82,100 +102,24 @@ export default function DetailBerita() {
     return () => {
       mounted = false;
     };
-  }, [id, language]);
+  }, [id]);
 
-  // TRANSLATE BERITA
-  const translateBeritaItem = async (item) => {
-    const cacheKey = `tpq_berita_translation_${item.id}_${language}`;
+  // =========================================================
+  // TERJEMAHAN
+  //
+  // Sudah diterjemahkan & disimpan backend saat Admin menyimpan
+  // berita (lihat BeritaController). Di sini tinggal dibaca,
+  // tidak ada panggilan AI lagi.
+  // =========================================================
 
-    try {
-      const cached = sessionStorage.getItem(cacheKey);
-
-      if (cached) {
-        const parsed = JSON.parse(cached);
-
-        if (parsed?.judul && parsed?.isi !== undefined) {
-          return {
-            ...item,
-            judul: parsed.judul,
-            isi: parsed.isi,
-          };
+  const translatedBerita =
+    berita && language !== "id" && berita.translations?.[language]
+      ? {
+          ...berita,
+          judul: berita.translations[language].judul,
+          isi: berita.translations[language].isi,
         }
-      }
-    } catch {
-      sessionStorage.removeItem(cacheKey);
-    }
-
-    const response = await api.post("/berita/translate", {
-      judul: item.judul || "",
-      isi: item.isi || "",
-      language,
-    });
-
-    if (!response.data?.success || !response.data?.data) {
-      throw new Error("Hasil terjemahan berita tidak valid.");
-    }
-
-    const translated = {
-      judul: response.data.data.judul || item.judul,
-      isi: response.data.data.isi || item.isi,
-    };
-
-    try {
-      sessionStorage.setItem(cacheKey, JSON.stringify(translated));
-    } catch {
-      console.warn("Cache terjemahan berita tidak dapat disimpan.");
-    }
-
-    return {
-      ...item,
-      judul: translated.judul,
-      isi: translated.isi,
-    };
-  };
-
-  useEffect(() => {
-    if (!berita) return;
-
-    if (language === "id") {
-      setTranslatedBerita(berita);
-      setLoadingTranslation(false);
-      return;
-    }
-
-    let cancelled = false;
-
-    const translateBerita = async () => {
-      setLoadingTranslation(true);
-      setTranslatedBerita(null);
-
-      try {
-        const translatedItem = await translateBeritaItem(berita);
-
-        if (cancelled) return;
-
-        setTranslatedBerita(translatedItem);
-      } catch (err) {
-        if (!cancelled) {
-          console.error("Gagal menerjemahkan berita:", err);
-
-          setTranslatedBerita({
-            ...berita,
-          });
-        }
-      } finally {
-        if (!cancelled) {
-          setLoadingTranslation(false);
-        }
-      }
-    };
-
-    translateBerita();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [language, berita, id]);
+      : berita;
 
   const texts = {
     id: {
@@ -236,7 +180,7 @@ export default function DetailBerita() {
   const getBeritaUrl = () => {
     if (!berita) return "";
 
-    return "http://127.0.0.1:8000/share/berita/" + berita.id;
+    return `${API_ROOT_URL}/share/berita/${berita.id}`;
   };
 
   const getShareText = () => {
@@ -322,17 +266,6 @@ ${getBeritaUrl()}`;
     return (
       <div className="p-10 text-center" dir={isArabic ? "rtl" : "ltr"}>
         {t.notFound}
-      </div>
-    );
-  }
-
-  if (language !== "id" && loadingTranslation && !translatedBerita) {
-    return (
-      <div
-        className="min-h-screen flex items-center justify-center p-10 text-center"
-        dir={isArabic ? "rtl" : "ltr"}
-      >
-        <div className="text-green-700 font-semibold">{t.translating}</div>
       </div>
     );
   }
@@ -658,7 +591,7 @@ ${getBeritaUrl()}`;
                   transition
                 "
               >
-                <div className="text-4xl">🟢</div>
+                <WhatsAppIcon className="w-9 h-9" />
                 <span className="font-semibold">WhatsApp</span>
               </button>
 
@@ -679,7 +612,7 @@ ${getBeritaUrl()}`;
                   transition
                 "
               >
-                <div className="text-4xl font-bold">f</div>
+                <FacebookIcon className="w-9 h-9" />
                 <span className="font-semibold">Facebook</span>
               </button>
 
@@ -700,7 +633,7 @@ ${getBeritaUrl()}`;
                   transition
                 "
               >
-                <div className="text-4xl">◎</div>
+                <InstagramIcon className="w-9 h-9" />
                 <span className="font-semibold">Instagram</span>
               </button>
 
@@ -721,7 +654,7 @@ ${getBeritaUrl()}`;
                   transition
                 "
               >
-                <div className="text-4xl">⋯</div>
+                <MoreHorizontal className="w-9 h-9" />
                 <span className="font-semibold">{t.other}</span>
               </button>
             </div>

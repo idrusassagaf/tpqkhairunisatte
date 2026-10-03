@@ -8,8 +8,6 @@ export default function BeritaPublic() {
   const { language } = useOutletContext();
 
   const [berita, setBerita] = useState([]);
-  const [translatedBerita, setTranslatedBerita] = useState([]);
-  const [loadingTranslation, setLoadingTranslation] = useState(false);
 
   useEffect(() => {
     const loadBerita = async () => {
@@ -26,119 +24,24 @@ export default function BeritaPublic() {
     loadBerita();
   }, []);
 
-  const translateBeritaItem = async (item, targetLanguage) => {
-    const cacheKey = `tpq_berita_translation_${item.id}_${language}`;
+  // =========================================================
+  // TERJEMAHAN
+  //
+  // Sudah diterjemahkan & disimpan backend saat Admin menyimpan
+  // berita (lihat BeritaController). Di sini tinggal dibaca,
+  // tidak ada panggilan AI per item / per halaman lagi.
+  // =========================================================
 
-    try {
-      const cached = sessionStorage.getItem(cacheKey);
+  const displayBerita =
+    language === "id"
+      ? berita
+      : berita.map((item) => {
+          const translated = item.translations?.[language];
 
-      if (cached) {
-        const parsed = JSON.parse(cached);
-
-        if (parsed?.judul && parsed?.isi !== undefined) {
-          return {
-            ...item,
-            judul: parsed.judul,
-            isi: parsed.isi,
-          };
-        }
-      }
-    } catch {
-      sessionStorage.removeItem(cacheKey);
-    }
-
-    const response = await api.post("/berita/translate", {
-      judul: item.judul || "",
-      isi: item.isi || "",
-      language,
-    });
-
-    if (!response.data?.success || !response.data?.data) {
-      throw new Error("Hasil terjemahan berita tidak valid.");
-    }
-
-    const translated = {
-      judul: response.data.data.judul || item.judul,
-      isi: response.data.data.isi || item.isi,
-    };
-
-    try {
-      sessionStorage.setItem(cacheKey, JSON.stringify(translated));
-    } catch {
-      console.warn("Cache terjemahan berita tidak dapat disimpan.");
-    }
-
-    return {
-      ...item,
-      judul: translated.judul,
-      isi: translated.isi,
-    };
-  };
-
-  useEffect(() => {
-    if (language === "id") {
-      setTranslatedBerita([]);
-      setLoadingTranslation(false);
-      return;
-    }
-
-    if (berita.length === 0) {
-      return;
-    }
-
-    let cancelled = false;
-
-    const translateBerita = async () => {
-      setLoadingTranslation(true);
-
-      try {
-        const targetLanguage = language === "en" ? "English" : "Arabic";
-
-        const hasil = [];
-
-        for (const item of berita) {
-          if (cancelled) return;
-
-          try {
-            const translatedItem = await translateBeritaItem(
-              item,
-              targetLanguage,
-            );
-
-            hasil.push(translatedItem);
-          } catch (err) {
-            console.error(`Gagal menerjemahkan berita ID ${item.id}:`, err);
-
-            hasil.push({
-              ...item,
-              judul: item.judul,
-              isi: item.isi,
-            });
-          }
-        }
-
-        if (!cancelled) {
-          setTranslatedBerita(hasil);
-        }
-      } catch (err) {
-        if (!cancelled) {
-          console.error("Gagal menerjemahkan berita:", err);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoadingTranslation(false);
-        }
-      }
-    };
-
-    translateBerita();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [language, berita]);
-
-  const displayBerita = language === "id" ? berita : translatedBerita;
+          return translated
+            ? { ...item, judul: translated.judul, isi: translated.isi }
+            : item;
+        });
 
   const translations = {
     id: {
@@ -223,12 +126,6 @@ export default function BeritaPublic() {
               {t.description}
             </p>
           </div>
-
-          {loadingTranslation && (
-            <div className="mb-4 text-center text-sm text-green-700 font-medium">
-              {t.translating}
-            </div>
-          )}
 
           {displayBerita.length === 0 ? (
             <div className="bg-white/35 backdrop-blur-md border border-white/30 rounded-3xl shadow-lg p-10 text-center">

@@ -16,6 +16,8 @@ import {
 
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import dejaVuSansRegular from "../assets/DejaVuSans.ttf";
+import dejaVuSansBold from "../assets/DejaVuSans-Bold.ttf";
 
 export default function Home() {
   const { language } = useOutletContext();
@@ -321,7 +323,7 @@ export default function Home() {
   // DOWNLOAD PDF
   // =========================================================
 
-  const downloadPDF = () => {
+  const downloadPDF = async () => {
     try {
       // =====================================================
       // TANGGAL REALTIME
@@ -341,11 +343,50 @@ export default function Home() {
 
       const namaTPQ = pengaturan.nama_tpq || "TPQ Khairunissa";
 
-      const profil = pengaturan.profil || "";
+      // =====================================================
+      // PROFIL/VISI/MISI SESUAI BAHASA YANG DIPILIH
+      //
+      // Sudah diterjemahkan & disimpan backend saat admin
+      // menyimpan Pengaturan Sistem -- tinggal dibaca, tanpa
+      // panggilan AI di sini.
+      // =====================================================
 
-      const visi = pengaturan.visi || "";
+      const profilTranslated = pengaturan.translations?.[language];
 
-      const misi = pengaturan.misi || "";
+      const profil =
+        (language !== "id" && profilTranslated?.profil) ||
+        pengaturan.profil ||
+        "";
+
+      const visi =
+        (language !== "id" && profilTranslated?.visi) ||
+        pengaturan.visi ||
+        "";
+
+      const misi =
+        (language !== "id" && profilTranslated?.misi) ||
+        pengaturan.misi ||
+        "";
+
+      // =====================================================
+      // PILIH TEKS SESUAI BAHASA
+      //
+      // Urutan: terjemahan asli dari backend (translations,
+      // hasil translate teks Admin) -> narasi generik hardcode
+      // (fallback) -> teks Indonesia asli.
+      // =====================================================
+
+      const pilihBahasa = (teksId, translationKey, narrative) => {
+        if (language === "id") return teksId || "";
+
+        const dariBackend = profilTranslated?.[translationKey];
+
+        if (dariBackend) return dariBackend;
+
+        if (language === "en") return narrative?.en || teksId || "";
+
+        return narrative?.ar || teksId || "";
+      };
 
       // =====================================================
       // BUAT PDF A4 PORTRAIT
@@ -357,6 +398,75 @@ export default function Home() {
         format: "a4",
       });
 
+      // =====================================================
+      // FONT ARABIC
+      //
+      // Font bawaan jsPDF (helvetica) tidak punya huruf Arab --
+      // teks Arab akan tampil berantakan tanpa font Unicode ini.
+      //
+      // Pakai DejaVu Sans (bukan NotoNaskhArabic) karena DejaVu
+      // Sans punya glyph Arab MAUPUN Latin dalam satu font. Ini
+      // penting karena banyak label di PDF ini masih Latin (nama
+      // TPQ, label kolom tabel, dll) -- kalau pakai font yang cuma
+      // punya huruf Arab, semua teks Latin itu hilang total (tidak
+      // tampil sama sekali, bukan cuma kotak-kotak).
+      // =====================================================
+
+      const muatFontTtf = async (url, filename, style) => {
+        const fontResponse = await fetch(url);
+
+        if (!fontResponse.ok) {
+          throw new Error(`Font gagal dimuat (${style}): HTTP ${fontResponse.status}`);
+        }
+
+        const fontArrayBuffer = await fontResponse.arrayBuffer();
+
+        const fontBytes = new Uint8Array(fontArrayBuffer);
+
+        let binary = "";
+
+        const chunkSize = 0x8000;
+
+        for (let i = 0; i < fontBytes.length; i += chunkSize) {
+          const chunk = fontBytes.subarray(
+            i,
+            Math.min(i + chunkSize, fontBytes.length),
+          );
+
+          binary += String.fromCharCode(...chunk);
+        }
+
+        const fontBase64 = btoa(binary);
+
+        doc.addFileToVFS(filename, fontBase64);
+        doc.addFont(filename, "DejaVuSans", style);
+      };
+
+      if (language === "ar") {
+        try {
+          await muatFontTtf(dejaVuSansRegular, "DejaVuSans.ttf", "normal");
+          await muatFontTtf(dejaVuSansBold, "DejaVuSans-Bold.ttf", "bold");
+        } catch (fontError) {
+          console.error("Font Arabic gagal dimuat untuk PDF Profil:", fontError);
+        }
+      }
+
+      // Dipakai di styles/headStyles autoTable supaya tabel juga
+      // pakai font Arab+Latin (bukan cuma pemanggilan doc.text()
+      // manual).
+      const fontStylesTabel =
+        language === "ar" ? { font: "DejaVuSans" } : {};
+
+      // Ganti "doc.setFont('helvetica', style)" dengan ini supaya
+      // otomatis pakai DejaVu Sans (Arab+Latin) saat bahasa Arab.
+      const aturFont = (style = "normal") => {
+        if (language === "ar") {
+          doc.setFont("DejaVuSans", style);
+        } else {
+          doc.setFont("helvetica", style);
+        }
+      };
+
       const pageWidth = doc.internal.pageSize.getWidth();
 
       const pageHeight = doc.internal.pageSize.getHeight();
@@ -364,18 +474,31 @@ export default function Home() {
       const centerX = pageWidth / 2;
 
       // =====================================================
+      // POSISI TEKS UNTUK RTL (ARAB)
+      //
+      // Teks Latin/Indonesia rata kiri dari margin kiri (x).
+      // Teks Arab dicerminkan: rata kanan dari margin yang sama,
+      // diukur dari tepi kanan halaman.
+      // =====================================================
+
+      const posisiX = (xKiri) =>
+        language === "ar" ? pageWidth - xKiri : xKiri;
+
+      const opsiAlign = language === "ar" ? { align: "right" } : {};
+
+      // =====================================================
       // HEADER SETIAP HALAMAN
       // =====================================================
 
       const drawHeader = () => {
-        doc.setFont("helvetica", "bold");
+        aturFont("bold");
         doc.setFontSize(16);
 
         doc.text(String(namaTPQ).toUpperCase(), centerX, 15, {
           align: "center",
         });
 
-        doc.setFont("helvetica", "normal");
+        aturFont("normal");
         doc.setFontSize(10);
 
         doc.text("Membentuk Generasi Qurani Berakhlak", centerX, 21, {
@@ -394,7 +517,7 @@ export default function Home() {
       const drawFooter = () => {
         const nomorHalaman = doc.internal.getNumberOfPages();
 
-        doc.setFont("helvetica", "normal");
+        aturFont("normal");
 
         doc.setFontSize(7);
 
@@ -413,6 +536,27 @@ export default function Home() {
       };
 
       // =====================================================
+      // PASTIKAN RUANG CUKUP SEBELUM MENULIS BLOK BARU
+      //
+      // Dipakai untuk konten yang ditulis manual lewat doc.text()
+      // (bukan autoTable, yang sudah bisa paginasi sendiri).
+      // Kalau sisa ruang di halaman tidak cukup, tutup halaman
+      // berjalan dengan footer, lalu mulai halaman baru.
+      // =====================================================
+
+      const ensureSpace = (currentY, neededHeight) => {
+        if (currentY + neededHeight > pageHeight - 20) {
+          drawFooter();
+          doc.addPage();
+          drawHeader();
+
+          return 36;
+        }
+
+        return currentY;
+      };
+
+      // =====================================================
       // HALAMAN 1
       // PROFIL + LOGO + STATISTIK
       // =====================================================
@@ -423,14 +567,14 @@ export default function Home() {
       // AHLAN WA SAHLAN
       // =====================================================
 
-      doc.setFont("helvetica", "bold");
+      aturFont("bold");
       doc.setFontSize(13);
 
       doc.text(`Ahlan wa sahlan di ${namaTPQ}`, centerX, 37, {
         align: "center",
       });
 
-      doc.setFont("helvetica", "normal");
+      aturFont("normal");
       doc.setFontSize(9);
 
       doc.text("Membentuk Generasi Qurani Berakhlak", centerX, 44, {
@@ -441,7 +585,7 @@ export default function Home() {
       // LOGO TPQ
       // =====================================================
 
-      doc.setFont("helvetica", "bold");
+      aturFont("bold");
       doc.setFontSize(11);
 
       doc.text(`Logo ${namaTPQ}`, centerX, 54, {
@@ -460,7 +604,7 @@ export default function Home() {
 
       let profilY = 105;
 
-      doc.setFont("helvetica", "bold");
+      aturFont("bold");
       doc.setFontSize(12);
 
       doc.text("PROFIL TPQ", centerX, profilY, {
@@ -470,12 +614,12 @@ export default function Home() {
       profilY += 7;
 
       if (profil) {
-        doc.setFont("helvetica", "normal");
+        aturFont("normal");
         doc.setFontSize(8.5);
 
         const profilLines = doc.splitTextToSize(String(profil), 165);
 
-        doc.text(profilLines, 22, profilY);
+        doc.text(profilLines, posisiX(22), profilY, opsiAlign);
 
         profilY += profilLines.length * 4.5 + 8;
       }
@@ -485,19 +629,26 @@ export default function Home() {
       // =====================================================
 
       if (visi) {
-        doc.setFont("helvetica", "bold");
+        const visiLinesPreview = doc.splitTextToSize(String(visi), 165);
+
+        profilY = ensureSpace(
+          profilY,
+          5 + visiLinesPreview.length * 4.5 + 6,
+        );
+
+        aturFont("bold");
         doc.setFontSize(10);
 
-        doc.text("VISI", 22, profilY);
+        doc.text("VISI", posisiX(22), profilY, opsiAlign);
 
         profilY += 5;
 
-        doc.setFont("helvetica", "normal");
+        aturFont("normal");
         doc.setFontSize(8.5);
 
         const visiLines = doc.splitTextToSize(String(visi), 165);
 
-        doc.text(visiLines, 22, profilY);
+        doc.text(visiLines, posisiX(22), profilY, opsiAlign);
 
         profilY += visiLines.length * 4.5 + 6;
       }
@@ -507,19 +658,26 @@ export default function Home() {
       // =====================================================
 
       if (misi) {
-        doc.setFont("helvetica", "bold");
+        const misiLinesPreview = doc.splitTextToSize(String(misi), 165);
+
+        profilY = ensureSpace(
+          profilY,
+          5 + misiLinesPreview.length * 4.5 + 8,
+        );
+
+        aturFont("bold");
         doc.setFontSize(10);
 
-        doc.text("MISI", 22, profilY);
+        doc.text("MISI", posisiX(22), profilY, opsiAlign);
 
         profilY += 5;
 
-        doc.setFont("helvetica", "normal");
+        aturFont("normal");
         doc.setFontSize(8.5);
 
         const misiLines = doc.splitTextToSize(String(misi), 165);
 
-        doc.text(misiLines, 22, profilY);
+        doc.text(misiLines, posisiX(22), profilY, opsiAlign);
 
         profilY += misiLines.length * 4.5 + 8;
       }
@@ -528,7 +686,9 @@ export default function Home() {
       // LAPORAN STATISTIK
       // =====================================================
 
-      doc.setFont("helvetica", "bold");
+      profilY = ensureSpace(profilY, 14 + 4 * 11 + 20);
+
+      aturFont("bold");
       doc.setFontSize(14);
 
       doc.text("LAPORAN STATISTIK", centerX, profilY, {
@@ -537,7 +697,7 @@ export default function Home() {
 
       profilY += 6;
 
-      doc.setFont("helvetica", "normal");
+      aturFont("normal");
       doc.setFontSize(9);
 
       doc.text(`Data statistik ${namaTPQ}`, centerX, profilY, {
@@ -575,6 +735,7 @@ export default function Home() {
         },
 
         styles: {
+          ...fontStylesTabel,
           fontSize: 9,
           cellPadding: 4,
           valign: "middle",
@@ -585,6 +746,7 @@ export default function Home() {
           fontSize: 9,
           fontStyle: "bold",
           halign: "center",
+          ...fontStylesTabel,
         },
 
         columnStyles: {
@@ -595,7 +757,7 @@ export default function Home() {
 
           1: {
             cellWidth: 95,
-            halign: "left",
+            halign: language === "ar" ? "right" : "left",
           },
 
           2: {
@@ -611,14 +773,16 @@ export default function Home() {
 
       let statistikY = doc.lastAutoTable.finalY + 12;
 
-      doc.setFont("helvetica", "bold");
+      statistikY = ensureSpace(statistikY, 7 + 4 * 6);
+
+      aturFont("bold");
       doc.setFontSize(11);
 
-      doc.text("Ringkasan", 30, statistikY);
+      doc.text("Ringkasan", posisiX(30), statistikY, opsiAlign);
 
       statistikY += 7;
 
-      doc.setFont("helvetica", "normal");
+      aturFont("normal");
       doc.setFontSize(9);
 
       const ringkasan = [
@@ -629,7 +793,7 @@ export default function Home() {
       ];
 
       ringkasan.forEach((text) => {
-        doc.text(`• ${text}`, 35, statistikY);
+        doc.text(`• ${text}`, posisiX(35), statistikY, opsiAlign);
 
         statistikY += 6;
       });
@@ -649,14 +813,14 @@ export default function Home() {
       // PROGRAM PEMBELAJARAN
       // =====================================================
 
-      doc.setFont("helvetica", "bold");
+      aturFont("bold");
       doc.setFontSize(14);
 
       doc.text("PROGRAM PEMBELAJARAN", centerX, 36, {
         align: "center",
       });
 
-      doc.setFont("helvetica", "normal");
+      aturFont("normal");
       doc.setFontSize(8.5);
 
       doc.text(
@@ -674,11 +838,35 @@ export default function Home() {
         head: [["No", "Program", "Keterangan"]],
 
         body: [
-          ["1", "Program Iqra", pengaturan.program_iqra || ""],
+          [
+            "1",
+            "Program Iqra",
+            pilihBahasa(
+              pengaturan.program_iqra,
+              "program_iqra",
+              programNarrative.iqra,
+            ),
+          ],
 
-          ["2", "Program Al-Qur'an", pengaturan.program_quran || ""],
+          [
+            "2",
+            "Program Al-Qur'an",
+            pilihBahasa(
+              pengaturan.program_quran,
+              "program_quran",
+              programNarrative.quran,
+            ),
+          ],
 
-          ["3", "Program Tahfidz", pengaturan.program_tahfidz || ""],
+          [
+            "3",
+            "Program Tahfidz",
+            pilihBahasa(
+              pengaturan.program_tahfidz,
+              "program_tahfidz",
+              programNarrative.tahfidz,
+            ),
+          ],
         ],
 
         theme: "grid",
@@ -691,6 +879,7 @@ export default function Home() {
         },
 
         styles: {
+          ...fontStylesTabel,
           fontSize: 8,
           cellPadding: 3,
           valign: "top",
@@ -701,6 +890,7 @@ export default function Home() {
           fontSize: 8,
           fontStyle: "bold",
           halign: "center",
+          ...fontStylesTabel,
         },
 
         columnStyles: {
@@ -711,7 +901,7 @@ export default function Home() {
 
           1: {
             cellWidth: 40,
-            halign: "left",
+            halign: language === "ar" ? "right" : "left",
           },
 
           2: {
@@ -727,7 +917,7 @@ export default function Home() {
 
       let keunggulanY = doc.lastAutoTable.finalY + 14;
 
-      doc.setFont("helvetica", "bold");
+      aturFont("bold");
       doc.setFontSize(14);
 
       doc.text(
@@ -750,14 +940,42 @@ export default function Home() {
           [
             "1",
             "Belajar Iqra & Al-Qur'an",
-            pengaturan.keunggulan_iqra_quran || "",
+            pilihBahasa(
+              pengaturan.keunggulan_iqra_quran,
+              "keunggulan_iqra_quran",
+              keunggulanNarrative.iqraQuran,
+            ),
           ],
 
-          ["2", "Praktik Ibadah", pengaturan.keunggulan_ibadah || ""],
+          [
+            "2",
+            "Praktik Ibadah",
+            pilihBahasa(
+              pengaturan.keunggulan_ibadah,
+              "keunggulan_ibadah",
+              keunggulanNarrative.ibadah,
+            ),
+          ],
 
-          ["3", "Pembinaan Akhlak", pengaturan.keunggulan_akhlak || ""],
+          [
+            "3",
+            "Pembinaan Akhlak",
+            pilihBahasa(
+              pengaturan.keunggulan_akhlak,
+              "keunggulan_akhlak",
+              keunggulanNarrative.akhlak,
+            ),
+          ],
 
-          ["4", "Guru Berpengalaman", pengaturan.keunggulan_guru || ""],
+          [
+            "4",
+            "Guru Berpengalaman",
+            pilihBahasa(
+              pengaturan.keunggulan_guru,
+              "keunggulan_guru",
+              keunggulanNarrative.guru,
+            ),
+          ],
         ],
 
         theme: "grid",
@@ -770,6 +988,7 @@ export default function Home() {
         },
 
         styles: {
+          ...fontStylesTabel,
           fontSize: 7.5,
           cellPadding: 3,
           valign: "top",
@@ -780,6 +999,7 @@ export default function Home() {
           fontSize: 8,
           fontStyle: "bold",
           halign: "center",
+          ...fontStylesTabel,
         },
 
         columnStyles: {
@@ -790,7 +1010,7 @@ export default function Home() {
 
           1: {
             cellWidth: 45,
-            halign: "left",
+            halign: language === "ar" ? "right" : "left",
           },
 
           2: {
@@ -815,14 +1035,14 @@ export default function Home() {
       // JUDUL
       // =====================================================
 
-      doc.setFont("helvetica", "bold");
+      aturFont("bold");
       doc.setFontSize(14);
 
       doc.text("PERSYARATAN PENDAFTARAN SANTRI", centerX, 37, {
         align: "center",
       });
 
-      doc.setFont("helvetica", "normal");
+      aturFont("normal");
       doc.setFontSize(8.5);
 
       doc.text(
@@ -844,13 +1064,41 @@ export default function Home() {
         head: [["No", "Persyaratan", "Keterangan"]],
 
         body: [
-          ["1", "Pendaftaran Gratis", pengaturan.syarat_gratis || ""],
+          [
+            "1",
+            "Pendaftaran Gratis",
+            pilihBahasa(
+              pengaturan.syarat_gratis,
+              "syarat_gratis",
+              syaratNarrative.gratis,
+            ),
+          ],
 
-          ["2", "Mengisi Form Pendaftaran", pengaturan.syarat_form || ""],
+          [
+            "2",
+            "Mengisi Form Pendaftaran",
+            pilihBahasa(
+              pengaturan.syarat_form,
+              "syarat_form",
+              syaratNarrative.form,
+            ),
+          ],
 
-          ["3", "Fotocopy Kartu Keluarga", pengaturan.syarat_kk || ""],
+          [
+            "3",
+            "Fotocopy Kartu Keluarga",
+            pilihBahasa(pengaturan.syarat_kk, "syarat_kk", syaratNarrative.kk),
+          ],
 
-          ["4", "Fotocopy KTP Orang Tua", pengaturan.syarat_ktp || ""],
+          [
+            "4",
+            "Fotocopy KTP Orang Tua",
+            pilihBahasa(
+              pengaturan.syarat_ktp,
+              "syarat_ktp",
+              syaratNarrative.ktp,
+            ),
+          ],
         ],
 
         theme: "grid",
@@ -863,6 +1111,7 @@ export default function Home() {
         },
 
         styles: {
+          ...fontStylesTabel,
           fontSize: 9,
           cellPadding: 4,
           valign: "middle",
@@ -873,6 +1122,7 @@ export default function Home() {
           fontSize: 9,
           fontStyle: "bold",
           halign: "center",
+          ...fontStylesTabel,
         },
 
         columnStyles: {
@@ -883,7 +1133,7 @@ export default function Home() {
 
           1: {
             cellWidth: 60,
-            halign: "left",
+            halign: language === "ar" ? "right" : "left",
           },
 
           2: {
@@ -899,28 +1149,30 @@ export default function Home() {
 
       let catatanY = doc.lastAutoTable.finalY + 15;
 
-      doc.setFont("helvetica", "bold");
+      aturFont("bold");
       doc.setFontSize(10);
 
-      doc.text("Catatan", 25, catatanY);
+      doc.text("Catatan", posisiX(25), catatanY, opsiAlign);
 
       catatanY += 7;
 
-      doc.setFont("helvetica", "normal");
+      aturFont("normal");
       doc.setFontSize(8.5);
 
       doc.text(
         `Dokumen persyaratan digunakan sebagai data pendukung administrasi pendaftaran santri di ${namaTPQ}.`,
-        25,
+        posisiX(25),
         catatanY,
+        opsiAlign,
       );
 
       catatanY += 6;
 
       doc.text(
         `Untuk informasi lebih lanjut, silakan menghubungi ${namaTPQ}.`,
-        25,
+        posisiX(25),
         catatanY,
+        opsiAlign,
       );
 
       drawFooter();

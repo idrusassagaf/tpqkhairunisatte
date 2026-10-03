@@ -11,7 +11,6 @@ export default function GaleriPublic() {
   const { language } = useOutletContext();
 
   const [data, setData] = useState([]);
-  const [translatedData, setTranslatedData] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
 
   const translations = {
@@ -46,14 +45,6 @@ export default function GaleriPublic() {
     loadGaleri();
   }, []);
 
-  useEffect(() => {
-    if (data.length > 0) {
-      translateGaleri();
-    } else {
-      setTranslatedData([]);
-    }
-  }, [data, language]);
-
   const scrollToGaleri = () => {
     document.getElementById("grid-galeri")?.scrollIntoView({
       behavior: "smooth",
@@ -70,65 +61,24 @@ export default function GaleriPublic() {
     }
   };
 
-  const translateGaleri = async () => {
-    if (language === "id") {
-      setTranslatedData(data);
-      return;
-    }
+  // =========================================================
+  // TERJEMAHAN
+  //
+  // Sudah diterjemahkan & disimpan backend saat Admin menyimpan
+  // foto galeri (lihat GaleriController). Di sini tinggal
+  // dibaca, tidak ada panggilan AI per item lagi.
+  // =========================================================
 
-    const hasil = [];
+  const translatedData =
+    language === "id"
+      ? data
+      : data.map((item) => {
+          const translated = item.translations?.[language];
 
-    for (const item of data) {
-      const cacheKey = `tpq_galeri_translation_${item.id}_${language}`;
-
-      const cached = sessionStorage.getItem(cacheKey);
-
-      if (cached) {
-        try {
-          const cachedData = JSON.parse(cached);
-
-          hasil.push({
-            ...item,
-            judul: cachedData.judul || item.judul,
-          });
-
-          continue;
-        } catch (error) {
-          sessionStorage.removeItem(cacheKey);
-        }
-      }
-
-      try {
-        const response = await api.post("/galeri/translate", {
-          judul: item.judul,
-          language,
+          return translated
+            ? { ...item, judul: translated.judul }
+            : item;
         });
-
-        const translatedTitle = response.data?.data?.judul || item.judul;
-
-        sessionStorage.setItem(
-          cacheKey,
-          JSON.stringify({
-            judul: translatedTitle,
-          }),
-        );
-
-        hasil.push({
-          ...item,
-          judul: translatedTitle,
-        });
-      } catch (error) {
-        console.error(`Gagal menerjemahkan judul galeri ID ${item.id}:`, error);
-
-        hasil.push({
-          ...item,
-          judul: item.judul,
-        });
-      }
-    }
-
-    setTranslatedData(hasil);
-  };
 
   const getImageUrl = (foto) => {
     return `${api.defaults.baseURL.replace(/\/api\/?$/, "")}/storage/${foto}`;

@@ -4,10 +4,40 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Berita;
+use App\Services\Translator\GeminiTranslator;
 use Illuminate\Http\Request;
 
 class BeritaController extends Controller
 {
+    /**
+     * Terjemahkan judul + isi ke EN/AR dan simpan ke kolom
+     * `translations`, supaya halaman publik tidak perlu
+     * memanggil AI setiap kali berita dibuka.
+     */
+    private function syncTranslations(Berita $berita): void
+    {
+        $fields = [
+            'judul' => (string) $berita->judul,
+            'isi' => (string) $berita->isi,
+        ];
+
+        $translator = new GeminiTranslator();
+
+        $hasil = $translator->translateToAll($fields, ['en', 'ar']);
+
+        $existing = is_array($berita->translations) ? $berita->translations : [];
+
+        foreach ($hasil as $language => $translated) {
+            if ($translated !== null) {
+                $existing[$language] = $translated;
+            }
+        }
+
+        $berita->translations = $existing;
+
+        $berita->save();
+    }
+
     // TAMPILKAN SEMUA BERITA
     public function index()
     {
@@ -43,6 +73,8 @@ class BeritaController extends Controller
             'foto' => $fotoPath,
         ]);
 
+        $this->syncTranslations($berita);
+
         return response()->json([
             'message' => 'Berita berhasil disimpan',
             'data' => $berita
@@ -61,6 +93,10 @@ class BeritaController extends Controller
                 ->store('berita', 'public');
         }
 
+        $perluTerjemahUlang =
+            $request->judul !== $berita->judul ||
+            $request->isi !== $berita->isi;
+
         $berita->update([
             'judul' => $request->judul,
             'isi' => $request->isi,
@@ -68,6 +104,10 @@ class BeritaController extends Controller
             'status' => $request->status,
             'foto' => $fotoPath,
         ]);
+
+        if ($perluTerjemahUlang) {
+            $this->syncTranslations($berita);
+        }
 
         return response()->json([
             'message' => 'Berita berhasil diupdate',

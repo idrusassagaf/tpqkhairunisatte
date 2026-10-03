@@ -1,6 +1,8 @@
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { api } from "../api";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 export default function KalenderPengajian() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -33,9 +35,20 @@ export default function KalenderPengajian() {
   const offset = firstDay === 0 ? 6 : firstDay - 1;
   const today = new Date();
 
+  // Format kunci HARUS sama persis dengan yang dikembalikan backend
+  // (kolom `tanggal` bertipe DATE di MySQL selalu "YYYY-MM-DD" dengan
+  // leading zero). Tanpa padStart, jadwal yang sudah tersimpan tidak
+  // akan pernah cocok/tampil di kalender.
+  const buatKey = (tahunX, bulanX, tanggalX) =>
+    `${tahunX}-${String(bulanX).padStart(2, "0")}-${String(tanggalX).padStart(2, "0")}`;
+
   const isToday = (tanggal) => {
-    const key = `${tahun}-${bulan + 1}-${tanggal}`;
-    const todayKey = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+    const key = buatKey(tahun, bulan + 1, tanggal);
+    const todayKey = buatKey(
+      today.getFullYear(),
+      today.getMonth() + 1,
+      today.getDate(),
+    );
 
     return key === todayKey;
   };
@@ -53,7 +66,7 @@ export default function KalenderPengajian() {
   };
 
   const pilihTanggal = (tanggal) => {
-    const key = `${tahun}-${bulan + 1}-${tanggal}`;
+    const key = buatKey(tahun, bulan + 1, tanggal);
     setSelectedDate(key);
   };
 
@@ -74,6 +87,126 @@ export default function KalenderPengajian() {
       setSelectedDate(null);
     } catch (err) {
       console.error("Gagal menyimpan jadwal", err);
+    }
+  };
+
+  // =========================================================
+  // DOWNLOAD PDF
+  // =========================================================
+
+  const downloadPDF = () => {
+    try {
+      const doc = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: "a4",
+      });
+
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const centerX = pageWidth / 2;
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.text("KALENDER PENGAJIAN TPQ", centerX, 18, { align: "center" });
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      doc.text(bulanTahun.toUpperCase(), centerX, 26, { align: "center" });
+
+      // =====================================================
+      // SUSUN GRID KALENDER (Senin - Minggu, sama seperti layar)
+      // =====================================================
+
+      const totalSel = offset + jumlahHari;
+      const totalMinggu = Math.ceil(totalSel / 7);
+
+      const gridTeks = [];
+      const gridStatus = [];
+
+      for (let m = 0; m < totalMinggu; m++) {
+        const barisTeks = [];
+        const barisStatus = [];
+
+        for (let h = 0; h < 7; h++) {
+          const selIndex = m * 7 + h;
+          const tanggal = selIndex - offset + 1;
+
+          if (tanggal < 1 || tanggal > jumlahHari) {
+            barisTeks.push("");
+            barisStatus.push(null);
+            continue;
+          }
+
+          const tglKey = buatKey(tahun, bulan + 1, tanggal);
+          const status = jadwal[tglKey];
+
+          const label =
+            status === "mengaji" ? "Mengaji" : status === "libur" ? "Libur" : "";
+
+          barisTeks.push(label ? `${tanggal}\n${label}` : `${tanggal}`);
+          barisStatus.push(status || null);
+        }
+
+        gridTeks.push(barisTeks);
+        gridStatus.push(barisStatus);
+      }
+
+      autoTable(doc, {
+        startY: 34,
+        head: [["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]],
+        body: gridTeks,
+        theme: "grid",
+        styles: {
+          fontSize: 9,
+          cellPadding: 3,
+          halign: "center",
+          valign: "middle",
+          minCellHeight: 16,
+        },
+        headStyles: {
+          fillColor: [30, 58, 138],
+          textColor: 255,
+          fontStyle: "bold",
+          halign: "center",
+        },
+        didParseCell: (data) => {
+          if (data.section !== "body") return;
+
+          const status = gridStatus[data.row.index]?.[data.column.index];
+
+          if (status === "mengaji") {
+            data.cell.styles.fillColor = [220, 252, 231];
+            data.cell.styles.textColor = [22, 101, 52];
+          } else if (status === "libur") {
+            data.cell.styles.fillColor = [254, 226, 226];
+            data.cell.styles.textColor = [153, 27, 27];
+          }
+        },
+      });
+
+      // =====================================================
+      // KETERANGAN
+      // =====================================================
+
+      const keteranganY = doc.lastAutoTable.finalY + 10;
+
+      doc.setFillColor(220, 252, 231);
+      doc.rect(20, keteranganY - 4, 5, 5, "F");
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(0, 0, 0);
+      doc.text("Mengaji", 28, keteranganY);
+
+      doc.setFillColor(254, 226, 226);
+      doc.rect(60, keteranganY - 4, 5, 5, "F");
+      doc.text("Libur", 68, keteranganY);
+
+      const namaFile = `kalender-pengajian-${tahun}-${String(bulan + 1).padStart(2, "0")}.pdf`;
+
+      doc.save(namaFile);
+    } catch (error) {
+      console.error("Gagal membuat PDF kalender:", error);
+      alert("PDF gagal dibuat. Silakan cek Console browser.");
     }
   };
 
@@ -145,11 +278,15 @@ export default function KalenderPengajian() {
             <div key={`empty-${i}`} />
           ))}
 
-          {Array.from({ length: jumlahHari }).map((_, index) => (
-            <div
-              key={index}
-              onClick={() => pilihTanggal(index + 1)}
-              className="
+          {Array.from({ length: jumlahHari }).map((_, index) => {
+            const tglKey = buatKey(tahun, bulan + 1, index + 1);
+            const statusTanggal = jadwal[tglKey];
+
+            return (
+              <div
+                key={index}
+                onClick={() => pilihTanggal(index + 1)}
+                className="
   h-14
   border
   rounded-lg
@@ -162,10 +299,10 @@ export default function KalenderPengajian() {
   justify-center
   hover:bg-gray-50
 "
-            >
-              {/* angka tanggal */}
-              <div
-                className={`
+              >
+                {/* angka tanggal */}
+                <div
+                  className={`
     w-7
     h-7
     rounded-full
@@ -178,24 +315,25 @@ export default function KalenderPengajian() {
 
     ${isToday(index + 1) ? "bg-gray-400 text-white shadow-md" : "text-gray-800"}
   `}
-              >
-                {index + 1}
+                >
+                  {index + 1}
+                </div>
+
+                {/* PREVIEW STATUS */}
+                {statusTanggal === "mengaji" && (
+                  <div className="mt-1 w-5 h-5 rounded-full bg-green-500 text-white text-[10px] font-bold flex items-center justify-center">
+                    M
+                  </div>
+                )}
+
+                {statusTanggal === "libur" && (
+                  <div className="mt-1 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                    L
+                  </div>
+                )}
               </div>
-
-              {/* 🔥 PREVIEW STATUS (INI YANG BENAR LETAKNYA) */}
-              {jadwal[`${tahun}-${bulan + 1}-${index + 1}`] === "mengaji" && (
-                <div className="mt-1 w-5 h-5 rounded-full bg-green-500 text-white text-[10px] font-bold flex items-center justify-center">
-                  M
-                </div>
-              )}
-
-              {jadwal[`${tahun}-${bulan + 1}-${index + 1}`] === "libur" && (
-                <div className="mt-1 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
-                  L
-                </div>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -216,7 +354,11 @@ export default function KalenderPengajian() {
             <span className="text-sm font-medium">Libur</span>
           </div>
           <div className="flex items-center gap-2">
-            <button className="border border-green-500 text-green-600 px-4 py-2 rounded-xl hover:bg-green-50">
+            <button
+              type="button"
+              onClick={downloadPDF}
+              className="border border-green-500 text-green-600 px-4 py-2 rounded-xl hover:bg-green-50"
+            >
               ⬇ Download
             </button>
           </div>

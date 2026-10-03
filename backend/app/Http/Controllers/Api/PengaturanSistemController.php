@@ -4,11 +4,70 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\PengaturanSistem;
+use App\Services\Translator\GeminiTranslator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class PengaturanSistemController extends Controller
 {
+    /**
+     * Field yang diterjemahkan ke EN/AR saat admin menyimpan
+     * pengaturan, supaya halaman publik & PDF tidak perlu
+     * memanggil AI setiap kali dibuka.
+     */
+    private const TRANSLATABLE_FIELDS = [
+        'profil',
+        'visi',
+        'misi',
+        'nilai_akhlak',
+        'nilai_quran',
+        'nilai_disiplin',
+        'nilai_prestasi',
+        'program_iqra',
+        'program_quran',
+        'program_tahfidz',
+        'keunggulan_iqra_quran',
+        'keunggulan_ibadah',
+        'keunggulan_akhlak',
+        'keunggulan_guru',
+        'syarat_gratis',
+        'syarat_form',
+        'syarat_kk',
+        'syarat_ktp',
+    ];
+
+    /**
+     * Terjemahkan field-field di atas ke EN & AR dan simpan ke
+     * kolom `translations`. Kalau salah satu bahasa gagal
+     * diterjemahkan, cache lama untuk bahasa itu tetap dipakai
+     * (tidak ditimpa null) supaya halaman publik tidak tiba-tiba
+     * kosong.
+     */
+    private function syncTranslations(PengaturanSistem $setting): void
+    {
+        $fields = [];
+
+        foreach (self::TRANSLATABLE_FIELDS as $key) {
+            $fields[$key] = (string) ($setting->{$key} ?? '');
+        }
+
+        $translator = new GeminiTranslator();
+
+        $existing = is_array($setting->translations) ? $setting->translations : [];
+
+        $hasil = $translator->translateToAll($fields, ['en', 'ar']);
+
+        foreach ($hasil as $language => $translated) {
+            if ($translated !== null) {
+                $existing[$language] = $translated;
+            }
+        }
+
+        $setting->translations = $existing;
+
+        $setting->save();
+    }
+
     /**
      * =========================================================
      * NARASI DEFAULT
@@ -213,6 +272,14 @@ class PengaturanSistemController extends Controller
         $data['logo_url'] = $setting->logo
             ? asset('storage/' . $setting->logo)
             : null;
+
+
+        // =====================================================
+        // TERJEMAHAN (EN/AR) -- sudah diterjemahkan saat admin
+        // simpan, frontend tinggal baca, tidak perlu panggil AI.
+        // =====================================================
+
+        $data['translations'] = $setting->translations ?? [];
 
 
         return $data;
@@ -563,7 +630,13 @@ class PengaturanSistemController extends Controller
         // SIMPAN
         // =====================================================
 
+        $perluTerjemahUlang = $setting->isDirty(self::TRANSLATABLE_FIELDS);
+
         $setting->save();
+
+        if ($perluTerjemahUlang) {
+            $this->syncTranslations($setting);
+        }
 
 
         // =====================================================

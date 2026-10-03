@@ -13,5 +13,10 @@ class Pengumuman extends Model
         'isi',
         'tanggal_berakhir',
         'status',
+        'translations',
+    ];
+
+    protected $casts = [
+        'translations' => 'array',
     ];
 }

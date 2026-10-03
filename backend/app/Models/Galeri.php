@@ -9,5 +9,10 @@ class Galeri extends Model
     protected $fillable = [
         'judul',
         'foto',
+        'translations',
+    ];
+
+    protected $casts = [
+        'translations' => 'array',
     ];
 }

@@ -3,6 +3,9 @@ import { api } from "../api";
 import { Eye, Download, Save } from "lucide-react";
 import RichTextEditor from "../components/laporan/RichTextEditor";
 
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
+
 export default function LaporanRingkas() {
   const [loading, setLoading] = useState(true);
 
@@ -60,13 +63,13 @@ export default function LaporanRingkas() {
 
   const previewPdf = () => {
     window.open(
-      "http://127.0.0.1:8000/api/laporan-ringkas/view?language=id",
+      `${API_BASE_URL}/laporan-ringkas/view?language=id`,
       "_blank",
     );
   };
 
   const downloadPdf = () => {
-    window.open("http://127.0.0.1:8000/api/laporan-ringkas/pdf", "_blank");
+    window.open(`${API_BASE_URL}/laporan-ringkas/pdf`, "_blank");
   };
 
   if (loading) {

@@ -41,10 +41,14 @@ export default function DetailPengumuman() {
 
   useEffect(() => {
     loadData();
-  }, [id, language]);
+  }, [id]);
 
   // =========================================================
   // LOAD DATA PENGUMUMAN
+  //
+  // Terjemahan (EN/AR) sudah disiapkan backend saat Admin
+  // menyimpan pengumuman -- tinggal dipilih sesuai bahasa,
+  // tidak ada panggilan AI di sini.
   // =========================================================
 
   const loadData = async () => {
@@ -55,71 +59,21 @@ export default function DetailPengumuman() {
 
       const item = data.find((p) => String(p.id) === String(id));
 
-      if (!item) {
-        setPengumuman(null);
-        return;
-      }
-
-      if (language === "id") {
-        setPengumuman(item);
-        return;
-      }
-
-      const cacheKey = `tpq_pengumuman_translation_${item.id}_${language}`;
-      const cached = sessionStorage.getItem(cacheKey);
-
-      if (cached) {
-        try {
-          const parsed = JSON.parse(cached);
-
-          setPengumuman({
-            ...item,
-            judul: parsed.judul,
-            isi: parsed.isi,
-          });
-
-          return;
-        } catch {
-          sessionStorage.removeItem(cacheKey);
-        }
-      }
-
-      try {
-        const translationRes = await api.post("/pengumuman/translate", {
-          judul: item.judul,
-          isi: item.isi,
-          language,
-        });
-
-        const result = translationRes.data?.data;
-
-        if (result?.judul && result?.isi) {
-          sessionStorage.setItem(
-            cacheKey,
-            JSON.stringify({
-              judul: result.judul,
-              isi: result.isi,
-            }),
-          );
-
-          setPengumuman({
-            ...item,
-            judul: result.judul,
-            isi: result.isi,
-          });
-        } else {
-          setPengumuman(item);
-        }
-      } catch (err) {
-        console.error(`Gagal menerjemahkan pengumuman ${item.id}:`, err);
-
-        setPengumuman(item);
-      }
+      setPengumuman(item || null);
     } catch (err) {
       console.error("Gagal mengambil data pengumuman:", err);
       setPengumuman(null);
     }
   };
+
+  const displayPengumuman =
+    pengumuman && language !== "id" && pengumuman.translations?.[language]
+      ? {
+          ...pengumuman,
+          judul: pengumuman.translations[language].judul,
+          isi: pengumuman.translations[language].isi,
+        }
+      : pengumuman;
 
   // =========================================================
   // FUNGSI JUSTIFY UNTUK PDF
@@ -289,7 +243,7 @@ export default function DetailPengumuman() {
       doc.setFont("helvetica", "bold");
       doc.setFontSize(9);
 
-      doc.text(`Status: ${pengumuman.status || "-"}`, 20, 51);
+      doc.text(`Status: ${displayPengumuman.status || "-"}`, 20, 51);
 
       // =====================================================
       // JUDUL PENGUMUMAN
@@ -298,7 +252,7 @@ export default function DetailPengumuman() {
       doc.setFont("helvetica", "bold");
       doc.setFontSize(13);
 
-      const judulPengumuman = pengumuman.judul || "-";
+      const judulPengumuman = displayPengumuman.judul || "-";
 
       const judulLines = doc.splitTextToSize(judulPengumuman, pageWidth - 40);
 
@@ -316,7 +270,7 @@ export default function DetailPengumuman() {
       doc.setFontSize(9);
 
       doc.text(
-        `${t.validUntil} ${pengumuman.tanggal_berakhir || "-"}`,
+        `${t.validUntil} ${displayPengumuman.tanggal_berakhir || "-"}`,
         20,
         posisiY,
       );
@@ -340,7 +294,7 @@ export default function DetailPengumuman() {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
 
-      const isiPengumuman = pengumuman.isi || "-";
+      const isiPengumuman = displayPengumuman.isi || "-";
 
       posisiY = drawJustifiedText(
         doc,
@@ -382,7 +336,7 @@ export default function DetailPengumuman() {
       // NAMA FILE PDF
       // =====================================================
 
-      const namaFile = `pengumuman-${String(pengumuman.judul || "tpq")
+      const namaFile = `pengumuman-${String(displayPengumuman.judul || "tpq")
         .toLowerCase()
         .replace(/[^a-z0-9]+/gi, "-")
         .replace(/^-+|-+$/g, "")}.pdf`;
@@ -529,7 +483,7 @@ export default function DetailPengumuman() {
                   font-semibold
                 "
               >
-                {pengumuman.status}
+                {displayPengumuman.status}
               </span>
             </div>
             {/* JUDUL */}
@@ -542,7 +496,7 @@ export default function DetailPengumuman() {
                 leading-tight
               "
             >
-              {pengumuman.judul}
+              {displayPengumuman.judul}
             </h1>
             {/* TANGGAL */}
             <div
@@ -557,7 +511,7 @@ export default function DetailPengumuman() {
               "
             >
               <CalendarDays size={18} />
-              {t.validUntil} {pengumuman.tanggal_berakhir}
+              {t.validUntil} {displayPengumuman.tanggal_berakhir}
             </div>
 
             {/* ISI PENGUMUMAN PUBLIC */}
@@ -576,7 +530,7 @@ export default function DetailPengumuman() {
                 overflowWrap: "break-word",
               }}
             >
-              {(pengumuman.isi || "-")
+              {(displayPengumuman.isi || "-")
                 .replace(/\r\n/g, "\n")
                 .replace(/\r/g, "\n")
                 .split(/\n\s*\n/)
