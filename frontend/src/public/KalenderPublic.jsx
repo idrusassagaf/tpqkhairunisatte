@@ -172,35 +172,14 @@ export default function KalenderPublic() {
 
   const offset = firstDay === 0 ? 6 : firstDay - 1;
 
-  // =========================================================
-  // PINDAH BULAN
-  // =========================================================
-
-  const prevMonth = () => {
-    setCurrentDate(
-      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1),
-    );
-
-    setShowDownload(false);
-  };
-
-  const nextMonth = () => {
-    setCurrentDate(
-      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1),
-    );
-
-    setShowDownload(false);
-  };
-
-  // =========================================================
-  // DATA UNTUK DOWNLOAD
-  // =========================================================
+  const buatKey = (tahunX, bulanX, tanggalX) =>
+    `${tahunX}-${String(bulanX).padStart(2, "0")}-${String(tanggalX).padStart(2, "0")}`;
 
   const getDownloadData = () => {
     return Array.from({ length: jumlahHari }).map((_, index) => {
       const tanggal = index + 1;
 
-      const key = `${tahun}-${bulan + 1}-${tanggal}`;
+      const key = buatKey(tahun, bulan + 1, tanggal);
 
       const status = jadwal[key] || "";
 
@@ -216,9 +195,7 @@ export default function KalenderPublic() {
 
       return {
         no: tanggal,
-        tanggal: `${String(tanggal).padStart(2, "0")} ${
-          t.months[bulan]
-        } ${tahun}`,
+        tanggal: `${String(tanggal).padStart(2, "0")} ${t.months[bulan]} ${tahun}`,
         status: keterangan,
       };
     });
@@ -234,7 +211,7 @@ export default function KalenderPublic() {
 
       const excelData = [
         [t.pdfTitle],
-        ["TPQ Khairunissa Ternate"],
+        ["TPQ Hairunissa Ternate"],
         [],
         [t.pdfPeriod, t.months[bulan], "|", "Tahun", tahun],
         [],
@@ -302,240 +279,134 @@ export default function KalenderPublic() {
   // DOWNLOAD PDF
   // =========================================================
 
-  const downloadPDF = async () => {
+  const downloadPDF = () => {
     try {
-      const downloadData = getDownloadData();
-
-      const sekarang = new Date();
-
-      const tanggalUpdate = sekarang.toLocaleDateString("id-ID", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      });
-
       const doc = new jsPDF({
-        orientation: "portrait",
+        orientation: "landscape",
         unit: "mm",
         format: "a4",
       });
 
-      console.log("PDF KALENDER: PORTRAIT AKTIF");
-
-      // =====================================================
-      // FONT ARABIC
-      // =====================================================
-
-      if (language === "ar") {
-        console.log("PDF KALENDER: MEMUAT FONT ARABIC");
-
-        const fontResponse = await fetch(notoNaskhArabicRegular);
-
-        if (!fontResponse.ok) {
-          throw new Error(
-            `Font Arabic gagal dimuat. HTTP ${fontResponse.status}`,
-          );
-        }
-
-        const fontArrayBuffer = await fontResponse.arrayBuffer();
-
-        const fontBase64 = arrayBufferToBase64(fontArrayBuffer);
-
-        doc.addFileToVFS("NotoNaskhArabic-Regular.ttf", fontBase64);
-
-        doc.addFont("NotoNaskhArabic-Regular.ttf", "NotoNaskhArabic", "normal");
-
-        doc.setFont("NotoNaskhArabic", "normal");
-
-        console.log("PDF KALENDER: FONT ARABIC BERHASIL DIMUAT");
-      }
-
       const pageWidth = doc.internal.pageSize.getWidth();
-
-      const pageHeight = doc.internal.pageSize.getHeight();
-
       const centerX = pageWidth / 2;
 
-      // =====================================================
-      // HELPER TEXT ARABIC
-      // =====================================================
-
-      const pdfText = (text) => {
-        if (language === "ar") {
-          return doc.processArabic(String(text));
-        }
-
-        return text;
-      };
-
-      // =====================================================
-      // JUDUL
-      // =====================================================
-
-      if (language !== "ar") {
-        doc.setFont("helvetica", "bold");
-      }
-
+      doc.setFont("helvetica", "bold");
       doc.setFontSize(16);
+      doc.text("KALENDER PENGAJIAN TPQ", centerX, 18, { align: "center" });
 
-      doc.text(pdfText(t.pdfTitle), centerX, 15, {
-        align: "center",
-      });
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      doc.text(bulanTahun.toUpperCase(), centerX, 26, { align: "center" });
 
-      // =====================================================
-      // SUB JUDUL
-      // =====================================================
+      const totalSel = offset + jumlahHari;
+      const totalMinggu = Math.ceil(totalSel / 7);
 
-      if (language !== "ar") {
-        doc.setFont("helvetica", "normal");
-      }
+      const gridTeks = [];
+      const gridStatus = [];
 
-      doc.setFontSize(10);
+      for (let m = 0; m < totalMinggu; m++) {
+        const barisTeks = [];
+        const barisStatus = [];
 
-      doc.text("TPQ Khairunissa Ternate", centerX, 21, {
-        align: "center",
-      });
+        for (let h = 0; h < 7; h++) {
+          const selIndex = m * 7 + h;
+          const tanggal = selIndex - offset + 1;
 
-      // =====================================================
-      // PERIODE
-      // =====================================================
-
-      doc.setFontSize(9);
-
-      doc.text(
-        pdfText(`${t.pdfPeriod}: ${t.months[bulan].toUpperCase()} ${tahun}`),
-        centerX,
-        27,
-        {
-          align: "center",
-        },
-      );
-
-      // =====================================================
-      // DATA TABEL
-      // =====================================================
-
-      const rows = downloadData.map((item) => [
-        item.no,
-        pdfText(item.tanggal),
-        pdfText(item.status),
-      ]);
-
-      const tableWidth = 170;
-
-      const tableLeft = (pageWidth - tableWidth) / 2;
-
-      autoTable(doc, {
-        startY: 33,
-
-        head: [
-          [
-            pdfText(t.pdfHeaderNo),
-            pdfText(t.pdfHeaderDate),
-            pdfText(t.pdfHeaderDescription),
-          ],
-        ],
-
-        body: rows,
-
-        theme: "grid",
-
-        tableWidth: tableWidth,
-
-        margin: {
-          left: tableLeft,
-          right: tableLeft,
-        },
-
-        styles: {
-          fontSize: 8,
-
-          cellPadding: 2.5,
-
-          overflow: "linebreak",
-
-          valign: "middle",
-
-          halign: "center",
-
-          ...(language === "ar"
-            ? {
-                font: "NotoNaskhArabic",
-              }
-            : {}),
-        },
-
-        headStyles: {
-          fontSize: 8,
-
-          fontStyle: language === "ar" ? "normal" : "bold",
-
-          halign: "center",
-
-          ...(language === "ar"
-            ? {
-                font: "NotoNaskhArabic",
-              }
-            : {}),
-        },
-
-        columnStyles: {
-          0: {
-            cellWidth: 20,
-            halign: "center",
-          },
-
-          1: {
-            cellWidth: 75,
-            halign: language === "ar" ? "right" : "left",
-          },
-
-          2: {
-            cellWidth: 75,
-            halign: "center",
-          },
-        },
-
-        didDrawPage: () => {
-          const nomorHalaman = doc.internal.getNumberOfPages();
-
-          if (language !== "ar") {
-            doc.setFont("helvetica", "normal");
-          } else {
-            doc.setFont("NotoNaskhArabic", "normal");
+          if (tanggal < 1 || tanggal > jumlahHari) {
+            barisTeks.push("");
+            barisStatus.push(null);
+            continue;
           }
 
-          doc.setFontSize(7);
+          const tglKey = buatKey(tahun, bulan + 1, tanggal);
+          const status = jadwal[tglKey];
 
-          doc.text(
-            pdfText(
-              `TPQ Khairunissa • ${t.pdfFooter} • Update ${tanggalUpdate} • Halaman ${nomorHalaman}`,
-            ),
-            centerX,
-            pageHeight - 7,
-            {
-              align: "center",
-            },
-          );
+          const label =
+            status === "mengaji"
+              ? "Mengaji"
+              : status === "libur"
+                ? "Libur"
+                : "";
+
+          barisTeks.push(label ? `${tanggal}\n${label}` : `${tanggal}`);
+          barisStatus.push(status || null);
+        }
+
+        gridTeks.push(barisTeks);
+        gridStatus.push(barisStatus);
+      }
+
+      autoTable(doc, {
+        startY: 34,
+        head: [
+          ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"],
+        ],
+        body: gridTeks,
+        theme: "grid",
+        styles: {
+          fontSize: 9,
+          cellPadding: 3,
+          halign: "center",
+          valign: "middle",
+          minCellHeight: 16,
+        },
+        headStyles: {
+          fillColor: [30, 58, 138],
+          textColor: 255,
+          fontStyle: "bold",
+          halign: "center",
+        },
+        didParseCell: (data) => {
+          if (data.section !== "body") return;
+
+          const status = gridStatus[data.row.index]?.[data.column.index];
+
+          if (status === "mengaji") {
+            data.cell.styles.fillColor = [220, 252, 231];
+            data.cell.styles.textColor = [22, 101, 52];
+          } else if (status === "libur") {
+            data.cell.styles.fillColor = [254, 226, 226];
+            data.cell.styles.textColor = [153, 27, 27];
+          }
         },
       });
 
-      // =====================================================
-      // NAMA FILE
-      // =====================================================
+      const keteranganY = doc.lastAutoTable.finalY + 10;
+
+      doc.setFillColor(220, 252, 231);
+      doc.rect(20, keteranganY - 4, 5, 5, "F");
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(0, 0, 0);
+      doc.text("Mengaji", 28, keteranganY);
+
+      doc.setFillColor(254, 226, 226);
+      doc.rect(60, keteranganY - 4, 5, 5, "F");
+      doc.text("Libur", 68, keteranganY);
 
       const nomorBulan = String(bulan + 1).padStart(2, "0");
-
       const namaFile = `kalender-pengajian-${tahun}-${nomorBulan}.pdf`;
 
       doc.save(namaFile);
-
       setShowDownload(false);
     } catch (error) {
-      console.error("Gagal membuat PDF:", error);
-
+      console.error("Gagal membuat PDF kalender:", error);
       alert("PDF gagal dibuat. Silakan cek Console browser.");
     }
+  };
+
+  const prevMonth = () => {
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1),
+    );
+    setShowDownload(false);
+  };
+
+  const nextMonth = () => {
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1),
+    );
+    setShowDownload(false);
   };
 
   // =========================================================
@@ -681,7 +552,7 @@ export default function KalenderPublic() {
               }).map((_, index) => {
                 const tanggal = index + 1;
 
-                const key = `${tahun}-${bulan + 1}-${tanggal}`;
+                const key = buatKey(tahun, bulan + 1, tanggal);
 
                 const status = jadwal[key];
 

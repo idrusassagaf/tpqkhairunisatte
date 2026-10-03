@@ -1,14 +1,14 @@
 <div style="text-align:center;">
 
     {{-- Logo --}}
-    <img src="{{ public_path('images/logo-tpq.png') }}"
+    <img src="{{ public_path('logo-tpq.png') }}"
         style="width:90px;margin-top:20px;">
 
     <div style="margin-top:18px;"></div>
 
     {{-- judul --}}
     <h1 style="
-        color:#173b8b;
+        color:#000000;
         font-size:28px;
         margin:0;
         font-weight:bold;
@@ -21,9 +21,9 @@
         font-size:20px;
         margin-top:8px;
         font-weight:bold;
-        color:#173b8b;
+        color:#000000;
     ">
-        MANAJEMEN TPQ KHAIRUNISSA KOTA TERNATE
+        MANAJEMEN TPQ HAIRUNISSA KOTA TERNATE
     </div>
 </div>
 
@@ -68,7 +68,7 @@
         font-size:16px;
         margin-top:4px;
     ">
-        TPQ Khairunissa
+        TPQ Hairunissa
     </div>
 
     <div style="

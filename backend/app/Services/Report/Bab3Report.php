@@ -118,7 +118,7 @@ class Bab3Report
 
         $intro = "
 
-TPQ Khairunissa memiliki sebanyak <b>{$totalGuru} orang guru</b> yang tercatat dalam Sistem Informasi TPQ Khairunissa. Berdasarkan jenis kelamin, terdiri dari <b>{$guruLaki} guru laki-laki</b> dan <b>{$guruPerempuan} guru perempuan</b>.
+TPQ Hairunissa memiliki sebanyak <b>{$totalGuru} orang guru</b> yang tercatat dalam Sistem Informasi TPQ Hairunissa. Berdasarkan jenis kelamin, terdiri dari <b>{$guruLaki} guru laki-laki</b> dan <b>{$guruPerempuan} guru perempuan</b>.
 
 Data guru disajikan pada tabel berikut.
 
@@ -140,7 +140,7 @@ Adapun persentase masing-masing kategori adalah <b>Guru Laki-laki sebesar {$pers
 
 Berdasarkan jumlah guru dan santri yang tercatat, terdapat <b>{$totalGuru} guru</b> untuk melayani <b>{$totalSantri} santri</b>. Dengan demikian, perbandingan jumlah guru dengan santri adalah <b>1 : {$rasioSantriPerGuru}</b>, atau secara rata-rata <b>1 guru berbanding {$rasioSantriPerGuru} santri</b>.
 
-Perbandingan tersebut memberikan gambaran mengenai ketersediaan tenaga pendidik dalam mendukung pelaksanaan kegiatan pembelajaran di TPQ Khairunissa.
+Perbandingan tersebut memberikan gambaran mengenai ketersediaan tenaga pendidik dalam mendukung pelaksanaan kegiatan pembelajaran di TPQ Hairunissa.
 
 ";
 
@@ -154,7 +154,7 @@ Perbandingan tersebut memberikan gambaran mengenai ketersediaan tenaga pendidik 
 
 <b>Kesimpulan</b><br><br>
 
-Berdasarkan data pada tabel, jumlah tenaga pendidik yang tercatat di TPQ Khairunissa sebanyak <b>{$totalGuru} guru</b>, yang terdiri dari <b>{$guruLaki} guru laki-laki</b> dan <b>{$guruPerempuan} guru perempuan</b>.
+Berdasarkan data pada tabel, jumlah tenaga pendidik yang tercatat di TPQ Hairunissa sebanyak <b>{$totalGuru} guru</b>, yang terdiri dari <b>{$guruLaki} guru laki-laki</b> dan <b>{$guruPerempuan} guru perempuan</b>.
 
 Dengan jumlah santri sebanyak <b>{$totalSantri} orang</b>, perbandingan guru dan santri adalah <b>1 : {$rasioSantriPerGuru}</b>. Kondisi tersebut menjadi gambaran mengenai ketersediaan tenaga pendidik dalam mendukung proses pembelajaran dan pendampingan santri.
 

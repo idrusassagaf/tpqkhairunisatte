@@ -280,7 +280,7 @@ export default function ProgresQuran() {
 
       doc.setFont("helvetica", "normal");
 
-      doc.text("TPQ Khairunissa Ternate", centerX, 21, {
+      doc.text("TPQ Hairunissa Ternate", centerX, 21, {
         align: "center",
       });
 
@@ -471,7 +471,7 @@ export default function ProgresQuran() {
           doc.setFontSize(7);
 
           doc.text(
-            `TPQ Khairunissa • Progres Al'Quran • Update ${tanggalUpdate} • Halaman ${nomorHalaman}`,
+            `TPQ Hairunissa • Progres Al'Quran • Update ${tanggalUpdate} • Halaman ${nomorHalaman}`,
             centerX,
             pageHeight - 7,
             {

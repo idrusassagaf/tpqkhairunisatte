@@ -400,7 +400,7 @@ export default function PengaturanSistem() {
 
               <p className="mt-1 text-sm text-gray-500">
                 Kelola identitas, profil, program, keunggulan, persyaratan,
-                logo, dan seluruh konten website TPQ Khairunissa.
+                logo, dan seluruh konten website TPQ Hairunissa.
               </p>
             </div>
           </div>

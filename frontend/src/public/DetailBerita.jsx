@@ -6,6 +6,12 @@ import heroImage from "../assets/hero-putih04.jpg";
 const API_ROOT_URL = (
   import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api"
 ).replace(/\/api\/?$/, "");
+
+const FRONTEND_URL = (
+  import.meta.env.VITE_FRONTEND_URL ||
+  window.location.origin ||
+  "http://localhost:5173"
+).replace(/\/$/, "");
 import {
   User,
   CalendarDays,
@@ -31,7 +37,13 @@ const FacebookIcon = (props) => (
 );
 
 const InstagramIcon = (props) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" {...props}>
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    {...props}
+  >
     <rect x="3" y="3" width="18" height="18" rx="5" />
     <circle cx="12" cy="12" r="4" />
     <circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none" />
@@ -124,7 +136,7 @@ export default function DetailBerita() {
   const texts = {
     id: {
       information: "Informasi TPQ",
-      description: "Informasi terbaru kegiatan TPQ Khairunnisa.",
+      description: "Informasi terbaru kegiatan TPQ Hairunnisa.",
       back: "Kembali ke Berita",
       share: "Bagikan",
       shareTitle: "Bagikan Berita",
@@ -140,7 +152,7 @@ export default function DetailBerita() {
 
     en: {
       information: "TPQ Information",
-      description: "Latest information about TPQ Khairunnisa activities.",
+      description: "Latest information about TPQ Hairunnisa activities.",
       back: "Back to News",
       share: "Share",
       shareTitle: "Share News",
@@ -156,8 +168,7 @@ export default function DetailBerita() {
 
     ar: {
       information: "معلومات TPQ",
-      description:
-        "أحدث المعلومات حول أنشطة TPQ Khairunnisa.",
+      description: "أحدث المعلومات حول أنشطة TPQ Hairunnisa.",
       back: "العودة إلى الأخبار",
       share: "مشاركة",
       shareTitle: "مشاركة الخبر",
@@ -168,8 +179,7 @@ export default function DetailBerita() {
       translating: "جاري ترجمة الخبر...",
       admin: "المسؤول",
       read: "قراءة",
-      unavailable:
-        "ميزة المشاركة غير متاحة في هذا المتصفح.",
+      unavailable: "ميزة المشاركة غير متاحة في هذا المتصفح.",
     },
   };
 
@@ -180,7 +190,7 @@ export default function DetailBerita() {
   const getBeritaUrl = () => {
     if (!berita) return "";
 
-    return `${API_ROOT_URL}/share/berita/${berita.id}`;
+    return `${FRONTEND_URL}/berita/${berita.id}`;
   };
 
   const getShareText = () => {

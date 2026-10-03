@@ -9,21 +9,21 @@ export default function PengumumanPublic() {
 
   const translations = {
     id: {
-      title: "Pengumuman TPQ Khairunnisa",
+      title: "Pengumuman TPQ Hairunnisa",
       subtitle:
         "Informasi dan pemberitahuan resmi untuk santri, guru dan wali santri.",
       readMore: "Baca Selengkapnya",
       empty: "Belum ada pengumuman tersedia.",
     },
     en: {
-      title: "TPQ Khairunnisa Announcements",
+      title: "TPQ Hairunnisa Announcements",
       subtitle:
         "Official information and announcements for students, teachers, and students' parents.",
       readMore: "Read More",
       empty: "No announcements available yet.",
     },
     ar: {
-      title: "إعلانات TPQ Khairunnisa",
+      title: "إعلانات TPQ Hairunnisa",
       subtitle:
         "المعلومات والإعلانات الرسمية للطلاب والمعلمين وأولياء أمور الطلاب.",
       readMore: "اقرأ المزيد",

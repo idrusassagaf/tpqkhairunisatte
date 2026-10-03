@@ -15,7 +15,7 @@ export default function Penutup({ masterData }) {
       <div className="mt-4 space-y-2">
         <Paragraf>
           Laporan Ringkas ini disusun secara otomatis berdasarkan data yang
-          tersimpan pada Sistem Informasi TPQ Khairunnisa. Sampai dengan laporan
+          tersimpan pada Sistem Informasi TPQ Hairunnisa. Sampai dengan laporan
           ini diterbitkan, sistem telah mengelola{" "}
           <b>{jumlahSantri} data santri</b>,<b> {jumlahGuru} data guru</b>,{" "}
           <b>{jumlahBerita} berita</b>,<b> {jumlahPengumuman} pengumuman</b>,
@@ -27,7 +27,7 @@ export default function Penutup({ masterData }) {
         <Paragraf>
           Diharapkan laporan ini dapat menjadi bahan evaluasi, pengambilan
           keputusan, serta dokumentasi dalam mendukung peningkatan kualitas
-          pengelolaan pendidikan di TPQ Khairunnisa.
+          pengelolaan pendidikan di TPQ Hairunnisa.
         </Paragraf>
 
         <Paragraf>

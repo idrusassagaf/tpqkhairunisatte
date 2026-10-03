@@ -65,7 +65,7 @@ export default function LoginAdmin() {
         <div className="text-center mb-4">
           <h1 className="text-3xl font-bold text-green-700">Login Admin</h1>
 
-          <p className="text-gray-500 mt-2">TPQ Khairunnisa</p>
+          <p className="text-gray-500 mt-2">TPQ Hairunnisa</p>
         </div>
 
         {/* ERROR */}
@@ -200,7 +200,7 @@ export default function LoginAdmin() {
 
         {/* FOOTER */}
         <p className="mt-3 text-center text-xs text-gray-400 leading-relaxed">
-          Untuk pendaftaran santri dilakukan langsung di TPQ Khairunnisa.
+          Untuk pendaftaran santri dilakukan langsung di TPQ Hairunnisa.
         </p>
       </div>
     </div>

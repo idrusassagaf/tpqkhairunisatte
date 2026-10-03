@@ -163,7 +163,7 @@ Bab ini merupakan rangkuman akhir dari seluruh data
 yang telah disajikan pada laporan.
 
 Berdasarkan data yang tersimpan dalam Sistem Informasi
-Manajemen TPQ Khairunissa, laporan ini menggambarkan
+Manajemen TPQ Hairunissa, laporan ini menggambarkan
 kondisi santri, guru, serta perkembangan proses
 pembelajaran secara menyeluruh.
 
@@ -182,7 +182,7 @@ Ringkasan data utama disajikan pada tabel berikut.
 
 <b>Analisis Data</b><br><br>
 
-Berdasarkan data yang tersedia, TPQ Khairunissa saat ini
+Berdasarkan data yang tersedia, TPQ Hairunissa saat ini
 mengelola sebanyak <b>{$santri}</b> santri dengan dukungan
 <b>{$guru}</b> guru.
 
@@ -213,7 +213,7 @@ berstatus <b>Lancar</b>, sedangkan
 masih berstatus <b>Belum</b>.
 
 Secara keseluruhan, data tersebut menunjukkan bahwa
-Sistem Informasi Manajemen TPQ Khairunissa telah
+Sistem Informasi Manajemen TPQ Hairunissa telah
 menghimpun informasi utama mengenai peserta didik,
 tenaga pengajar, serta perkembangan pembelajaran
 sebagai bahan pemantauan dan evaluasi.
@@ -232,7 +232,7 @@ sebagai bahan pemantauan dan evaluasi.
 <b>Kesimpulan</b><br><br>
 
 Berdasarkan keseluruhan data yang disajikan dalam laporan,
-TPQ Khairunissa memiliki <b>{$santri}</b> santri dan
+TPQ Hairunissa memiliki <b>{$santri}</b> santri dan
 <b>{$guru}</b> guru dengan rasio rata-rata
 <b>1 : {$rasioGuru}</b>.
 
@@ -247,7 +247,7 @@ yang lebih tepat pada periode berikutnya.
 
 Seluruh data dalam laporan dihasilkan berdasarkan data
 yang tersimpan pada Sistem Informasi Manajemen TPQ
-Khairunissa sehingga dapat diperbarui secara otomatis
+Hairunissa sehingga dapat diperbarui secara otomatis
 mengikuti perubahan data pada sistem.
 
 ";

@@ -108,7 +108,7 @@ class Bab2Report
 
         $intro = "
 
-Berdasarkan data santri yang tercatat pada Sistem Informasi TPQ Khairunissa, terdapat <b>{$total} santri</b> yang tercatat berdasarkan status orang tua.
+Berdasarkan data santri yang tercatat pada Sistem Informasi TPQ Hairunissa, terdapat <b>{$total} santri</b> yang tercatat berdasarkan status orang tua.
 
 Data tersebut terdiri dari <b>{$santunanOT}</b> santri dengan status <b>Santunan OT</b>, <b>{$anakYatim}</b> anak yatim, <b>{$anakPiatu}</b> anak piatu, dan <b>{$yatimPiatu}</b> anak yatim piatu.
 
@@ -132,7 +132,7 @@ Berdasarkan data pada tabel, dari jumlah total sebanyak <b>{$total} santri</b> m
 
 Adapun persentase masing-masing kategori adalah <b>Santunan OT sebesar {$persenSantunanOT}% ({$santunanOT} dari {$total} santri)</b>, <b>Anak Yatim sebesar {$persenAnakYatim}% ({$anakYatim} dari {$total} santri)</b>, <b>Anak Piatu sebesar {$persenAnakPiatu}% ({$anakPiatu} dari {$total} santri)</b>, dan <b>Yatim Piatu sebesar {$persenYatimPiatu}% ({$yatimPiatu} dari {$total} santri)</b>.
 
-Data tersebut memberikan gambaran mengenai kondisi orang tua santri yang tercatat dalam Sistem Informasi TPQ Khairunissa.
+Data tersebut memberikan gambaran mengenai kondisi orang tua santri yang tercatat dalam Sistem Informasi TPQ Hairunissa.
 
 ";
 
@@ -146,7 +146,7 @@ Data tersebut memberikan gambaran mengenai kondisi orang tua santri yang tercata
 
 <b>Kesimpulan</b><br><br>
 
-Berdasarkan data pada tabel, kategori <b>Santunan OT</b> merupakan kelompok dengan jumlah santri terbanyak, sedangkan kategori lainnya terdiri dari anak yatim, anak piatu, dan yatim piatu. Data tersebut menjadi gambaran kondisi sosial santri yang perlu diperhatikan dalam penyelenggaraan dan pengelolaan pendidikan di TPQ Khairunissa.
+Berdasarkan data pada tabel, kategori <b>Santunan OT</b> merupakan kelompok dengan jumlah santri terbanyak, sedangkan kategori lainnya terdiri dari anak yatim, anak piatu, dan yatim piatu. Data tersebut menjadi gambaran kondisi sosial santri yang perlu diperhatikan dalam penyelenggaraan dan pengelolaan pendidikan di TPQ Hairunissa.
 
 ";
 

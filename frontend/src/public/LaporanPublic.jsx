@@ -14,11 +14,11 @@ export default function LaporanPublic() {
       arsip: "Arsip Dokumen",
       title: "Laporan TPQ",
       description:
-        "Halaman ini berisi berbagai laporan resmi TPQ Khairunnisa, meliputi laporan kegiatan, laporan tahunan, laporan administrasi, serta dokumen lainnya.",
+        "Halaman ini berisi berbagai laporan resmi TPQ Hairunnisa, meliputi laporan kegiatan, laporan tahunan, laporan administrasi, serta dokumen lainnya.",
       daftar: "Daftar Dokumen",
-      laporan: "Laporan TPQ Khairunnisa",
+      laporan: "Laporan TPQ Hairunnisa",
       laporanDescription:
-        "Laporan resmi Sistem Informasi Manajemen TPQ Khairunnisa yang diperbarui secara otomatis berdasarkan data terbaru.",
+        "Laporan resmi Sistem Informasi Manajemen TPQ Hairunnisa yang diperbarui secara otomatis berdasarkan data terbaru.",
       format: "Format : PDF",
       preview: "Preview PDF",
       download: "Download PDF",
@@ -28,11 +28,11 @@ export default function LaporanPublic() {
       arsip: "Document Archive",
       title: "TPQ Reports",
       description:
-        "This page contains various official reports of TPQ Khairunnisa, including activity reports, annual reports, administrative reports, and other documents.",
+        "This page contains various official reports of TPQ Hairunnisa, including activity reports, annual reports, administrative reports, and other documents.",
       daftar: "Document List",
-      laporan: "TPQ Khairunnisa Report",
+      laporan: "TPQ Hairunnisa Report",
       laporanDescription:
-        "Official report of the TPQ Khairunnisa Management Information System, automatically updated based on the latest data.",
+        "Official report of the TPQ Hairunnisa Management Information System, automatically updated based on the latest data.",
       format: "Format: PDF",
       preview: "Preview PDF",
       download: "Download PDF",
@@ -42,11 +42,11 @@ export default function LaporanPublic() {
       arsip: "أرشيف الوثائق",
       title: "تقارير TPQ",
       description:
-        "تحتوي هذه الصفحة على مختلف التقارير الرسمية لـ TPQ Khairunnisa، بما في ذلك تقارير الأنشطة والتقارير السنوية والتقارير الإدارية والوثائق الأخرى.",
+        "تحتوي هذه الصفحة على مختلف التقارير الرسمية لـ TPQ Hairunnisa، بما في ذلك تقارير الأنشطة والتقارير السنوية والتقارير الإدارية والوثائق الأخرى.",
       daftar: "قائمة الوثائق",
-      laporan: "تقرير TPQ Khairunnisa",
+      laporan: "تقرير TPQ Hairunnisa",
       laporanDescription:
-        "التقرير الرسمي لنظام المعلومات الإدارية لـ TPQ Khairunnisa، والذي يتم تحديثه تلقائيًا بناءً على أحدث البيانات.",
+        "التقرير الرسمي لنظام المعلومات الإدارية لـ TPQ Hairunnisa، والذي يتم تحديثه تلقائيًا بناءً على أحدث البيانات.",
       format: "التنسيق: PDF",
       preview: "معاينة PDF",
       download: "تنزيل PDF",

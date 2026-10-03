@@ -330,7 +330,7 @@ export default function StatusGuru() {
 
     doc.setFont("helvetica", "normal");
 
-    doc.text("TPQ Khairunissa Ternate", contentCenter, 21, {
+    doc.text("TPQ Hairunissa Ternate", contentCenter, 21, {
       align: "center",
     });
 
@@ -486,7 +486,7 @@ export default function StatusGuru() {
       didDrawPage: () => {
         const nomorHalaman = doc.internal.getNumberOfPages();
 
-        const footerText = `TPQ Khairunissa • Progres Al'Quran • Update ${tanggalDownload} • Halaman ${nomorHalaman}`;
+        const footerText = `TPQ Hairunissa • Progres Al'Quran • Update ${tanggalDownload} • Halaman ${nomorHalaman}`;
 
         doc.setFont("helvetica", "normal");
 

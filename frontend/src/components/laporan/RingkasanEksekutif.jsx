@@ -25,7 +25,7 @@ export default function RingkasanEksekutif({ masterData }) {
       <div className="mt-5 space-y-3">
         <Paragraf>
           Berdasarkan hasil pengolahan data pada
-          <b> Sistem Informasi TPQ Khairunnisa</b>, saat laporan ini dibuat
+          <b> Sistem Informasi TPQ Hairunnisa</b>, saat laporan ini dibuat
           terdapat
           <b> {statistik.jumlahSantri} santri</b> yang dibimbing oleh
           <b> {statistik.jumlahGuru} guru</b>. Program pembelajaran terdiri atas

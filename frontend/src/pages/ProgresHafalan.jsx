@@ -204,7 +204,7 @@ export default function ProgresHafalan() {
 
       doc.setFont("helvetica", "normal");
 
-      doc.text("TPQ Khairunissa Ternate", centerX, 21, {
+      doc.text("TPQ Hairunissa Ternate", centerX, 21, {
         align: "center",
       });
 
@@ -337,7 +337,7 @@ export default function ProgresHafalan() {
           doc.setFont("helvetica", "normal");
 
           doc.text(
-            `TPQ Khairunissa • Progres Hafalan • Update ${tanggalUpdate} • Halaman ${nomorHalaman}`,
+            `TPQ Hairunissa • Progres Hafalan • Update ${tanggalUpdate} • Halaman ${nomorHalaman}`,
             centerX,
             pageHeight - 7,
             {

@@ -321,7 +321,7 @@ export default function DetailPengumuman() {
         doc.setTextColor(100, 100, 100);
 
         doc.text(
-          `TPQ Khairunissa • Pengumuman • Update ${tanggalUpdate} • Halaman ${halaman}`,
+          `TPQ Hairunissa • Pengumuman • Update ${tanggalUpdate} • Halaman ${halaman}`,
           centerX,
           pageHeight - 7,
           {

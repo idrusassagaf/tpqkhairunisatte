@@ -11,7 +11,7 @@ $labels = [
 'orangTua' => 'Orang Tua',
 'analisis' => 'Analisis Data',
 'kesimpulan' => 'Kesimpulan',
-'intro' => 'Berdasarkan data yang tersimpan dalam Sistem Informasi Manajemen TPQ Khairunissa, terdapat sebanyak',
+'intro' => 'Berdasarkan data yang tersimpan dalam Sistem Informasi Manajemen TPQ Hairunissa, terdapat sebanyak',
 'students' => 'santri yang didukung oleh',
 'teachers' => 'guru.',
 'ratioText' => 'Perbandingan jumlah santri dengan guru menunjukkan rasio rata-rata sebesar',
@@ -20,7 +20,7 @@ $labels = [
 'parentData' => 'Data orang tua yang tercatat dalam sistem berjumlah',
 'parentCompare' => 'data. Jumlah tersebut setara dengan sekitar',
 'comparedStudents' => 'dibandingkan dengan jumlah data santri.',
-'conclusionText' => 'Secara keseluruhan, Ringkasan Eksekutif menggambarkan kondisi utama TPQ Khairunissa berdasarkan data santri, guru, dan orang tua yang tersimpan dalam sistem. Perbandingan jumlah santri dan guru memberikan gambaran mengenai kapasitas tenaga pengajar dalam mendukung proses pembelajaran, sedangkan data orang tua memberikan gambaran mengenai keterhubungan data keluarga dengan peserta didik. Data tersebut dapat menjadi dasar pemantauan kondisi kelembagaan, evaluasi pengelolaan, serta bahan pertimbangan dalam penyusunan program TPQ pada periode berikutnya. Seluruh angka dalam ringkasan ini dihasilkan secara otomatis berdasarkan data yang tersimpan dalam Sistem Informasi Manajemen TPQ Khairunissa.',
+'conclusionText' => 'Secara keseluruhan, Ringkasan Eksekutif menggambarkan kondisi utama TPQ Hairunissa berdasarkan data santri, guru, dan orang tua yang tersimpan dalam sistem. Perbandingan jumlah santri dan guru memberikan gambaran mengenai kapasitas tenaga pengajar dalam mendukung proses pembelajaran, sedangkan data orang tua memberikan gambaran mengenai keterhubungan data keluarga dengan peserta didik. Data tersebut dapat menjadi dasar pemantauan kondisi kelembagaan, evaluasi pengelolaan, serta bahan pertimbangan dalam penyusunan program TPQ pada periode berikutnya. Seluruh angka dalam ringkasan ini dihasilkan secara otomatis berdasarkan data yang tersimpan dalam Sistem Informasi Manajemen TPQ Hairunissa.',
 ],
 'en' => [
 'title' => 'EXECUTIVE SUMMARY',
@@ -31,7 +31,7 @@ $labels = [
 'orangTua' => 'Parents',
 'analisis' => 'Data Analysis',
 'kesimpulan' => 'Conclusion',
-'intro' => 'Based on the data stored in the TPQ Khairunissa Management Information System, there are',
+'intro' => 'Based on the data stored in the TPQ Hairunissa Management Information System, there are',
 'students' => 'students supported by',
 'teachers' => 'teachers.',
 'ratioText' => 'The comparison between the number of students and teachers shows an average ratio of',
@@ -40,7 +40,7 @@ $labels = [
 'parentData' => 'The number of parent records stored in the system is',
 'parentCompare' => 'records. This amount is equivalent to approximately',
 'comparedStudents' => 'compared with the number of student records.',
-'conclusionText' => 'Overall, the Executive Summary describes the main condition of TPQ Khairunissa based on the student, teacher, and parent data stored in the system. The comparison between the number of students and teachers provides an overview of the teaching staff capacity in supporting the learning process, while the parent data provides an overview of the connection between family data and students. This data can serve as a basis for monitoring institutional conditions, evaluating management, and considering the preparation of TPQ programs for the following period. All figures in this summary are generated automatically based on the data stored in the TPQ Khairunissa Management Information System.',
+'conclusionText' => 'Overall, the Executive Summary describes the main condition of TPQ Hairunissa based on the student, teacher, and parent data stored in the system. The comparison between the number of students and teachers provides an overview of the teaching staff capacity in supporting the learning process, while the parent data provides an overview of the connection between family data and students. This data can serve as a basis for monitoring institutional conditions, evaluating management, and considering the preparation of TPQ programs for the following period. All figures in this summary are generated automatically based on the data stored in the TPQ Hairunissa Management Information System.',
 ],
 'ar' => [
 'title' => 'الملخص التنفيذي',
@@ -51,7 +51,7 @@ $labels = [
 'orangTua' => 'أولياء الأمور',
 'analisis' => 'تحليل البيانات',
 'kesimpulan' => 'الخلاصة',
-'intro' => 'بناءً على البيانات المخزنة في نظام إدارة المعلومات في TPQ Khairunissa، يوجد',
+'intro' => 'بناءً على البيانات المخزنة في نظام إدارة المعلومات في TPQ Hairunissa، يوجد',
 'students' => 'من الطلاب الذين يشرف عليهم',
 'teachers' => 'من المعلمين.',
 'ratioText' => 'تُظهر المقارنة بين عدد الطلاب والمعلمين أن متوسط النسبة هو',
@@ -60,7 +60,7 @@ $labels = [
 'parentData' => 'يبلغ عدد بيانات أولياء الأمور المسجلة في النظام',
 'parentCompare' => 'بيانات، وهو ما يعادل حوالي',
 'comparedStudents' => 'مقارنة بعدد بيانات الطلاب.',
-'conclusionText' => 'بشكل عام، يعرض الملخص التنفيذي الحالة الرئيسية لـ TPQ Khairunissa استنادًا إلى بيانات الطلاب والمعلمين وأولياء الأمور المخزنة في النظام. وتوفر المقارنة بين عدد الطلاب والمعلمين صورة عن قدرة الكادر التعليمي على دعم عملية التعلم، بينما توفر بيانات أولياء الأمور صورة عن ارتباط بيانات الأسرة بالطلاب. ويمكن أن تشكل هذه البيانات أساسًا لمتابعة الحالة المؤسسية وتقييم الإدارة والاستفادة منها في إعداد برامج TPQ للفترة القادمة. ويتم إنشاء جميع الأرقام الواردة في هذا الملخص تلقائيًا بناءً على البيانات المخزنة في نظام إدارة المعلومات في TPQ Khairunissa.',
+'conclusionText' => 'بشكل عام، يعرض الملخص التنفيذي الحالة الرئيسية لـ TPQ Hairunissa استنادًا إلى بيانات الطلاب والمعلمين وأولياء الأمور المخزنة في النظام. وتوفر المقارنة بين عدد الطلاب والمعلمين صورة عن قدرة الكادر التعليمي على دعم عملية التعلم، بينما توفر بيانات أولياء الأمور صورة عن ارتباط بيانات الأسرة بالطلاب. ويمكن أن تشكل هذه البيانات أساسًا لمتابعة الحالة المؤسسية وتقييم الإدارة والاستفادة منها في إعداد برامج TPQ للفترة القادمة. ويتم إنشاء جميع الأرقام الواردة في هذا الملخص تلقائيًا بناءً على البيانات المخزنة في نظام إدارة المعلومات في TPQ Hairunissa.',
 ],
 ];
 

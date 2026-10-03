@@ -33,7 +33,7 @@
         </div>
 
         <div style="margin-top:15px;font-weight:bold;">
-            Kepala TPQ Khairunissa
+            Kepala TPQ Hairunissa
         </div>
 
         <div style="height:80px;"></div>

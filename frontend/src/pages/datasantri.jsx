@@ -227,7 +227,7 @@ export default function DataSantri() {
 
     doc.setFont("helvetica", "normal");
 
-    doc.text("TPQ Khairunissa Ternate", 148, 21, {
+    doc.text("TPQ Hairunissa Ternate", 148, 21, {
       align: "center",
     });
 
@@ -367,7 +367,7 @@ export default function DataSantri() {
         doc.setFont("helvetica", "normal");
 
         doc.text(
-          `TPQ Khairunissa • Database Santri • Update ${tanggalRealtime} • Halaman ${doc.internal.getNumberOfPages()}`,
+          `TPQ Hairunissa • Database Santri • Update ${tanggalRealtime} • Halaman ${doc.internal.getNumberOfPages()}`,
           148,
           pageHeight - 7,
           {

@@ -520,7 +520,7 @@ export default function ProgresHafalanSantri() {
 
       const excelData = [
         ["PROGRES HAFALAN SANTRI"],
-        ["TPQ Khairunissa Ternate"],
+        ["TPQ Hairunissa Ternate"],
         [],
         [
           "Nama Santri",
@@ -639,7 +639,7 @@ export default function ProgresHafalanSantri() {
 
       doc.setFontSize(10);
 
-      doc.text("TPQ Khairunissa Ternate", centerX, 21, {
+      doc.text("TPQ Hairunissa Ternate", centerX, 21, {
         align: "center",
       });
 
@@ -748,7 +748,7 @@ export default function ProgresHafalanSantri() {
           doc.setFontSize(7);
 
           doc.text(
-            `TPQ Khairunissa • Progres Hafalan Santri • Update ${tanggalDownload} • Halaman ${nomorHalaman}`,
+            `TPQ Hairunissa • Progres Hafalan Santri • Update ${tanggalDownload} • Halaman ${nomorHalaman}`,
             centerX,
             pageHeight - 7,
             {

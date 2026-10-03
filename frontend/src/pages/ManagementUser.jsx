@@ -294,7 +294,7 @@ export default function ManagementUser() {
                 </h1>
 
                 <p className="text-xs md:text-sm text-gray-500 mt-1">
-                  Kelola akun pengguna sistem TPQ Khairunissa
+                  Kelola akun pengguna sistem TPQ Hairunissa
                 </p>
               </div>
             </div>
@@ -832,7 +832,7 @@ export default function ManagementUser() {
         {/* FOOTER */}
         <div className="text-center pb-4">
           <p className="text-xs text-gray-400">
-            TPQ Khairunissa • Management User
+            TPQ Hairunissa • Management User
           </p>
         </div>
       </div>

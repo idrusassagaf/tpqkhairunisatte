@@ -47,7 +47,7 @@
 
     <meta
         property="og:site_name"
-        content="TPQ Khairunnisa">
+        content="TPQ Hairunnisa">
 
     <!-- TWITTER / X -->
 
@@ -70,12 +70,6 @@
         content="{{ $imageUrl }}">
 
     @endif
-
-    <!-- REDIRECT KE FRONTEND -->
-
-    <meta
-        http-equiv="refresh"
-        content="0;url={{ $frontendUrl }}">
 
 </head>
 

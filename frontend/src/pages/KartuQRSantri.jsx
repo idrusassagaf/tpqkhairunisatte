@@ -318,7 +318,7 @@ export default function KartuQRSantri() {
                     {/* HEADER KARTU */}
                     <div className="bg-green-600 text-white px-5 py-4 text-center">
                       <div className="text-xl font-bold tracking-wide whitespace-nowrap">
-                        TPQ KHAIRUNISSA
+                        TPQ HAIRUNISSA
                       </div>
 
                       <div className="text-xs mt-1 opacity-90 tracking-wide">

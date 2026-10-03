@@ -17,7 +17,7 @@ class LaporanSettingController extends Controller
             'cover' => '',
 
             'pendahuluan' =>
-            'Laporan Ringkas TPQ Khairunissa berisi seluruh informasi kegiatan pembelajaran TPQ yang disusun secara otomatis berdasarkan data terbaru pada sistem.',
+            'Laporan Ringkas TPQ Hairunissa berisi seluruh informasi kegiatan pembelajaran TPQ yang disusun secara otomatis berdasarkan data terbaru pada sistem.',
 
             'ringkasan' => '',
 
@@ -50,10 +50,10 @@ class LaporanSettingController extends Controller
 
             $setting = PengaturanLaporan::create([
                 'judul' =>
-                'Laporan Ringkas TPQ Khairunissa',
+                'Laporan Ringkas TPQ Hairunissa',
 
                 'sub_judul' =>
-                'Sistem Informasi Manajemen TPQ Khairunissa',
+                'Sistem Informasi Manajemen TPQ Hairunissa',
 
                 'narasi' =>
                 $this->defaultNarasi(),

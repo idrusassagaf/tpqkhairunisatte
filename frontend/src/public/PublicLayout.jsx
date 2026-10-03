@@ -34,9 +34,9 @@ export default function PublicLayout() {
       contact: "Kontak",
       login: "Login Admin",
 
-      footerTitle: "TPQ KHAIRUNNISA",
+      footerTitle: "TPQ HAIRUNNISA",
       footerDescription:
-        "Terima kasih telah berkunjung ke website Taman Pendidikan Al-Qur'an Khairunissa Ternate yang berkomitmen membentuk generasi Qurani yang berilmu, berakhlak, dan berkarakter Islami.",
+        "Terima kasih telah berkunjung ke website Taman Pendidikan Al-Qur'an Hairunissa Ternate yang berkomitmen membentuk generasi Qurani yang berilmu, berakhlak, dan berkarakter Islami.",
       menu: "Menu",
       information: "Informasi",
 
@@ -58,9 +58,9 @@ export default function PublicLayout() {
       contact: "Contact",
       login: "Admin Login",
 
-      footerTitle: "TPQ KHAIRUNNISA",
+      footerTitle: "TPQ HAIRUNNISA",
       footerDescription:
-        "Thank you for visiting the website of Taman Pendidikan Al-Qur'an Khairunissa Ternate, committed to nurturing a Qur'anic generation with knowledge, good character, and Islamic values.",
+        "Thank you for visiting the website of Taman Pendidikan Al-Qur'an Hairunissa Ternate, committed to nurturing a Qur'anic generation with knowledge, good character, and Islamic values.",
       menu: "Navigation",
       information: "Information",
 
@@ -82,9 +82,9 @@ export default function PublicLayout() {
       contact: "اتصل بنا",
       login: "دخول المسؤول",
 
-      footerTitle: "TPQ KHAIRUNNISA",
+      footerTitle: "TPQ HAIRUNNISA",
       footerDescription:
-        "شكرًا لزيارتكم موقع Taman Pendidikan Al-Qur'an Khairunissa Ternate، الذي يلتزم بتكوين جيل قرآني متعلم، حسن الأخلاق، ومتصف بالقيم الإسلامية.",
+        "شكرًا لزيارتكم موقع Taman Pendidikan Al-Qur'an Hairunissa Ternate، الذي يلتزم بتكوين جيل قرآني متعلم، حسن الأخلاق، ومتصف بالقيم الإسلامية.",
       menu: "القائمة",
       information: "المعلومات",
 
@@ -121,7 +121,7 @@ export default function PublicLayout() {
             {/* LOGO BULAT */}
             <img
               src={logoTPQ}
-              alt="Logo TPQ Khairunnisa"
+              alt="Logo TPQ Hairunnisa"
               className="
                 w-11
                 h-11
@@ -146,7 +146,7 @@ export default function PublicLayout() {
                   leading-tight
                 "
               >
-                TPQ KHAIRUNNISA
+                TPQ HAIRUNNISA
               </h1>
 
               <p className="text-[9px] md:text-xs text-gray-500">
@@ -1124,7 +1124,7 @@ export default function PublicLayout() {
 
           {/* COPYRIGHT */}
           <div className="border-t border-gray-700 mt-10 pt-6 text-center text-sm text-gray-400">
-            © {new Date().getFullYear()} TPQ Khairunnisa
+            © {new Date().getFullYear()} TPQ Hairunnisa
           </div>
         </div>
       </footer>

@@ -234,7 +234,7 @@ class LaporanPdfController extends Controller
         }
 
         $prompt = <<<TEXT
-Anda adalah penerjemah resmi Laporan Ringkas TPQ Khairunissa.
+Anda adalah penerjemah resmi Laporan Ringkas TPQ Hairunissa.
 
 Terjemahkan seluruh teks Bahasa Indonesia di dalam JSON berikut
 ke {$targetLanguage}.
@@ -667,10 +667,10 @@ TEXT;
             $setting = new PengaturanLaporan();
 
             $setting->judul =
-                "Laporan Ringkas TPQ Khairunissa";
+                "Laporan Ringkas TPQ Hairunissa";
 
             $setting->sub_judul =
-                "Sistem Informasi Manajemen TPQ Khairunissa";
+                "Sistem Informasi Manajemen TPQ Hairunissa";
 
             $setting->narasi = [];
             $setting->penutup = "";
@@ -782,11 +782,11 @@ TEXT;
                     : $fontMetrics->getFont('Helvetica', 'italic');
 
                 $footerText = $language === 'en'
-                    ? 'TPQ Khairunissa Summary Report - Update : '
+                    ? 'TPQ Hairunissa Summary Report - Update : '
                     : (
                         $language === 'ar'
-                        ? 'التقرير الموجز لـ TPQ Khairunissa - التحديث : '
-                        : 'Laporan Ringkas TPQ Khairunissa - Update : '
+                        ? 'التقرير الموجز لـ TPQ Hairunissa - التحديث : '
+                        : 'Laporan Ringkas TPQ Hairunissa - Update : '
                     );
 
                 $pageText = $language === 'en'

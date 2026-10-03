@@ -292,9 +292,7 @@ export default function ProfilTPQ() {
                   md:text-base
                 "
               >
-                <p dir={isArabic ? "rtl" : "ltr"}>
-                  {displayedProfil}
-                </p>
+                <p dir={isArabic ? "rtl" : "ltr"}>{displayedProfil}</p>
               </div>
             </div>
           </div>
@@ -319,52 +317,54 @@ export default function ProfilTPQ() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
+          <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-5 gap-2.5 sm:gap-3 md:gap-4">
             {guru.map((item) => (
               <div
                 key={item.id}
                 className="
                   bg-white
-                  rounded-3xl
-                  border
-                  border-green-100
-                  shadow-md
-                  hover:shadow-lg
+                  rounded-xl
+                  border border-green-100
+                  shadow-sm
+                  hover:shadow-md
                   transition-all
                   duration-300
-                  px-3 md:px-5
-                  py-4 md:py-6
+                  px-2 py-3
                   text-center
+                  flex flex-col items-center justify-center
+                  min-h-[150px]
                 "
               >
-                <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-4">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 mx-auto mb-2 overflow-hidden rounded-full border border-green-200 bg-gradient-to-br from-green-100 to-emerald-200 shadow-inner">
                   {item.foto_url ? (
                     <img
                       src={item.foto_url}
-                      alt={item.nama_guru}
-                      className="
-                        w-full
-                        h-full
-                        rounded-full
-                        object-cover
-                        border-2
-                        border-green-400
-                      "
+                      alt={item.nama_guru || "Guru"}
+                      className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full bg-green-100 rounded-full"></div>
+                    <div className="w-full h-full flex items-center justify-center text-[9px] sm:text-[10px] md:text-xs font-bold text-green-700">
+                      {String(item.nama_guru || "?")
+                        .trim()
+                        .split(" ")
+                        .filter(Boolean)
+                        .slice(0, 2)
+                        .map((word) => word[0])
+                        .join("")
+                        .toUpperCase() || "T"}
+                    </div>
                   )}
                 </div>
 
-                <h3 className="font-extralight text-lg md:text-xl text-green-600">
+                <h3 className="font-semibold text-[10px] sm:text-xs md:text-sm text-black leading-tight break-words">
                   {item.nama_guru}
                 </h3>
 
                 <p
-                  className="text-black text-xs md:text-sm mt-2"
+                  className="text-[8px] sm:text-[9px] md:text-[11px] mt-1.5 text-black font-medium break-all"
                   dir={isArabic ? "rtl" : "ltr"}
                 >
-                  {t.nig} : {item.nig} | {t.education} {item.pendidikan}
+                  {t.nig} : {item.nig || "-"}
                 </p>
               </div>
             ))}

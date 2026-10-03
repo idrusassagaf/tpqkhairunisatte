@@ -1205,7 +1205,7 @@ export default function MasterData() {
 
                   {/* NARASI */}
                   <div className="text-base p-4 space-y-3 bg-blue-100 text-gray-700 text-justify">
-                    Adalah guru TPQ Khairunnisa Ternate dengan nomor ID {g.nig}.
+                    Adalah guru TPQ Hairunnisa Ternate dengan nomor ID {g.nig}.
                     Berjenis kelamin{" "}
                     {g.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"}{" "}
                     berusia {g.usia} tahun dan lahir pada tanggal{" "}

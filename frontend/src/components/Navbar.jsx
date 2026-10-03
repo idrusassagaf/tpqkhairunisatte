@@ -40,7 +40,7 @@ export default function Navbar({ setOpen }) {
       {/* LOGO TPQ */}
       <img
         src={logoTPQ}
-        alt="Logo TPQ Khairunnisa"
+        alt="Logo TPQ Hairunnisa"
         className="
           ml-4
           w-10
@@ -54,7 +54,7 @@ export default function Navbar({ setOpen }) {
       />
 
       {/* NAMA TPQ */}
-      <div className="ml-3 font-semibold">TPQ KHAIRUNNISA</div>
+      <div className="ml-3 font-semibold">TPQ HAIRUNNISA</div>
 
       {/* USER + LOGOUT */}
       <div className="ml-auto flex items-center gap-3">

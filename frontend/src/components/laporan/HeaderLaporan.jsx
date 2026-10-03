@@ -78,7 +78,7 @@ export default function HeaderLaporan() {
           <p>
             <span className="font-semibold">Sumber Data</span>
             {" : "}
-            Database TPQ Khairunnisa
+            Database TPQ Hairunnisa
           </p>
 
           <p>

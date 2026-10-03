@@ -40,7 +40,7 @@ const LayoutLaporan = forwardRef(({ children }, ref) => {
         {/* ================= FOOTER ================= */}
         <div className="mt-12 pt-4 border-t border-gray-300 text-xs text-gray-500 flex justify-between items-center">
           <span>
-            © {new Date().getFullYear()} TPQ Khairunnisa - Sistem Informasi TPQ
+            © {new Date().getFullYear()} TPQ Hairunnisa - Sistem Informasi TPQ
           </span>
 
           <span>Halaman 1</span>

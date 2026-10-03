@@ -58,7 +58,7 @@ STRICT RULES:
 3. Only translate the text values.
 4. Do not change numbers, dates, codes, or proper names.
 5. Do NOT translate people's names.
-6. Do NOT translate the official name "TPQ Khairunnissa" / "TPQ Khairunissa".
+6. Do NOT translate the official name "TPQ Khairunnissa" / "TPQ Hairunissa".
 7. Preserve simple HTML tags such as <br> if present.
 8. Do not add new information. Do not remove information.
 9. Do not add explanations or comments.

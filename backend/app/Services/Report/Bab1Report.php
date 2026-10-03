@@ -149,7 +149,7 @@ Perbandingan jumlah santri antara kelas Iqra dan Al-Qur'an sebesar <b>{$rasioKel
 
 <b>Kesimpulan</b><br><br>
 
-Komposisi santri berdasarkan jenis kelamin maupun jenjang pembelajaran menunjukkan kondisi yang cukup riil. Hal lainnya menunjukkan proses pembelajaran di TPQ Khairunissa berjalan secara berkesinambungan mulai dari kelas Iqra hingga Al-Qur'an.
+Komposisi santri berdasarkan jenis kelamin maupun jenjang pembelajaran menunjukkan kondisi yang cukup riil. Hal lainnya menunjukkan proses pembelajaran di TPQ Hairunissa berjalan secara berkesinambungan mulai dari kelas Iqra hingga Al-Qur'an.
 
 ";
 

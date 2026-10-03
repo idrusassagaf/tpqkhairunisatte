@@ -236,7 +236,7 @@ export default function ProgresIqra() {
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
 
-      doc.text("TPQ Khairunissa Ternate", centerX, 21, {
+      doc.text("TPQ Hairunissa Ternate", centerX, 21, {
         align: "center",
       });
 
@@ -377,7 +377,7 @@ export default function ProgresIqra() {
           doc.setFont("helvetica", "normal");
 
           doc.text(
-            `TPQ Khairunissa • Progres Iqra • Update ${tanggalUpdate} • Halaman ${nomorHalaman}`,
+            `TPQ Hairunissa • Progres Iqra • Update ${tanggalUpdate} • Halaman ${nomorHalaman}`,
             centerX,
             pageHeight - 7,
             {

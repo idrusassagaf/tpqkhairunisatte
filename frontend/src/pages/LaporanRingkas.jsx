@@ -86,7 +86,7 @@ export default function LaporanRingkas() {
           </h1>
 
           <p className="text-gray-500 mt-1">
-            Kelola narasi umum setiap bagian laporan ringkas TPQ Khairunissa.
+            Kelola narasi umum setiap bagian laporan ringkas TPQ Hairunissa.
           </p>
         </div>
         <div className="p-3 md:p-8 space-y-6">

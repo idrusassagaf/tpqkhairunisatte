@@ -45,9 +45,9 @@ export default function BeritaPublic() {
 
   const translations = {
     id: {
-      title: "Berita TPQ Khairunnisa",
+      title: "Berita TPQ Hairunnisa",
       description:
-        "Informasi, kegiatan dan dokumentasi terbaru seputar TPQ Khairunnisa.",
+        "Informasi, kegiatan dan dokumentasi terbaru seputar TPQ Hairunnisa.",
       mainNews: "Berita Utama",
       previousNews: "Berita Sebelumnya",
       readMore: "Baca Selengkapnya",
@@ -59,9 +59,9 @@ export default function BeritaPublic() {
     },
 
     en: {
-      title: "TPQ Khairunnisa News",
+      title: "TPQ Hairunnisa News",
       description:
-        "Latest information, activities, and documentation about TPQ Khairunnisa.",
+        "Latest information, activities, and documentation about TPQ Hairunnisa.",
       mainNews: "Featured News",
       previousNews: "Previous News",
       readMore: "Read More",
@@ -73,8 +73,8 @@ export default function BeritaPublic() {
     },
 
     ar: {
-      title: "أخبار TPQ Khairunnisa",
-      description: "أحدث المعلومات والأنشطة والتوثيق حول TPQ Khairunnisa.",
+      title: "أخبار TPQ Hairunnisa",
+      description: "أحدث المعلومات والأنشطة والتوثيق حول TPQ Hairunnisa.",
       mainNews: "الخبر الرئيسي",
       previousNews: "الأخبار السابقة",
       readMore: "اقرأ المزيد",

@@ -348,7 +348,7 @@ export default function ManagementPassword() {
 
         <div className="text-center pb-4">
           <p className="text-xs text-gray-400">
-            TPQ Khairunissa • Management Password
+            TPQ Hairunissa • Management Password
           </p>
         </div>
       </div>

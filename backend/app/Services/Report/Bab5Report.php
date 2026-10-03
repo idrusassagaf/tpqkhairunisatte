@@ -77,7 +77,7 @@ class Bab5Report
 
         $intro = "
 
-Sebanyak <b>{$total}</b> santri tercatat dalam program pembelajaran Iqra pada Sistem Informasi TPQ Khairunissa.
+Sebanyak <b>{$total}</b> santri tercatat dalam program pembelajaran Iqra pada Sistem Informasi TPQ Hairunissa.
 
 Perkembangan pembelajaran Iqra setiap santri dicatat melalui sistem sehingga perkembangan belajar dapat dipantau dan dievaluasi secara berkala.
 
@@ -117,7 +117,7 @@ Perbandingan antara santri dengan progres Lancar dan Belum Lancar adalah sebesar
 
 Berdasarkan data progres pembelajaran Iqra, capaian santri menunjukkan adanya perkembangan pembelajaran yang dapat dipantau melalui sistem. Santri yang telah mencapai status <b>Lancar</b> dapat terus mempertahankan dan meningkatkan kemampuan membaca Al-Qur'an, sedangkan santri yang masih berstatus <b>Belum Lancar</b> perlu mendapatkan perhatian dan pendampingan secara berkelanjutan.
 
-Data progres ini dapat menjadi salah satu dasar bagi pengelola dan guru TPQ Khairunissa dalam melakukan evaluasi serta menentukan tindak lanjut pembelajaran pada periode berikutnya.
+Data progres ini dapat menjadi salah satu dasar bagi pengelola dan guru TPQ Hairunissa dalam melakukan evaluasi serta menentukan tindak lanjut pembelajaran pada periode berikutnya.
 
 ";
 

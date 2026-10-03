@@ -174,7 +174,7 @@ Program hafalan Al-Qur'an diikuti oleh
 <b>{$total}</b> data hafalan santri.
 
 Seluruh perkembangan hafalan dicatat melalui
-Sistem Informasi TPQ Khairunissa sehingga pencapaian
+Sistem Informasi TPQ Hairunissa sehingga pencapaian
 setiap santri dapat dipantau secara berkala.
 
 Data perkembangan hafalan disajikan berdasarkan

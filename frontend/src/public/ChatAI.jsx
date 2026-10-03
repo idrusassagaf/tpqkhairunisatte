@@ -10,7 +10,7 @@ export default function ChatAI() {
   const [messages, setMessages] = useState([
     {
       role: "ai",
-      text: "Assalamualaikum..! Saya Asisten AI TPQ Khairunnisa. Ada yang bisa saya bantu?",
+      text: "Assalamualaikum..! Saya Asisten AI TPQ Hairunnisa. Ada yang bisa saya bantu?",
     },
   ]);
 
@@ -184,7 +184,7 @@ export default function ChatAI() {
               <div>
                 <h3 className="font-semibold text-sm">Asisten AI</h3>
 
-                <p className="text-[11px] text-green-100">TPQ Khairunnisa</p>
+                <p className="text-[11px] text-green-100">TPQ Hairunnisa</p>
               </div>
             </div>
 

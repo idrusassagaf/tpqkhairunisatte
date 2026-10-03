@@ -18,7 +18,7 @@ export default function GaleriPublic() {
       dokumentasi: "Dokumentasi Kegiatan",
       title: "Galeri Santri TPQ",
       description:
-        "Dokumentasi berbagai kegiatan santri TPQ Khairunnisa yang berisi aktivitas belajar, mengaji, perlombaan dan momen kebersamaan dalam membentuk generasi Qurani yang berakhlak mulia.",
+        "Dokumentasi berbagai kegiatan santri TPQ Hairunnisa yang berisi aktivitas belajar, mengaji, perlombaan dan momen kebersamaan dalam membentuk generasi Qurani yang berakhlak mulia.",
       preview: "Preview",
     },
 
@@ -26,7 +26,7 @@ export default function GaleriPublic() {
       dokumentasi: "Activity Documentation",
       title: "TPQ Santri Gallery",
       description:
-        "Documentation of various activities of TPQ Khairunnisa students, including learning activities, Quran recitation, competitions, and moments of togetherness in building a Qur'anic generation with noble character.",
+        "Documentation of various activities of TPQ Hairunnisa students, including learning activities, Quran recitation, competitions, and moments of togetherness in building a Qur'anic generation with noble character.",
       preview: "Preview",
     },
 
@@ -34,7 +34,7 @@ export default function GaleriPublic() {
       dokumentasi: "توثيق الأنشطة",
       title: "معرض طلاب TPQ",
       description:
-        "توثيق مختلف أنشطة طلاب TPQ Khairunnisa، بما في ذلك أنشطة التعلم وتلاوة القرآن والمسابقات ولحظات التآلف في بناء جيل قرآني ذي أخلاق كريمة.",
+        "توثيق مختلف أنشطة طلاب TPQ Hairunnisa، بما في ذلك أنشطة التعلم وتلاوة القرآن والمسابقات ولحظات التآلف في بناء جيل قرآني ذي أخلاق كريمة.",
       preview: "معاينة",
     },
   };

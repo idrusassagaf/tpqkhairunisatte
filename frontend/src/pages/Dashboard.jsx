@@ -157,7 +157,7 @@ export default function Dashboard() {
               </h2>
 
               <p className="text-xs text-gray-500 mt-1">
-                Data utama TPQ Khairunissa
+                Data utama TPQ Hairunissa
               </p>
             </div>
           </div>
@@ -438,7 +438,7 @@ export default function Dashboard() {
 
         <div className="text-center pt-2 pb-4">
           <p className="text-xs text-gray-400">
-            TPQ Khairunissa • Sistem Informasi Manajemen
+            TPQ Hairunissa • Sistem Informasi Manajemen
           </p>
         </div>
       </div>

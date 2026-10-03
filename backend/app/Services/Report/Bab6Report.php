@@ -85,7 +85,7 @@ class Bab6Report
 
 Sebanyak <b>{$total}</b> data progres santri tercatat dalam program pembelajaran Al-Qur'an.
 
-Perkembangan pembelajaran Al-Qur'an setiap santri dicatat melalui Sistem Informasi TPQ Khairunissa sehingga perkembangan belajar dapat dipantau dan dievaluasi secara berkala.
+Perkembangan pembelajaran Al-Qur'an setiap santri dicatat melalui Sistem Informasi TPQ Hairunissa sehingga perkembangan belajar dapat dipantau dan dievaluasi secara berkala.
 
 Berdasarkan data yang tersedia, terdapat <b>{$lancar}</b> santri dengan progres <b>Lancar</b> dan <b>{$belum}</b> santri yang masih berstatus <b>Belum Lancar</b>.
 
@@ -107,7 +107,7 @@ Berdasarkan data pada tabel, dari jumlah keseluruhan sebanyak <b>{$total}</b> da
 
 Sementara itu, terdapat <b>{$belum}</b> santri atau sebesar <b>{$persenBelum}%</b> yang masih berstatus <b>Belum Lancar</b> dan memerlukan pendampingan serta pembinaan dalam proses pembelajaran.
 
-Perbandingan antara santri dengan progres Lancar dan Belum Lancar adalah sebesar <b>{$rasioLancarBelum}</b>. Komposisi tersebut memberikan gambaran mengenai perkembangan pembelajaran Al-Qur'an yang tercatat dalam Sistem Informasi TPQ Khairunissa.
+Perbandingan antara santri dengan progres Lancar dan Belum Lancar adalah sebesar <b>{$rasioLancarBelum}</b>. Komposisi tersebut memberikan gambaran mengenai perkembangan pembelajaran Al-Qur'an yang tercatat dalam Sistem Informasi TPQ Hairunissa.
 
 ";
 
@@ -123,7 +123,7 @@ Perbandingan antara santri dengan progres Lancar dan Belum Lancar adalah sebesar
 
 Berdasarkan data progres pembelajaran Al-Qur'an, perkembangan santri dapat dipantau melalui pencatatan progres secara berkala. Santri yang telah mencapai status <b>Lancar</b> dapat terus mempertahankan dan meningkatkan kemampuan membaca Al-Qur'an, sedangkan santri yang masih berstatus <b>Belum Lancar</b> perlu mendapatkan pendampingan dan pembinaan secara berkelanjutan.
 
-Data progres ini dapat menjadi salah satu dasar bagi guru dan pengelola TPQ Khairunissa dalam melakukan evaluasi serta menentukan tindak lanjut pembelajaran pada periode berikutnya.
+Data progres ini dapat menjadi salah satu dasar bagi guru dan pengelola TPQ Hairunissa dalam melakukan evaluasi serta menentukan tindak lanjut pembelajaran pada periode berikutnya.
 
 ";
 

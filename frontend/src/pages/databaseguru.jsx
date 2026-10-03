@@ -229,7 +229,7 @@ export default function DatabaseGuru() {
 
       doc.setFontSize(10);
 
-      doc.text("TPQ Khairunissa Ternate", centerX, 21, {
+      doc.text("TPQ Hairunissa Ternate", centerX, 21, {
         align: "center",
       });
 
@@ -394,7 +394,7 @@ export default function DatabaseGuru() {
           doc.setFontSize(7);
 
           doc.text(
-            `TPQ Khairunissa • Database Guru • Update ${tanggalDownload} • Halaman ${nomorHalaman}`,
+            `TPQ Hairunissa • Database Guru • Update ${tanggalDownload} • Halaman ${nomorHalaman}`,
             centerX,
             pageHeight - 7,
             {

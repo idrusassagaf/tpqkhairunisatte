@@ -341,7 +341,7 @@ export default function Home() {
       // DATA DINAMIS
       // =====================================================
 
-      const namaTPQ = pengaturan.nama_tpq || "TPQ Khairunissa";
+      const namaTPQ = pengaturan.nama_tpq || "TPQ Hairunissa";
 
       // =====================================================
       // PROFIL/VISI/MISI SESUAI BAHASA YANG DIPILIH

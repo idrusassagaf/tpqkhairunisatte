@@ -214,7 +214,7 @@ export default function KontakPublic() {
 
   const whatsappNumber = getWhatsAppNumber(setting?.no_hp);
 
-  const namaTPQ = setting?.nama_tpq || "TPQ Khairunnisa";
+  const namaTPQ = setting?.nama_tpq || "TPQ Hairunnisa";
 
   return (
     <div
