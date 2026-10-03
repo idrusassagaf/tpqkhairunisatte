@@ -44,60 +44,63 @@ import LaporanPublic from "./public/LaporanPublic";
 import KontakPublic from "./public/KontakPublic";
 import LoginAdmin from "./public/LoginAdmin";
 
+const SITE_URL = "https://tpq-hairunnisa.site";
+const DEFAULT_OG_IMAGE = `${SITE_URL}/logo-tpq.png`;
+
 const seoMap = {
   "/": {
     title: "TPQ Hairunnisa | Taman Pendidikan Al-Qur'an Ternate",
     description:
       "TPQ Hairunnisa Ternate adalah lembaga pendidikan Al-Qur'an yang fokus pada pembelajaran Iqra, membaca Al-Qur'an, hafalan, dan pembinaan akhlak islami.",
-    image: "https://tpq-hairunnisa.site/bg-islamic.png",
+    image: DEFAULT_OG_IMAGE,
   },
   "/profil": {
     title: "Profil TPQ Hairunnisa | Sejarah, Visi & Misi",
     description:
       "Kenali profil TPQ Hairunnisa Ternate, visi, misi, program unggulan, serta komitmen dalam membentuk generasi Qurani yang berakhlak.",
-    image: "https://tpq-hairunnisa.site/bg-islamic.png",
+    image: DEFAULT_OG_IMAGE,
   },
   "/berita": {
     title: "Berita TPQ Hairunnisa | Informasi Terbaru",
     description:
       "Baca berita dan informasi terbaru seputar kegiatan, pembelajaran, dan aktivitas santri TPQ Hairunnisa Ternate.",
-    image: "https://tpq-hairunnisa.site/bg-islamic.png",
+    image: DEFAULT_OG_IMAGE,
   },
   "/pengumuman": {
     title: "Pengumuman TPQ Hairunnisa",
     description:
       "Temukan pengumuman resmi, jadwal kegiatan, dan informasi penting bagi santri, guru, dan wali santri TPQ Hairunnisa.",
-    image: "https://tpq-hairunnisa.site/bg-islamic.png",
+    image: DEFAULT_OG_IMAGE,
   },
   "/kalender": {
     title: "Kalender Kegiatan TPQ Hairunnisa",
     description:
       "Lihat kalender kegiatan dan jadwal pengajian TPQ Hairunnisa Ternate untuk kegiatan pembelajaran dan program islami.",
-    image: "https://tpq-hairunnisa.site/bg-islamic.png",
+    image: DEFAULT_OG_IMAGE,
   },
   "/galeri": {
     title: "Galeri TPQ Hairunnisa | Dokumentasi Kegiatan",
     description:
       "Lihat galeri dokumentasi kegiatan santri TPQ Hairunnisa, mulai dari belajar Iqra, Al-Qur'an, hafalan, hingga kegiatan islami lainnya.",
-    image: "https://tpq-hairunnisa.site/bg-islamic.png",
+    image: DEFAULT_OG_IMAGE,
   },
   "/laporan": {
     title: "Laporan TPQ Hairunnisa | Arsip Dokumentasi",
     description:
       "Akses laporan resmi, arsip dokumentasi, dan ringkasan kegiatan TPQ Hairunnisa Ternate secara lengkap.",
-    image: "https://tpq-hairunnisa.site/bg-islamic.png",
+    image: DEFAULT_OG_IMAGE,
   },
   "/kontak": {
     title: "Kontak TPQ Hairunnisa | Hubungi Kami",
     description:
       "Hubungi TPQ Hairunnisa Ternate untuk informasi pendaftaran santri, jadwal, dan pertanyaan seputar kegiatan pembelajaran.",
-    image: "https://tpq-hairunnisa.site/bg-islamic.png",
+    image: DEFAULT_OG_IMAGE,
   },
   "/login": {
     title: "Login Admin TPQ Hairunnisa",
     description:
       "Halaman login admin untuk mengelola data santri, guru, berita, pengumuman, dan kegiatan TPQ Hairunnisa.",
-    image: "https://tpq-hairunnisa.site/bg-islamic.png",
+    image: DEFAULT_OG_IMAGE,
   },
 };
 
@@ -113,7 +116,7 @@ function SeoUpdater() {
         title: "Berita TPQ Hairunnisa | Informasi Terbaru",
         description:
           "Baca berita dan informasi terbaru seputar kegiatan, pembelajaran, dan aktivitas santri TPQ Hairunnisa Ternate.",
-        image: "https://tpq-hairunnisa.site/bg-islamic.png",
+        image: DEFAULT_OG_IMAGE,
       };
     }
 
@@ -122,11 +125,11 @@ function SeoUpdater() {
         title: "Pengumuman TPQ Hairunnisa",
         description:
           "Temukan pengumuman resmi, jadwal kegiatan, dan informasi penting bagi santri, guru, dan wali santri TPQ Hairunnisa.",
-        image: "https://tpq-hairunnisa.site/bg-islamic.png",
+        image: DEFAULT_OG_IMAGE,
       };
     }
 
-    const currentUrl = `https://tpq-hairunnisa.site${pathname}`;
+    const currentUrl = `${SITE_URL}${pathname}`;
 
     document.title = match.title;
 

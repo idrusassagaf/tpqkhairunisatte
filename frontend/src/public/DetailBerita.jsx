@@ -272,6 +272,63 @@ ${getBeritaUrl()}`;
     setShowShare(false);
   };
 
+  useEffect(() => {
+    if (!berita || !displayBerita) return;
+
+    const baseUrl = window.location.origin;
+    const pageUrl = `${baseUrl}/berita/${berita.id}`;
+    const imageUrl = berita.foto
+      ? `${baseUrl}/storage/${berita.foto}`
+      : `${baseUrl}/logo-tpq.png`;
+    const title = displayBerita.judul || "Berita TPQ Hairunnisa";
+    const description = String(displayBerita.isi || "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    const setMeta = (selector, attr, value) => {
+      let el = document.querySelector(selector);
+      if (!el) {
+        el = document.createElement("meta");
+        document.head.appendChild(el);
+      }
+      el.setAttribute(attr, value);
+    };
+
+    setMeta('meta[property="og:title"]', "property", "og:title");
+    setMeta('meta[property="og:title"]', "content", title);
+
+    setMeta('meta[property="og:description"]', "property", "og:description");
+    setMeta(
+      'meta[property="og:description"]',
+      "content",
+      description.slice(0, 200) + (description.length > 200 ? "..." : ""),
+    );
+
+    setMeta('meta[property="og:url"]', "property", "og:url");
+    setMeta('meta[property="og:url"]', "content", pageUrl);
+
+    setMeta('meta[property="og:image"]', "property", "og:image");
+    setMeta('meta[property="og:image"]', "content", imageUrl);
+
+    setMeta('meta[property="og:image:alt"]', "property", "og:image:alt");
+    setMeta('meta[property="og:image:alt"]', "content", title);
+
+    setMeta('meta[name="twitter:title"]', "name", "twitter:title");
+    setMeta('meta[name="twitter:title"]', "content", title);
+
+    setMeta('meta[name="twitter:description"]', "name", "twitter:description");
+    setMeta(
+      'meta[name="twitter:description"]',
+      "content",
+      description.slice(0, 200) + (description.length > 200 ? "..." : ""),
+    );
+
+    setMeta('meta[name="twitter:image"]', "name", "twitter:image");
+    setMeta('meta[name="twitter:image"]', "content", imageUrl);
+
+    document.title = title;
+  }, [berita, displayBerita]);
+
   if (!berita) {
     return (
       <div className="p-10 text-center" dir={isArabic ? "rtl" : "ltr"}>
