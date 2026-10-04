@@ -5,6 +5,7 @@ import heroImage from "../assets/hero-putih04.jpg";
 import { MapPin, Phone, Mail, Clock, Loader2, AlertCircle } from "lucide-react";
 
 import { api } from "../api";
+import { Skeleton } from "../components/Skeleton";
 
 export default function KontakPublic() {
   const { language } = useOutletContext();
@@ -169,10 +170,30 @@ export default function KontakPublic() {
           <div className="absolute inset-0 bg-white/10"></div>
 
           <div className="relative z-10 flex min-h-[400px] items-center justify-center px-4">
-            <div className="flex flex-col items-center gap-3 text-gray-600">
-              <Loader2 size={32} className="animate-spin text-green-600" />
+            <div className="w-full max-w-3xl space-y-4 py-10">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm space-y-3">
+                  <Skeleton className="h-5 w-1/2" />
 
-              <span className="text-sm">{t.loading}</span>
+                  <Skeleton className="h-3 w-full" />
+
+                  <Skeleton className="h-3 w-4/5" />
+                </div>
+
+                <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm space-y-3">
+                  <Skeleton className="h-5 w-1/2" />
+
+                  <Skeleton className="h-3 w-full" />
+
+                  <Skeleton className="h-3 w-4/5" />
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm space-y-3">
+                <Skeleton className="h-5 w-1/3" />
+
+                <Skeleton className="h-48 w-full rounded-xl" />
+              </div>
             </div>
           </div>
         </section>

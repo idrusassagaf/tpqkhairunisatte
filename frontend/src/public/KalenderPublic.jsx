@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 
 import { api } from "../api";
+import { Skeleton, SkeletonCard } from "../components/Skeleton";
 
 import heroImage from "../assets/hero-putih04.jpg";
 import notoNaskhArabicRegular from "../assets/NotoNaskhArabic-Regular.ttf";
@@ -22,6 +23,8 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 export default function KalenderPublic() {
+  const [loading, setLoading] = useState(true);
+
   const { language } = useOutletContext();
 
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -154,6 +157,8 @@ export default function KalenderPublic() {
       setJadwal(res.data);
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -547,9 +552,13 @@ export default function KalenderPublic() {
                 <div key={i}></div>
               ))}
 
-              {Array.from({
-                length: jumlahHari,
-              }).map((_, index) => {
+              {loading
+                ? Array.from({ length: 35 }).map((_, i) => (
+                    <Skeleton key={i} className="h-16 md:h-20 rounded-xl" />
+                  ))
+                : Array.from({
+                    length: jumlahHari,
+                  }).map((_, index) => {
                 const tanggal = index + 1;
 
                 const key = buatKey(tahun, bulan + 1, tanggal);

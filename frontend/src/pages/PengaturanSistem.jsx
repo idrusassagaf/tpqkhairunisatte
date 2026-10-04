@@ -19,6 +19,7 @@ import {
   ClipboardList,
 } from "lucide-react";
 import { api } from "../api";
+import { Skeleton } from "../components/Skeleton";
 
 export default function PengaturanSistem() {
   const fileInputRef = useRef(null);
@@ -363,14 +364,38 @@ export default function PengaturanSistem() {
   if (loading) {
     return (
       <div className="-mx-2 px-2 py-4 md:mx-0 md:p-6">
-        <div className="rounded-2xl border border-gray-100 bg-white p-10 shadow-sm">
-          <div className="flex min-h-[300px] items-center justify-center">
-            <div className="flex flex-col items-center gap-3 text-gray-500">
-              <Loader2 size={32} className="animate-spin text-emerald-600" />
+        <div className="mx-auto max-w-6xl space-y-5">
+          <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm md:p-6">
+            <div className="flex items-center gap-4">
+              <Skeleton className="h-12 w-12 rounded-xl" />
 
-              <span className="text-sm">Memuat pengaturan sistem...</span>
+              <div className="space-y-2">
+                <Skeleton className="h-5 w-48" />
+
+                <Skeleton className="h-3 w-80" />
+              </div>
             </div>
           </div>
+
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm md:p-6">
+              <div className="mb-5 flex items-center gap-3 border-b border-gray-100 pb-4">
+                <Skeleton className="h-10 w-10 rounded-xl" />
+
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-40" />
+
+                  <Skeleton className="h-3 w-56" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <Skeleton className="h-11 w-full rounded-xl" />
+
+                <Skeleton className="h-11 w-full rounded-xl" />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     );

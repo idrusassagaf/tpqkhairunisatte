@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
 import { api } from "../api";
+import { SkeletonCard } from "../components/Skeleton";
+import { isiToPlainText } from "../utils/berita";
 import heroImage from "../assets/hero-putih04.jpg";
 import { ChevronRight } from "lucide-react";
 
 export default function PengumumanPublic() {
+  const [loading, setLoading] = useState(true);
+
   const { language } = useOutletContext();
 
   const translations = {
@@ -50,6 +54,8 @@ export default function PengumumanPublic() {
     } catch (err) {
       console.error("Gagal mengambil pengumuman:", err);
       setPengumuman([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -103,7 +109,13 @@ export default function PengumumanPublic() {
 
           {/* List */}
 
-          {displayPengumuman.length === 0 ? (
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <SkeletonCard withImage={false} />
+
+              <SkeletonCard withImage={false} />
+            </div>
+          ) : displayPengumuman.length === 0 ? (
             <div className="bg-white rounded-3xl shadow-xl p-10 text-center">
               <p className="text-gray-500">{t.empty}</p>
             </div>
@@ -161,9 +173,9 @@ transition
                     md:leading-7
                     "
                     >
-                      {item.isi?.length > 180
-                        ? item.isi.substring(0, 180) + "..."
-                        : item.isi}
+                      {isiToPlainText(item.isi).length > 180
+                        ? isiToPlainText(item.isi).substring(0, 180) + "..."
+                        : isiToPlainText(item.isi)}
                     </p>
                   </div>
 

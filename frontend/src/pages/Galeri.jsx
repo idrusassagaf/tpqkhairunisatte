@@ -1,7 +1,15 @@
 import { useEffect, useState } from "react";
+import { Image as ImageIcon } from "lucide-react";
 import { api } from "../api";
+import { Skeleton } from "../components/Skeleton";
+
+// Gaya input seragam dengan halaman admin lainnya
+const inputCls =
+  "w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-800 shadow-sm transition focus:border-purple-400 focus:outline-none focus:ring-4 focus:ring-purple-100 disabled:bg-gray-100 disabled:text-gray-500";
 
 export default function Galeri() {
+  const [loading, setLoading] = useState(true);
+
   const [judul, setJudul] = useState("");
   const [foto, setFoto] = useState(null);
   const [data, setData] = useState([]);
@@ -17,6 +25,8 @@ export default function Galeri() {
       setData(res.data.data || []);
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -99,14 +109,27 @@ export default function Galeri() {
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Galeri TPQ</h1>
+    <div className="mx-auto w-full max-w-6xl min-w-0 space-y-5 p-3 md:p-6">
+      {/* HEADER */}
+      <div className="flex items-start gap-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm md:p-6">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-pink-100 text-pink-700">
+          <ImageIcon size={22} />
+        </div>
+
+        <div>
+          <h1 className="text-xl font-semibold text-gray-900">Galeri TPQ</h1>
+
+          <p className="mt-0.5 text-sm text-gray-500">
+            Unggah dan kelola foto kegiatan TPQ.
+          </p>
+        </div>
+      </div>
 
       {/* FORM */}
-      <div className="bg-white rounded-2xl shadow p-6 mb-8">
+      <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm md:p-6">
         <form onSubmit={simpanGaleri} className="space-y-4">
           {isSubmitting && (
-            <div className="rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700">
+            <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
               <div className="flex items-center gap-2">
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
                 <span>Mengupload foto galeri...</span>
@@ -114,61 +137,94 @@ export default function Galeri() {
             </div>
           )}
 
-          <input
-            type="text"
-            placeholder="Judul Foto"
-            value={judul}
-            onChange={(e) => setJudul(e.target.value)}
-            className="w-full border rounded-xl p-3 disabled:cursor-not-allowed disabled:bg-slate-100"
-            required
-            disabled={isSubmitting}
-          />
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-gray-600">Judul Foto</label>
 
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setFoto(e.target.files[0])}
-            className="w-full border rounded-xl p-3 disabled:cursor-not-allowed disabled:bg-slate-100"
-            required
-            disabled={isSubmitting}
-          />
+            <input
+              type="text"
+              placeholder="Judul Foto"
+              value={judul}
+              onChange={(e) => setJudul(e.target.value)}
+              className={inputCls}
+              required
+              disabled={isSubmitting}
+            />
+          </div>
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="bg-green-600 hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed text-white px-6 py-3 rounded-xl"
-          >
-            {isSubmitting ? "Mengupload..." : "Upload Foto"}
-          </button>
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-gray-600">Foto</label>
+
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setFoto(e.target.files[0])}
+              className="w-full rounded-xl border border-dashed border-gray-300 bg-gray-50 p-3 text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-pink-100 file:px-3 file:py-2 file:text-pink-700 hover:file:bg-pink-200 disabled:cursor-not-allowed disabled:opacity-60"
+              required
+              disabled={isSubmitting}
+            />
+          </div>
+
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="rounded-xl bg-green-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-green-400"
+            >
+              {isSubmitting ? "Mengupload..." : "Upload Foto"}
+            </button>
+          </div>
         </form>
       </div>
 
       {/* DATA */}
-      <div className="grid md:grid-cols-3 gap-6">
-        {data.map((item) => (
-          <div
-            key={item.id}
-            className="bg-white rounded-2xl shadow overflow-hidden"
-          >
-            <img
-              src={`${api.defaults.baseURL.replace(/\/api\/?$/, "")}/storage/${item.foto}`}
-              alt={item.judul}
-              className="w-full h-56 object-cover"
-            />
+      {loading ? (
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+              <Skeleton className="h-56 w-full rounded-none" />
 
-            <div className="p-4">
-              <h3 className="font-semibold mb-3">{item.judul}</h3>
+              <div className="flex items-center justify-between gap-3 p-4">
+                <Skeleton className="h-4 w-32" />
 
-              <button
-                onClick={() => hapusGaleri(item.id)}
-                className="bg-red-500 text-white px-4 py-2 rounded-lg"
-              >
-                Hapus
-              </button>
+                <Skeleton className="h-7 w-16 rounded-lg" />
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : data.length === 0 ? (
+        <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center text-sm text-gray-500 shadow-sm">
+          Belum ada foto di galeri.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:grid-cols-3">
+          {data.map((item) => (
+            <div
+              key={item.id}
+              className="group overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition hover:shadow-md"
+            >
+              <div className="relative overflow-hidden">
+                <img
+                  src={`${api.defaults.baseURL.replace(/\/api\/?$/, "")}/storage/${item.foto}`}
+                  alt={item.judul}
+                  className="h-56 w-full object-cover transition duration-300 group-hover:scale-105"
+                />
+              </div>
+
+              <div className="flex items-center justify-between gap-3 p-4">
+                <h3 className="truncate font-semibold text-gray-900">{item.judul}</h3>
+
+                <button
+                  type="button"
+                  onClick={() => hapusGaleri(item.id)}
+                  className="shrink-0 rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 transition hover:bg-red-100"
+                >
+                  Hapus
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

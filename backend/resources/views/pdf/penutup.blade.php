@@ -5,7 +5,7 @@
 @if(!empty($setting->narasi['penutup']))
 
 <p style="text-align:justify; line-height:1.8;">
-    {!! nl2br(e($setting->narasi['penutup'])) !!}
+    {!! $setting->narasi['penutup'] !!}
 </p>
 
 @endif

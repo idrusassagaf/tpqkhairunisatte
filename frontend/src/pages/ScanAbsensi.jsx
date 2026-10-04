@@ -133,170 +133,174 @@ export default function ScanAbsensi() {
   };
 
   return (
-    <div className="p-4 md:p-6">
-      <div className="max-w-4xl mx-auto">
-        {/* HEADER */}
-        <div className="mb-6">
-          <h1 className="text-sm md:text-3xl font-extralight text-gray-800">
-            Scan QR Absensi
-          </h1>
+    <div className="mx-auto w-full max-w-4xl min-w-0 space-y-5 p-3 md:p-6">
+      {/* HEADER */}
+      <div className="flex items-start gap-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm md:p-6">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-purple-100 text-purple-600">
+          <ScanLine size={22} />
+        </div>
 
-          <p className="text-sm text-gray-500 mt-1">
+        <div>
+          <h1 className="text-xl font-semibold text-gray-900">Scan QR Absensi</h1>
+
+          <p className="mt-0.5 text-sm text-gray-500">
             Scan QR santri atau guru menggunakan kamera laptop/PC.
           </p>
         </div>
+      </div>
 
-        {/* PILIH TIPE */}
-        <div className="bg-white rounded-xl shadow p-4 md:p-5 mb-5">
-          <div className="flex items-center gap-2 mb-3">
-            <Users size={20} className="text-purple-600" />
-            <h2 className="font-extralight text-gray-800">Jenis Absensi</h2>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              onClick={() => handleTipeChange("santri")}
-              className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border transition ${
-                tipe === "santri"
-                  ? "bg-gray-500 text-white border-gray-600"
-                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-              }`}
-            >
-              <UserRound size={18} />
-              Santri
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleTipeChange("guru")}
-              className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border transition ${
-                tipe === "guru"
-                  ? "bg-gray-500 text-white border-gray-600"
-                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-              }`}
-            >
-              <Users size={18} />
-              Guru
-            </button>
-          </div>
+      {/* PILIH TIPE */}
+      <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+        <div className="mb-4 flex items-center gap-2">
+          <Users size={18} className="text-purple-600" />
+          <h2 className="text-sm font-semibold text-gray-800">Jenis Absensi</h2>
         </div>
 
-        {/* CAMERA */}
-        <div className="bg-white rounded-xl shadow p-4 md:p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Camera size={21} className="text-purple-600" />
-            <h2 className="font-extralight text-gray-800">Kamera</h2>
+        <div className="grid grid-cols-2 gap-2 rounded-xl bg-gray-100 p-1.5">
+          <button
+            type="button"
+            onClick={() => handleTipeChange("santri")}
+            className={`flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition ${
+              tipe === "santri"
+                ? "bg-purple-600 text-white shadow-sm"
+                : "text-gray-600 hover:bg-white"
+            }`}
+          >
+            <UserRound size={17} />
+            Santri
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleTipeChange("guru")}
+            className={`flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition ${
+              tipe === "guru"
+                ? "bg-purple-600 text-white shadow-sm"
+                : "text-gray-600 hover:bg-white"
+            }`}
+          >
+            <Users size={17} />
+            Guru
+          </button>
+        </div>
+      </div>
+
+      {/* KAMERA */}
+      <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm md:p-6">
+        <div className="mb-4 flex items-center gap-2">
+          <Camera size={18} className="text-purple-600" />
+          <h2 className="text-sm font-semibold text-gray-800">Kamera</h2>
+        </div>
+
+        <div
+          id="qr-reader"
+          className="mx-auto w-full max-w-md overflow-hidden rounded-xl"
+        />
+
+        {!cameraActive && !hasil && (
+          <div className="py-8 text-center">
+            <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100">
+              <ScanLine size={32} className="text-gray-400" />
+            </div>
+
+            <p className="mb-4 text-sm text-gray-500">
+              Pilih jenis absensi kemudian tekan tombol mulai kamera.
+            </p>
+
+            <button
+              type="button"
+              onClick={startScanner}
+              disabled={loading}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-green-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <Camera size={18} />
+              Mulai Kamera
+            </button>
           </div>
+        )}
 
-          <div
-            id="qr-reader"
-            className="w-full max-w-md mx-auto overflow-hidden rounded-xl"
-          />
+        {cameraActive && (
+          <div className="mt-4 text-center">
+            <p className="mb-3 text-sm text-gray-500">
+              Arahkan QR Code ke kotak kamera.
+            </p>
 
-          {!cameraActive && !hasil && (
-            <div className="text-center py-8">
-              <ScanLine size={48} className="mx-auto text-gray-300 mb-3" />
+            <button
+              type="button"
+              onClick={stopScanner}
+              className="rounded-xl border border-gray-300 px-5 py-2 text-sm text-gray-700 transition hover:bg-gray-50"
+            >
+              Hentikan Kamera
+            </button>
+          </div>
+        )}
 
-              <p className="text-sm text-gray-500 mb-4">
-                Pilih jenis absensi kemudian tekan tombol mulai kamera.
-              </p>
+        {/* ERROR */}
+        {error && (
+          <div className="mt-5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+            {error}
+          </div>
+        )}
 
-              <button
-                type="button"
-                onClick={startScanner}
-                disabled={loading}
-                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-green-600 text-white hover:bg-gray-600 transition disabled:opacity-50"
-              >
-                <Camera size={18} />
-                Mulai Kamera
-              </button>
-            </div>
-          )}
-
-          {cameraActive && (
-            <div className="text-center mt-4">
-              <p className="text-sm text-gray-500 mb-3">
-                Arahkan QR Code ke kotak kamera.
-              </p>
-
-              <button
-                type="button"
-                onClick={stopScanner}
-                className="px-5 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition"
-              >
-                Hentikan Kamera
-              </button>
-            </div>
-          )}
-
-          {/* ERROR */}
-          {error && (
-            <div className="mt-5 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-              {error}
-            </div>
-          )}
-
-          {/* HASIL */}
-          {hasil && (
-            <div className="mt-5 rounded-xl border border-green-200 bg-green-50 p-5">
-              <div className="flex items-center gap-3 mb-4">
-                <CheckCircle2 size={28} className="text-green-600" />
-
-                <div>
-                  <h3 className="font-bold text-green-800">Absensi Berhasil</h3>
-
-                  <p className="text-sm text-green-700">
-                    Kehadiran berhasil dicatat.
-                  </p>
-                </div>
+        {/* HASIL */}
+        {hasil && (
+          <div className="mt-5 rounded-2xl border border-green-200 bg-green-50 p-5">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm">
+                <CheckCircle2 size={26} className="text-green-600" />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                <div>
-                  <span className="text-gray-500">Nama</span>
-                  <div className="font-semibold text-gray-800">
-                    {hasil.nama}
-                  </div>
-                </div>
+              <div>
+                <h3 className="font-semibold text-green-800">Absensi Berhasil</h3>
 
+                <p className="text-sm text-green-700">
+                  Kehadiran berhasil dicatat.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 rounded-xl bg-white p-4 text-sm md:grid-cols-2">
+              <div>
+                <span className="text-xs text-gray-500">Nama</span>
+                <div className="font-semibold text-gray-900">{hasil.nama}</div>
+              </div>
+
+              <div>
+                <span className="text-xs text-gray-500">
+                  {hasil.tipe === "guru" ? "NIG" : "NIS"}
+                </span>
+                <div className="font-semibold text-gray-900">{hasil.kode}</div>
+              </div>
+
+              <div>
+                <span className="text-xs text-gray-500">Tanggal</span>
+                <div className="font-semibold text-gray-900">{hasil.tanggal}</div>
+              </div>
+
+              <div>
+                <span className="text-xs text-gray-500">Jam</span>
+                <div className="font-semibold text-gray-900">{hasil.jam}</div>
+              </div>
+
+              <div>
+                <span className="text-xs text-gray-500">Status</span>
                 <div>
-                  <span className="text-gray-500">
-                    {hasil.tipe === "guru" ? "NIG" : "NIS"}
+                  <span className="inline-flex rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700">
+                    HADIR
                   </span>
-                  <div className="font-semibold text-gray-800">
-                    {hasil.kode}
-                  </div>
-                </div>
-
-                <div>
-                  <span className="text-gray-500">Tanggal</span>
-                  <div className="font-semibold text-gray-800">
-                    {hasil.tanggal}
-                  </div>
-                </div>
-
-                <div>
-                  <span className="text-gray-500">Jam</span>
-                  <div className="font-semibold text-gray-800">{hasil.jam}</div>
-                </div>
-
-                <div>
-                  <span className="text-gray-500">Status</span>
-                  <div className="font-bold text-green-700">HADIR</div>
                 </div>
               </div>
-
-              <button
-                type="button"
-                onClick={startScanner}
-                className="mt-5 w-full md:w-auto px-5 py-3 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition"
-              >
-                Scan Berikutnya
-              </button>
             </div>
-          )}
-        </div>
+
+            <button
+              type="button"
+              onClick={startScanner}
+              className="mt-5 w-full rounded-xl bg-purple-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-purple-700 md:w-auto"
+            >
+              Scan Berikutnya
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

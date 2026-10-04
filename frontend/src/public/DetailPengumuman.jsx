@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useOutletContext } from "react-router-dom";
 import { api } from "../api";
+import { Skeleton } from "../components/Skeleton";
+import { isHtmlContent, isiToParagraphs } from "../utils/berita";
 import heroImage from "../assets/hero-putih04.jpg";
 
 import { ArrowLeft, CalendarDays, Download, FileText } from "lucide-react";
@@ -8,6 +10,8 @@ import { ArrowLeft, CalendarDays, Download, FileText } from "lucide-react";
 import jsPDF from "jspdf";
 
 export default function DetailPengumuman() {
+  const [loading, setLoading] = useState(true);
+
   const { id } = useParams();
   const { language } = useOutletContext();
 
@@ -63,6 +67,8 @@ export default function DetailPengumuman() {
     } catch (err) {
       console.error("Gagal mengambil data pengumuman:", err);
       setPengumuman(null);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -294,7 +300,7 @@ export default function DetailPengumuman() {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
 
-      const isiPengumuman = displayPengumuman.isi || "-";
+      const isiPengumuman = isiToParagraphs(displayPengumuman.isi) || "-";
 
       posisiY = drawJustifiedText(
         doc,
@@ -356,6 +362,28 @@ export default function DetailPengumuman() {
   // =========================================================
   // JIKA DATA BELUM DITEMUKAN
   // =========================================================
+
+  if (loading) {
+    return (
+      <div className="bg-[#f8faf8] min-h-screen p-6 md:p-10">
+        <div className="max-w-3xl mx-auto space-y-4">
+          <Skeleton className="h-8 w-2/3" />
+
+          <Skeleton className="h-4 w-1/3" />
+
+          <Skeleton className="mt-6 h-64 w-full rounded-2xl" />
+
+          <div className="space-y-2 pt-4">
+            <Skeleton className="h-3 w-full" />
+
+            <Skeleton className="h-3 w-11/12" />
+
+            <Skeleton className="h-3 w-3/4" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!pengumuman) {
     return <div className="p-10 text-center">{t.notFound}</div>;
@@ -530,7 +558,12 @@ export default function DetailPengumuman() {
                 overflowWrap: "break-word",
               }}
             >
-              {(displayPengumuman.isi || "-")
+              {isHtmlContent(displayPengumuman.isi) ? (
+                <div
+                  className="isi-berita"
+                  dangerouslySetInnerHTML={{ __html: displayPengumuman.isi }}
+                />
+              ) : (displayPengumuman.isi || "-")
                 .replace(/\r\n/g, "\n")
                 .replace(/\r/g, "\n")
                 .split(/\n\s*\n/)

@@ -1,9 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
 import { api } from "../api";
-import { Eye } from "lucide-react";
+import { Skeleton, SkeletonRows } from "../components/Skeleton";
+import { Eye, BookOpen } from "lucide-react";
+
+// Gaya input seragam dengan halaman admin lainnya
+const inputCls =
+  "w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-800 shadow-sm transition focus:border-purple-400 focus:outline-none focus:ring-4 focus:ring-purple-100";
 import { useNavigate } from "react-router-dom";
 
 export default function MasterHafalan() {
+  const [loading, setLoading] = useState(true);
   const [santri, setSantri] = useState([]);
   const [progresHafalan, setProgresHafalan] = useState([]);
   const [search, setSearch] = useState("");
@@ -99,6 +105,8 @@ export default function MasterHafalan() {
       setProgresHafalan(Array.isArray(dataHafalan) ? dataHafalan : []);
     } catch (err) {
       console.error("Gagal ambil data master hafalan:", err);
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -218,105 +226,137 @@ export default function MasterHafalan() {
   // =========================================================
 
   return (
-    <div className="space-y-4 p-4">
-      <div className="bg-white rounded-2xl shadow p-0 overflow-x-auto">
-        {/* TITLE */}
+    <div className="mx-auto w-full max-w-7xl min-w-0 space-y-5 overflow-x-hidden p-3 md:p-6">
+      {/* HEADER */}
+      <div className="flex items-start gap-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm md:p-6">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-purple-100 text-purple-600">
+          <BookOpen size={22} />
+        </div>
 
-        <h1 className="text-lg font-light tracking-wide text-black ml-2 mb-4">
-          MASTER HAFALAN
-        </h1>
+        <div>
+          <h1 className="text-xl font-semibold text-gray-900">Master Hafalan</h1>
 
+          <p className="mt-0.5 text-sm text-gray-500">
+            Rekap jumlah hafalan yang sudah dan belum lancar setiap santri.
+          </p>
+        </div>
+      </div>
+
+      <div className="space-y-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm md:p-6">
         {/* SEARCH */}
-
-        <div className="mb-4">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <input
             type="text"
             placeholder="Cari nama / NIS / kelas..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="
-              border rounded-lg px-3 py-2
-              text-sm w-full md:w-72
-              focus:outline-none focus:ring-2
-              focus:ring-purple-300
-            "
+            className={`${inputCls} md:w-72`}
           />
+
+          {santri.length > 0 && (
+            <div className="text-xs text-gray-500">
+              Menampilkan{" "}
+              <span className="font-semibold text-gray-700">
+                {filteredSantri.length === 0 ? 0 : startIndex + 1}
+              </span>{" "}
+              –{" "}
+              <span className="font-semibold text-gray-700">
+                {Math.min(startIndex + ITEMS_PER_PAGE, filteredSantri.length)}
+              </span>{" "}
+              dari{" "}
+              <span className="font-semibold text-gray-700">
+                {filteredSantri.length}
+              </span>{" "}
+              santri
+            </div>
+          )}
         </div>
 
         {/* TABLE DESKTOP */}
-
-        <table className="hidden md:table w-full border text-xs text-black">
-          <thead className="bg-gray-100 text-black">
-            <tr>
-              <th className="p-1 border w-16">No.</th>
-              <th className="p-1 border">Nama Santri</th>
-              <th className="p-1 border">NIS</th>
-              <th className="p-1 border">Kelas</th>
-              <th className="p-1 border text-center">Sudah Lancar</th>
-              <th className="p-1 border text-center">Belum Lancar</th>
-              <th className="p-1 border text-center">Lihat Hafalan</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {santri.length === 0 ? (
+        <div className="hidden overflow-x-auto rounded-xl border border-gray-200 md:block">
+          <table className="w-full text-sm text-gray-700">
+            <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
               <tr>
-                <td colSpan="7" className="text-center p-6 text-gray-500">
-                  Data santri belum tersedia
-                </td>
+                <th className="w-16 px-4 py-3 text-center font-semibold">No.</th>
+                <th className="px-4 py-3 text-left font-semibold">Nama Santri</th>
+                <th className="px-4 py-3 text-left font-semibold">NIS</th>
+                <th className="px-4 py-3 text-left font-semibold">Kelas</th>
+                <th className="px-4 py-3 text-center font-semibold">Sudah Lancar</th>
+                <th className="px-4 py-3 text-center font-semibold">Belum Lancar</th>
+                <th className="px-4 py-3 text-center font-semibold">Lihat Hafalan</th>
               </tr>
-            ) : currentSantri.length === 0 ? (
-              <tr>
-                <td colSpan="7" className="text-center p-6 text-gray-500">
-                  Data santri tidak ditemukan
-                </td>
-              </tr>
-            ) : (
-              currentSantri.map((s, i) => (
-                <tr key={s.nis || i} className="border-t hover:bg-gray-50">
-                  <td className="p-1 border text-center">
-                    {startIndex + i + 1}
-                  </td>
+            </thead>
 
-                  <td className="p-1 border font-medium">{s.nama}</td>
-
-                  <td className="p-1 border">{s.nis}</td>
-
-                  <td className="p-1 border">{s.kelas}</td>
-
-                  <td className="p-1 border text-center font-medium text-green-700">
-                    {getJumlahHafalan(s.nis, "Lancar")}-Hafalan
-                  </td>
-
-                  <td className="p-1 border text-center font-medium text-red-700">
-                    {getJumlahHafalan(s.nis, "Belum")}-Hafalan
-                  </td>
-
-                  <td className="p-1 border text-center">
-                    <button
-                      type="button"
-                      onClick={() => navigate(`/dashboard/master-hafalan/${s.nis}`)}
-                      className="
-                        inline-flex items-center justify-center
-                        w-7 h-7 rounded-full
-                        bg-purple-100 hover:bg-purple-200
-                        text-purple-700 transition
-                      "
-                    >
-                      <Eye size={18} />
-                    </button>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="7" className="p-0">
+                    <SkeletonRows rows={6} cols={5} />
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : santri.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="px-4 py-8 text-center text-gray-500">
+                    Data santri belum tersedia
+                  </td>
+                </tr>
+              ) : currentSantri.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="px-4 py-8 text-center text-gray-500">
+                    Data santri tidak ditemukan
+                  </td>
+                </tr>
+              ) : (
+                currentSantri.map((s, i) => (
+                  <tr
+                    key={s.nis || i}
+                    className="border-t border-gray-100 transition hover:bg-purple-50/40"
+                  >
+                    <td className="px-4 py-3 text-center text-gray-500">
+                      {startIndex + i + 1}
+                    </td>
+
+                    <td className="px-4 py-3 font-medium text-gray-900">{s.nama}</td>
+
+                    <td className="px-4 py-3 whitespace-nowrap">{s.nis}</td>
+
+                    <td className="px-4 py-3 whitespace-nowrap">{s.kelas || "-"}</td>
+
+                    <td className="px-4 py-3 text-center">
+                      <span className="inline-flex rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700">
+                        {getJumlahHafalan(s.nis, "Lancar")} Hafalan
+                      </span>
+                    </td>
+
+                    <td className="px-4 py-3 text-center">
+                      <span className="inline-flex rounded-full bg-red-100 px-2.5 py-1 text-xs font-medium text-red-700">
+                        {getJumlahHafalan(s.nis, "Belum")} Hafalan
+                      </span>
+                    </td>
+
+                    <td className="px-4 py-3 text-center">
+                      <button
+                        type="button"
+                        aria-label={`Lihat hafalan ${s.nama}`}
+                        onClick={() => navigate(`/dashboard/master-hafalan/${s.nis}`)}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-purple-200 bg-purple-50 text-purple-700 transition hover:bg-purple-100"
+                      >
+                        <Eye size={16} />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
 
         {/* MOBILE CARD */}
-
-        <div className="md:hidden space-y-3 mt-4">
-          {currentSantri.length === 0 ? (
-            <div className="text-center text-gray-500 p-4">
+        <div className="space-y-3 md:hidden">
+          {loading ? (
+            <SkeletonRows rows={4} cols={3} />
+          ) : currentSantri.length === 0 ? (
+            <div className="p-4 text-center text-gray-500">
               {santri.length === 0
                 ? "Data santri belum tersedia"
                 : "Data santri tidak ditemukan"}
@@ -329,71 +369,42 @@ export default function MasterHafalan() {
               return (
                 <div
                   key={s.nis || i}
-                  className="
-                    bg-white
-                    border
-                    rounded-2xl
-                    shadow-sm
-                    p-3
-                  "
+                  className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm"
                 >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
                       <div className="flex gap-2">
-                        <span className="font-semibold text-black">
+                        <span className="font-semibold text-gray-500">
                           {startIndex + i + 1}.
                         </span>
 
-                        <span
-                          className="
-                            font-semibold
-                            text-black
-                            truncate
-                          "
-                        >
+                        <span className="truncate font-semibold text-gray-900">
                           {s.nama}
                         </span>
                       </div>
 
-                      <div
-                        className="
-                          text-xs
-                          text-gray-600
-                          mt-1
-                          ml-6
-                        "
-                      >
-                        NIS {s.nis} | K-{s.kelas}
+                      <div className="mt-1 ml-6 text-xs text-gray-500">
+                        NIS {s.nis} · Kelas {s.kelas || "-"}
                       </div>
-                    </div>
 
-                    <div
-                      className="
-                        text-center
-                        text-xs
-                        font-semibold
-                        min-w-[50px]
-                      "
-                    >
-                      <div className="text-black mt-1">{lancar}- Lcr</div>
+                      <div className="mt-3 ml-6 flex flex-wrap gap-2">
+                        <span className="inline-flex rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700">
+                          {lancar} Lancar
+                        </span>
 
-                      <div className="text-black mt-2">{belum}- Blm</div>
+                        <span className="inline-flex rounded-full bg-red-100 px-2.5 py-1 text-xs font-medium text-red-700">
+                          {belum} Belum
+                        </span>
+                      </div>
                     </div>
 
                     <button
                       type="button"
+                      aria-label={`Lihat hafalan ${s.nama}`}
                       onClick={() => navigate(`/dashboard/master-hafalan/${s.nis}`)}
-                      className="
-                        w-9 h-9
-                        rounded-full
-                        bg-purple-100
-                        text-purple-700
-                        flex items-center
-                        justify-center
-                        shrink-0
-                      "
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-purple-200 bg-purple-50 text-purple-700 transition hover:bg-purple-100"
                     >
-                      <Eye size={15} />
+                      <Eye size={16} />
                     </button>
                   </div>
                 </div>
@@ -403,38 +414,18 @@ export default function MasterHafalan() {
         </div>
 
         {/* PAGINATION */}
-
         {totalPages > 1 && (
-          <div className="flex flex-col md:flex-row items-center justify-between gap-3 mt-4 pt-4 border-t p-2">
+          <div className="flex flex-col items-center justify-between gap-3 border-t border-gray-100 pt-4 md:flex-row">
             <div className="text-xs text-gray-500">
-              Menampilkan{" "}
-              <span className="font-semibold text-gray-700">
-                {startIndex + 1}
-              </span>{" "}
-              -{" "}
-              <span className="font-semibold text-gray-700">
-                {Math.min(startIndex + ITEMS_PER_PAGE, filteredSantri.length)}
-              </span>{" "}
-              dari{" "}
-              <span className="font-semibold text-gray-700">
-                {filteredSantri.length}
-              </span>{" "}
-              santri
+              Halaman {currentPage} dari {totalPages}
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className="flex flex-wrap items-center justify-center gap-1">
               <button
                 type="button"
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="
-                  px-3 py-2
-                  border rounded-lg
-                  text-xs
-                  disabled:opacity-40
-                  disabled:cursor-not-allowed
-                  hover:bg-gray-100
-                "
+                className="rounded-lg border bg-white px-3 py-1.5 text-xs transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Sebelumnya
               </button>
@@ -445,10 +436,10 @@ export default function MasterHafalan() {
                     type="button"
                     key={page}
                     onClick={() => setCurrentPage(page)}
-                    className={`min-w-9 px-3 py-2 rounded-lg text-xs border ${
+                    className={`min-w-[32px] rounded-lg border px-3 py-1.5 text-xs transition ${
                       currentPage === page
-                        ? "bg-purple-600 text-white border-purple-600"
-                        : "bg-white text-gray-700 hover:bg-gray-100"
+                        ? "border-purple-600 bg-purple-600 text-white"
+                        : "bg-white text-gray-700 hover:bg-gray-50"
                     }`}
                   >
                     {page}
@@ -462,14 +453,7 @@ export default function MasterHafalan() {
                   setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                 }
                 disabled={currentPage === totalPages}
-                className="
-                  px-3 py-2
-                  border rounded-lg
-                  text-xs
-                  disabled:opacity-40
-                  disabled:cursor-not-allowed
-                  hover:bg-gray-100
-                "
+                className="rounded-lg border bg-white px-3 py-1.5 text-xs transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Berikutnya
               </button>

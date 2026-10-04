@@ -1,12 +1,19 @@
 import { useEffect, useState } from "react";
-import { Download, FileSpreadsheet, FileText } from "lucide-react";
+import { Download, FileSpreadsheet, FileText, BookMarked } from "lucide-react";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 import { api } from "../api";
+import { SkeletonRows } from "../components/Skeleton";
+
+// Gaya input seragam dengan halaman admin lainnya
+const inputCls =
+  "w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-800 shadow-sm transition focus:border-purple-400 focus:outline-none focus:ring-4 focus:ring-purple-100";
 
 export default function ProgresQuran() {
+  const [loading, setLoading] = useState(true);
+
   const [dataQuran, setDataQuran] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [search, setSearch] = useState("");
@@ -98,6 +105,8 @@ export default function ProgresQuran() {
 
       setDataQuran([]);
       setFilteredData([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -519,94 +528,81 @@ export default function ProgresQuran() {
   // =========================================================
 
   return (
-    <div className="p-4 space-y-4">
-      {/* =====================================================
-          HEADER
-      ===================================================== */}
+    <div className="mx-auto w-full max-w-7xl min-w-0 space-y-5 overflow-x-hidden p-3 md:p-6">
+      {/* HEADER */}
+      <div className="flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between md:p-6">
+        <div className="flex items-start gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+            <BookMarked size={22} />
+          </div>
 
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        {/* TITLE */}
+          <div>
+            <h1 className="text-xl font-semibold text-gray-900">Progres Al-Qur&apos;an</h1>
 
-        <h1 className="text-lg tracking-wider font-light text-black">
-          PROGRES AL'QURAN
-        </h1>
+            <p className="mt-0.5 text-sm text-gray-500">
+              Pantau juz, surah, ayat, dan progres bacaan santri.
+            </p>
+          </div>
+        </div>
 
-        {/* SEARCH + FILTER + DOWNLOAD */}
+        {/* DOWNLOAD */}
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setShowDownload((prev) => !prev)}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 md:w-auto"
+          >
+            <Download size={17} />
+            Download
+          </button>
 
-        <div className="flex flex-col sm:flex-row gap-2">
-          {/* SEARCH */}
+          {showDownload && (
+            <div className="absolute right-0 z-50 mt-2 w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg md:w-52">
+              <button
+                type="button"
+                onClick={handleDownloadExcel}
+                className="flex w-full items-center gap-3 px-4 py-3 text-sm text-gray-700 transition hover:bg-gray-50"
+              >
+                <FileSpreadsheet size={18} className="text-green-600" />
 
+                <div className="text-left">
+                  <div className="font-medium">Excel</div>
+                  <div className="text-xs text-gray-400">.xlsx</div>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDownloadPDF}
+                className="flex w-full items-center gap-3 border-t px-4 py-3 text-sm text-gray-700 transition hover:bg-gray-50"
+              >
+                <FileText size={18} className="text-red-600" />
+
+                <div className="text-left">
+                  <div className="font-medium">PDF</div>
+                  <div className="text-xs text-gray-400">.pdf</div>
+                </div>
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="space-y-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm md:p-6">
+        {/* FILTER */}
+        <div className="flex flex-col gap-3 md:flex-row md:flex-wrap md:items-center">
           <input
             type="text"
             placeholder="Cari santri / guru / surah..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="border p-2 rounded text-xs w-full sm:w-64"
+            className={`${inputCls} md:w-72`}
           />
-
-          {/* DOWNLOAD */}
-
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setShowDownload((prev) => !prev)}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition"
-            >
-              <Download size={17} />
-              Download
-            </button>
-
-            {showDownload && (
-              <div className="absolute right-0 mt-2 w-full sm:w-52 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden">
-                {/* EXCEL */}
-
-                <button
-                  type="button"
-                  onClick={handleDownloadExcel}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition"
-                >
-                  <FileSpreadsheet size={18} className="text-green-600" />
-
-                  <div className="text-left">
-                    <div className="font-medium">Excel</div>
-
-                    <div className="text-xs text-gray-400">.xlsx</div>
-                  </div>
-                </button>
-
-                {/* PDF */}
-
-                <button
-                  type="button"
-                  onClick={handleDownloadPDF}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition border-t"
-                >
-                  <FileText size={18} className="text-red-600" />
-
-                  <div className="text-left">
-                    <div className="font-medium">PDF</div>
-
-                    <div className="text-xs text-gray-400">.pdf</div>
-                  </div>
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* =====================================================
-          FILTER
-      ===================================================== */}
-
-      <div className="p-0 md:bg-white md:rounded-xl md:shadow md:p-4 md:overflow-x-auto">
-        <div className="mb-4 flex flex-wrap gap-2">
-          {/* FILTER JUZ */}
 
           <select
             value={filterJuz}
             onChange={(e) => setFilterJuz(e.target.value)}
-            className="border p-2 rounded text-xs"
+            className={`${inputCls} md:w-36`}
           >
             <option value="">Semua Juz</option>
 
@@ -617,108 +613,104 @@ export default function ProgresQuran() {
             ))}
           </select>
 
-          {/* FILTER SURAH */}
-
           <input
             type="text"
             placeholder="Filter Surah"
             value={filterSurah}
             onChange={(e) => setFilterSurah(e.target.value)}
-            className="border p-2 rounded text-xs"
+            className={`${inputCls} md:w-44`}
           />
-
-          {/* FILTER PROGRES */}
 
           <select
             value={filterProgres}
             onChange={(e) => setFilterProgres(e.target.value)}
-            className="border p-2 rounded text-xs"
+            className={`${inputCls} md:w-44`}
           >
             <option value="">Semua Progres</option>
-
             <option value="Belum">Belum</option>
-
             <option value="Lancar">Lancar</option>
           </select>
-
-          {/* FILTER PRESTASI */}
 
           <select
             value={filterPrestasi}
             onChange={(e) => setFilterPrestasi(e.target.value)}
-            className="border p-2 rounded text-xs"
+            className={`${inputCls} md:w-44`}
           >
             <option value="">Semua Prestasi</option>
-
             <option value="Di-Lanjut">Di-Lanjut</option>
-
             <option value="Di-Ulang">Di-Ulang</option>
           </select>
         </div>
 
-        {/* =================================================
-            DESKTOP
-        ================================================= */}
-
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-xs border">
-            <thead className="bg-gray-100">
+        {loading ? (
+          <SkeletonRows rows={6} cols={6} />
+        ) : (
+          <>
+          {/* DESKTOP */}
+        <div className="hidden overflow-x-auto rounded-xl border border-gray-200 md:block">
+          <table className="w-full text-sm text-gray-700">
+            <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
               <tr>
-                <th className="p-2 border">Nama Santri</th>
-
-                <th className="p-2 border">NIS</th>
-
-                <th className="p-2 border">Guru</th>
-
-                <th className="p-2 border">Kelas</th>
-
-                <th className="p-2 border">Juz</th>
-
-                <th className="p-2 border">Surah</th>
-
-                <th className="p-2 border">Ayat</th>
-
-                <th className="p-2 border">Halaman</th>
-
-                <th className="p-2 border">Progres</th>
-
-                <th className="p-2 border">Prestasi</th>
-
-                <th className="p-2 border">Update</th>
+                <th className="px-4 py-3 font-semibold">Nama Santri</th>
+                <th className="px-4 py-3 font-semibold">NIS</th>
+                <th className="px-4 py-3 font-semibold">Guru</th>
+                <th className="px-4 py-3 font-semibold">Kelas</th>
+                <th className="px-4 py-3 font-semibold">Juz</th>
+                <th className="px-4 py-3 font-semibold">Surah</th>
+                <th className="px-4 py-3 font-semibold">Ayat</th>
+                <th className="px-4 py-3 font-semibold">Halaman</th>
+                <th className="px-4 py-3 font-semibold">Progres</th>
+                <th className="px-4 py-3 font-semibold">Prestasi</th>
+                <th className="px-4 py-3 font-semibold">Update</th>
               </tr>
             </thead>
 
             <tbody>
               {currentData.length === 0 ? (
                 <tr>
-                  <td colSpan="11" className="text-center p-4 text-gray-500">
-                    Belum ada data progres Qur'an
+                  <td colSpan="11" className="px-4 py-8 text-center text-gray-500">
+                    Belum ada data progres Qur&apos;an
                   </td>
                 </tr>
               ) : (
                 currentData.map((d, i) => (
-                  <tr key={i} className="border-t">
-                    <td className="p-2 border font-semibold">{d.nama}</td>
+                  <tr
+                    key={i}
+                    className="border-t border-gray-100 transition hover:bg-emerald-50/40"
+                  >
+                    <td className="px-4 py-3 font-semibold text-gray-900">{d.nama}</td>
 
-                    <td className="p-2 border">{d.nis}</td>
+                    <td className="px-4 py-3 whitespace-nowrap">{d.nis}</td>
 
-                    <td className="p-2 border">{d.guru}</td>
+                    <td className="px-4 py-3">{d.guru}</td>
 
-                    <td className="p-2 border">{d.kelas}</td>
+                    <td className="px-4 py-3 whitespace-nowrap">{d.kelas}</td>
 
-                    <td className="p-2 border">{d.juz}</td>
+                    <td className="px-4 py-3 text-center">{d.juz}</td>
 
-                    <td className="p-2 border">{d.surah}</td>
+                    <td className="px-4 py-3">{d.surah}</td>
 
-                    <td className="p-2 border">{d.ayat}</td>
+                    <td className="px-4 py-3 text-center">{d.ayat}</td>
 
-                    <td className="p-2 border">{d.halaman}</td>
+                    <td className="px-4 py-3 text-center">{d.halaman}</td>
 
-                    <td className="p-2 border">{d.progres}</td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
+                          d.progres === "Lancar"
+                            ? "bg-green-100 text-green-700"
+                            : d.progres === "Belum"
+                              ? "bg-red-100 text-red-700"
+                              : "bg-gray-100 text-gray-600"
+                        }`}
+                      >
+                        {d.progres}
+                      </span>
+                    </td>
 
-                    <td className="p-2 border">{d.prestasi}</td>
+                    <td className="px-4 py-3 font-medium">{d.prestasi}</td>
 
-                    <td className="p-2 border text-xs text-gray-500">
+                    <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">
                       {d.update}
                     </td>
                   </tr>
@@ -728,61 +720,68 @@ export default function ProgresQuran() {
           </table>
         </div>
 
-        {/* =================================================
-            MOBILE
-        ================================================= */}
-
-        <div className="md:hidden w-full max-w-full space-y-4">
+        {/* MOBILE */}
+        <div className="w-full space-y-3 md:hidden">
           {currentData.length === 0 ? (
-            <div className="text-center text-gray-500">
-              Belum ada data progres Qur'an
+            <div className="p-4 text-center text-gray-500">
+              Belum ada data progres Qur&apos;an
             </div>
           ) : (
             currentData.map((d, i) => (
               <div
                 key={i}
-                className="w-full max-w-full bg-gray-0 border rounded-2xl shadow overflow-hidden"
+                className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm"
               >
-                {/* HEADER */}
+                <div className="bg-emerald-50 px-4 py-3 text-center">
+                  <div className="font-semibold text-gray-900">
+                    {d.nama?.toUpperCase()}
+                  </div>
 
-                <div className="bg-gray-300 text-black text-center font-bold py-3 px-3 text-sm leading-5">
-                  {d.nama?.toUpperCase()}
-                  <br />
-                  NIS : {d.nis} | Kelas {d.kelas}
+                  <div className="mt-0.5 text-xs text-gray-500">
+                    NIS {d.nis} · Kelas {d.kelas}
+                  </div>
                 </div>
 
-                {/* BODY */}
+                <div className="space-y-2 p-4 text-sm text-gray-700">
+                  <div className="flex flex-wrap gap-2">
+                    <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs">
+                      Juz {d.juz}
+                    </span>
 
-                <div className="p-2 text-sm text-gray-700 space-y-1 text-center">
-                  {/* SURAH */}
+                    <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs">
+                      Ayat {d.ayat || "-"}
+                    </span>
 
-                  <div>
-                    <b>SURAH : {(d.surah || "-").toUpperCase()}</b>
+                    <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs">
+                      Hal. {d.halaman}
+                    </span>
+
+                    <span
+                      className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                        d.progres === "Lancar"
+                          ? "bg-green-100 text-green-700"
+                          : d.progres === "Belum"
+                            ? "bg-red-100 text-red-700"
+                            : "bg-gray-100 text-gray-600"
+                      }`}
+                    >
+                      {d.progres || "-"}
+                    </span>
                   </div>
 
-                  {/* JUZ / AYAT / HALAMAN */}
-
                   <div>
-                    | Juz {d.juz} | Ayat {d.ayat || "-"} | Halaman {d.halaman} |
+                    Surah <span className="font-medium">{d.surah || "-"}</span>
                   </div>
 
-                  {/* GURU */}
-
                   <div>
-                    Guru : <b>{d.guru || "-"}</b>
+                    Guru <span className="font-medium">{d.guru || "-"}</span>
                   </div>
 
-                  {/* PROGRES */}
-
                   <div>
-                    Progres <b>{(d.progres || "-").toUpperCase()}</b> maka
-                    prestasi belajar santri harus{" "}
-                    <b>{(d.prestasi || "-").toUpperCase()}</b>
+                    Prestasi <span className="font-semibold">{d.prestasi || "-"}</span>
                   </div>
 
-                  {/* UPDATE */}
-
-                  <div className="text-[11px] text-purple-700 border-t pt-3">
+                  <div className="border-t border-gray-100 pt-2 text-xs text-purple-700">
                     Update tanggal {d.update}
                   </div>
                 </div>
@@ -791,73 +790,59 @@ export default function ProgresQuran() {
           )}
         </div>
 
-        {/* =================================================
-            PAGINATION
-        ================================================= */}
+        </>
+        )}
 
+        {/* PAGINATION */}
         {filteredData.length > 0 && (
-          <div className="flex flex-col md:flex-row items-center justify-between gap-3 mt-4 pt-4 border-t">
-            {/* INFO DATA */}
-
+          <div className="flex flex-col items-center justify-between gap-3 border-t border-gray-100 pt-4 md:flex-row">
             <div className="text-xs text-gray-500">
               Menampilkan{" "}
-              <span className="font-semibold text-gray-700">
-                {startIndex + 1}
-              </span>{" "}
-              -{" "}
+              <span className="font-semibold text-gray-700">{startIndex + 1}</span>{" "}
+              –{" "}
               <span className="font-semibold text-gray-700">
                 {Math.min(startIndex + ITEMS_PER_PAGE, filteredData.length)}
               </span>{" "}
               dari{" "}
-              <span className="font-semibold text-gray-700">
-                {filteredData.length}
-              </span>{" "}
-              santri
+              <span className="font-semibold text-gray-700">{filteredData.length}</span>{" "}
+              data
             </div>
 
-            {/* BUTTON PAGINATION */}
-
             {totalPages > 1 && (
-              <div className="flex items-center gap-1">
-                {/* SEBELUMNYA */}
-
+              <div className="flex flex-wrap items-center justify-center gap-1">
                 <button
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(prev - 1, 1))
-                  }
+                  type="button"
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-2 border rounded-lg text-xs disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                  className="rounded-lg border bg-white px-3 py-1.5 text-xs transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   Sebelumnya
                 </button>
 
-                {/* NOMOR HALAMAN */}
-
-                {Array.from(
-                  { length: totalPages },
-                  (_, index) => index + 1,
-                ).map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`min-w-9 px-3 py-2 rounded-lg text-xs border ${
-                      currentPage === page
-                        ? "bg-purple-600 text-white border-purple-600"
-                        : "bg-white text-gray-700 hover:bg-gray-100"
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
-
-                {/* BERIKUTNYA */}
+                {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+                  (page) => (
+                    <button
+                      key={page}
+                      type="button"
+                      onClick={() => setCurrentPage(page)}
+                      className={`min-w-[32px] rounded-lg border px-3 py-1.5 text-xs transition ${
+                        currentPage === page
+                          ? "border-purple-600 bg-purple-600 text-white"
+                          : "bg-white text-gray-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ),
+                )}
 
                 <button
+                  type="button"
                   onClick={() =>
                     setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                   }
                   disabled={currentPage === totalPages}
-                  className="px-3 py-2 border rounded-lg text-xs disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                  className="rounded-lg border bg-white px-3 py-1.5 text-xs transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   Berikutnya
                 </button>

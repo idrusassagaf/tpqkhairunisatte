@@ -1,12 +1,25 @@
 import { useEffect, useState } from "react";
 import { Link, useParams, useLocation } from "react-router-dom";
-import { Download, FileSpreadsheet, FileText } from "lucide-react";
+import {
+  Download,
+  FileSpreadsheet,
+  FileText,
+  BookOpen,
+  ArrowLeft,
+} from "lucide-react";
 import { api } from "../api";
+import { SkeletonRows } from "../components/Skeleton";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
+// Gaya input seragam dengan halaman admin lainnya
+const inputCls =
+  "w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 shadow-sm transition focus:border-purple-400 focus:outline-none focus:ring-4 focus:ring-purple-100 disabled:bg-gray-100 disabled:text-gray-500";
+
 export default function ProgresHafalanSantri() {
+  const [loading, setLoading] = useState(true);
+
   const { nis } = useParams();
 
   const [guru, setGuru] = useState([]);
@@ -369,7 +382,7 @@ export default function ProgresHafalanSantri() {
   // =========================================================
 
   useEffect(() => {
-    loadHafalan();
+    loadHafalan().finally(() => setLoading(false));
   }, [nis]);
 
   // =========================================================
@@ -789,264 +802,57 @@ export default function ProgresHafalanSantri() {
   // =========================================================
 
   return (
-    <div className="p-4">
-      {/* ================= HEADER ================= */}
-
-      <div className="bg-gray-200 rounded-2xl shadow p-4 mb-4">
-        <div className="flex items-start justify-between mb-3">
-          <div>
-            <h1
-              className="
-                hidden md:block
-                text-lg
-                font-light
-                tracking-[3px]
-                uppercase
-                text-black
-                mb-2
-              "
-            >
-              HAFALAN SANTRI
-            </h1>
-
-            <div
-              className="
-                hidden md:flex
-                flex-wrap
-                items-center
-                gap-2
-                text-black
-                font-light
-                tracking-[2px]
-                text-xs
-              "
-            >
-              <span className="font-bold uppercase">{santri?.nama || "-"}</span>
-
-              <span>|</span>
-
-              <span>{nis}</span>
-
-              <span>|</span>
-
-              <span>Kelas {santri?.kelas || "-"}</span>
-
-              <span>|</span>
-
-              <span className="text-green-700">
-                Sudah Lancar {getJumlah("Lancar")}-Hafalan
-              </span>
-
-              <span>|</span>
-
-              <span className="text-red-600">
-                Belum Lancar {getJumlah("Belum")}-Hafalan
-              </span>
-            </div>
+    <div className="mx-auto w-full max-w-7xl min-w-0 space-y-5 p-3 md:p-6">
+      {/* HEADER */}
+      <div className="flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm md:flex-row md:items-start md:justify-between md:p-6">
+        <div className="flex items-start gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-purple-100 text-purple-600">
+            <BookOpen size={22} />
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setShowDownload((prev) => !prev)}
-                className="
-                  inline-flex
-                  items-center
-                  justify-center
-                  gap-2
-                  px-4
-                  py-2
-                  rounded-lg
-                  bg-blue-600
-                  text-white
-                  text-sm
-                  font-medium
-                  hover:bg-blue-700
-                  transition
-                "
-              >
-                <Download size={17} />
-                Download
-              </button>
+          <div className="min-w-0">
+            <h1 className="text-xl font-semibold text-gray-900">
+              {santri?.nama || "Hafalan Santri"}
+            </h1>
 
-              {showDownload && (
-                <div
-                  className="
-                    absolute
-                    right-0
-                    mt-2
-                    w-52
-                    bg-white
-                    border
-                    border-gray-200
-                    rounded-xl
-                    shadow-lg
-                    z-50
-                    overflow-hidden
-                  "
-                >
-                  <button
-                    type="button"
-                    onClick={handleDownloadExcel}
-                    className="
-                      w-full
-                      flex
-                      items-center
-                      gap-3
-                      px-4
-                      py-3
-                      text-sm
-                      text-gray-700
-                      hover:bg-gray-50
-                      transition
-                    "
-                  >
-                    <FileSpreadsheet size={18} className="text-green-600" />
+            <p className="mt-0.5 text-sm text-gray-500">
+              NIS {nis} · Kelas {santri?.kelas || "-"}
+            </p>
 
-                    <div className="text-left">
-                      <div className="font-medium">Excel</div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <span className="inline-flex rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700">
+                Sudah Lancar: {getJumlah("Lancar")} Hafalan
+              </span>
 
-                      <div className="text-xs text-gray-400">.xlsx</div>
-                    </div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleDownloadPDF}
-                    className="
-                      w-full
-                      flex
-                      items-center
-                      gap-3
-                      px-4
-                      py-3
-                      text-sm
-                      text-gray-700
-                      hover:bg-gray-50
-                      transition
-                      border-t
-                    "
-                  >
-                    <FileText size={18} className="text-red-600" />
-
-                    <div className="text-left">
-                      <div className="font-medium">PDF</div>
-
-                      <div className="text-xs text-gray-400">.pdf</div>
-                    </div>
-                  </button>
-                </div>
-              )}
+              <span className="inline-flex rounded-full bg-red-100 px-2.5 py-1 text-xs font-medium text-red-700">
+                Belum Lancar: {getJumlah("Belum")} Hafalan
+              </span>
             </div>
-
-            <Link
-              to={backLink}
-              className="
-                text-sm
-                font-medium
-                text-purple-700
-                hover:underline
-                whitespace-nowrap
-              "
-            >
-              ← Kembali
-            </Link>
           </div>
         </div>
 
-        {/* ================= MOBILE ================= */}
-
-        <div className="md:hidden text-center text-black">
-          <h1
-            className="
-              text-lg
-              font-light
-              tracking-[3px]
-              uppercase
-              mb-4
-            "
-          >
-            HAFALAN SANTRI
-          </h1>
-
-          <div className="font-bold text-lg uppercase">
-            {santri?.nama || "-"}
-          </div>
-
-          <div className="text-xs text-gray-700 mt-1">
-            {nis} | Kelas {santri?.kelas || "-"}
-          </div>
-
-          <div className="text-xs text-green-700 mt-3">
-            Sudah Lancar : {getJumlah("Lancar")}-Hafalan
-          </div>
-
-          <div className="text-xs text-red-600 mt-1">
-            Belum Lancar : {getJumlah("Belum")}-Hafalan
-          </div>
-
-          <div className="relative flex justify-center mt-4">
+        <div className="flex items-center gap-2 md:shrink-0">
+          <div className="relative">
             <button
               type="button"
               onClick={() => setShowDownload((prev) => !prev)}
-              className="
-                inline-flex
-                items-center
-                justify-center
-                gap-2
-                px-4
-                py-2
-                rounded-lg
-                bg-blue-600
-                text-white
-                text-sm
-                font-medium
-                hover:bg-blue-700
-                transition
-              "
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700"
             >
               <Download size={17} />
               Download
             </button>
 
             {showDownload && (
-              <div
-                className="
-                  absolute
-                  top-full
-                  mt-2
-                  w-52
-                  bg-white
-                  border
-                  border-gray-200
-                  rounded-xl
-                  shadow-lg
-                  z-50
-                  overflow-hidden
-                "
-              >
+              <div className="absolute right-0 z-50 mt-2 w-52 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
                 <button
                   type="button"
                   onClick={handleDownloadExcel}
-                  className="
-                    w-full
-                    flex
-                    items-center
-                    gap-3
-                    px-4
-                    py-3
-                    text-sm
-                    text-gray-700
-                    hover:bg-gray-50
-                    transition
-                  "
+                  className="flex w-full items-center gap-3 px-4 py-3 text-sm text-gray-700 transition hover:bg-gray-50"
                 >
                   <FileSpreadsheet size={18} className="text-green-600" />
 
                   <div className="text-left">
                     <div className="font-medium">Excel</div>
-
                     <div className="text-xs text-gray-400">.xlsx</div>
                   </div>
                 </button>
@@ -1054,56 +860,51 @@ export default function ProgresHafalanSantri() {
                 <button
                   type="button"
                   onClick={handleDownloadPDF}
-                  className="
-                    w-full
-                    flex
-                    items-center
-                    gap-3
-                    px-4
-                    py-3
-                    text-sm
-                    text-gray-700
-                    hover:bg-gray-50
-                    transition
-                    border-t
-                  "
+                  className="flex w-full items-center gap-3 border-t px-4 py-3 text-sm text-gray-700 transition hover:bg-gray-50"
                 >
                   <FileText size={18} className="text-red-600" />
 
                   <div className="text-left">
                     <div className="font-medium">PDF</div>
-
                     <div className="text-xs text-gray-400">.pdf</div>
                   </div>
                 </button>
               </div>
             )}
           </div>
+
+          <Link
+            to={backLink}
+            className="inline-flex items-center gap-1 whitespace-nowrap rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-purple-700 transition hover:bg-purple-50"
+          >
+            <ArrowLeft size={16} />
+            Kembali
+          </Link>
         </div>
       </div>
 
-      {/* ================= TABLE DESKTOP ================= */}
-
-      <div className="hidden md:block bg-white rounded-2xl shadow p-4 overflow-x-auto">
-        <table className="w-full border text-xs text-black">
-          <thead className="bg-gray-100">
+      {/* TABLE DESKTOP */}
+      <div className="hidden overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-sm md:block">
+        <table className="w-full text-sm text-gray-700">
+          <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
             <tr>
-              <th className="p-2 border w-14">No</th>
-
-              <th className="p-2 border text-left">Jenis Hafalan</th>
-
-              <th className="p-2 border">Guru</th>
-
-              <th className="p-2 border">Progres</th>
-
-              <th className="p-2 border">Prestasi</th>
-
-              <th className="p-2 border">Update</th>
+              <th className="w-14 px-4 py-3 text-center font-semibold">No</th>
+              <th className="px-4 py-3 text-left font-semibold">Jenis Hafalan</th>
+              <th className="px-4 py-3 text-left font-semibold">Guru</th>
+              <th className="px-4 py-3 text-left font-semibold">Progres</th>
+              <th className="px-4 py-3 text-center font-semibold">Prestasi</th>
+              <th className="px-4 py-3 text-center font-semibold">Update</th>
             </tr>
           </thead>
 
           <tbody>
-            {jenisHafalan.map((item, i) => {
+            {loading ? (
+              <tr>
+                <td colSpan="6" className="p-0">
+                  <SkeletonRows rows={8} cols={4} />
+                </td>
+              </tr>
+            ) : jenisHafalan.map((item, i) => {
               const progres = dataHafalan[i]?.progres || "";
 
               const prestasi =
@@ -1114,22 +915,20 @@ export default function ProgresHafalanSantri() {
                     : "-";
 
               return (
-                <tr key={i} className="hover:bg-gray-50">
-                  <td className="p-2 border text-center">{i + 1}</td>
+                <tr
+                  key={i}
+                  className="border-t border-gray-100 transition hover:bg-purple-50/40"
+                >
+                  <td className="px-4 py-3 text-center text-gray-500">{i + 1}</td>
 
-                  <td className="p-2 border">{item}</td>
+                  <td className="px-4 py-3 font-medium text-gray-900">{item}</td>
 
-                  <td className="p-2 border">
+                  <td className="px-4 py-3">
                     <select
                       disabled={isReadonly}
                       value={dataHafalan[i]?.guru || ""}
                       onChange={(e) => handleChange(i, "guru", e.target.value)}
-                      className="
-                        border rounded
-                        px-2 py-1
-                        w-full
-                        text-xs
-                      "
+                      className={`${inputCls} py-1.5 text-xs`}
                     >
                       <option value="">Pilih Guru</option>
 
@@ -1146,33 +945,36 @@ export default function ProgresHafalanSantri() {
                     </select>
                   </td>
 
-                  <td className="p-2 border">
+                  <td className="px-4 py-3">
                     <select
                       disabled={isReadonly}
                       value={progres}
-                      onChange={(e) =>
-                        handleChange(i, "progres", e.target.value)
-                      }
-                      className="
-                        border rounded
-                        px-2 py-1
-                        w-full
-                        text-xs
-                      "
+                      onChange={(e) => handleChange(i, "progres", e.target.value)}
+                      className={`${inputCls} py-1.5 text-xs`}
                     >
                       <option value="">Pilih</option>
-
                       <option value="Belum">Belum</option>
-
                       <option value="Lancar">Lancar</option>
                     </select>
                   </td>
 
-                  <td className="p-2 border text-center font-medium">
-                    {prestasi}
+                  <td className="px-4 py-3 text-center">
+                    {prestasi !== "-" ? (
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
+                          progres === "Lancar"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {prestasi}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
                   </td>
 
-                  <td className="p-2 border text-center text-xs">
+                  <td className="px-4 py-3 text-center text-xs text-gray-500">
                     {dataHafalan[i]?.update || "-"}
                   </td>
                 </tr>
@@ -1182,10 +984,11 @@ export default function ProgresHafalanSantri() {
         </table>
       </div>
 
-      {/* ================= MOBILE CARD ================= */}
-
-      <div className="md:hidden space-y-4">
-        {jenisHafalan.map((item, i) => {
+      {/* MOBILE CARD */}
+      <div className="space-y-3 md:hidden">
+        {loading ? (
+          <SkeletonRows rows={5} cols={2} />
+        ) : jenisHafalan.map((item, i) => {
           const progres = dataHafalan[i]?.progres || "";
 
           const prestasi =
@@ -1198,40 +1001,25 @@ export default function ProgresHafalanSantri() {
           return (
             <div
               key={i}
-              className="
-                bg-white
-                rounded-2xl
-                shadow
-                border
-                overflow-hidden
-              "
+              className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm"
             >
-              <div
-                className="
-                  bg-purple-600
-                  text-white
-                  px-4 py-3
-                  font-semibold
-                  text-sm
-                "
-              >
-                {i + 1}. {item}
+              <div className="flex items-start gap-3 bg-purple-50 px-4 py-3">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-purple-600 text-xs font-semibold text-white">
+                  {i + 1}
+                </span>
+
+                <span className="text-sm font-semibold text-gray-900">{item}</span>
               </div>
 
-              <div className="p-4 space-y-4 text-sm text-black">
+              <div className="space-y-3 p-4 text-sm text-gray-700">
                 <div>
-                  <div className="mb-1 font-medium">Guru</div>
+                  <div className="mb-1 text-xs font-medium text-gray-600">Guru</div>
 
                   <select
                     disabled={isReadonly}
                     value={dataHafalan[i]?.guru || ""}
                     onChange={(e) => handleChange(i, "guru", e.target.value)}
-                    className="
-                      border rounded-lg
-                      px-3 py-2
-                      w-full
-                      text-xs
-                    "
+                    className={`${inputCls} text-xs`}
                   >
                     <option value="">Pilih Guru</option>
 
@@ -1249,36 +1037,29 @@ export default function ProgresHafalanSantri() {
                 </div>
 
                 <div>
-                  <div className="mb-1 font-medium">Progres</div>
+                  <div className="mb-1 text-xs font-medium text-gray-600">Progres</div>
 
                   <select
                     disabled={isReadonly}
                     value={progres}
                     onChange={(e) => handleChange(i, "progres", e.target.value)}
-                    className="
-                      border rounded-lg
-                      px-3 py-2
-                      w-full
-                      text-xs
-                    "
+                    className={`${inputCls} text-xs`}
                   >
                     <option value="">Pilih</option>
-
                     <option value="Belum">Belum</option>
-
                     <option value="Lancar">Lancar</option>
                   </select>
                 </div>
 
-                <div className="text-sm">
-                  <span className="font-medium">Prestasi :</span> {prestasi}
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-medium text-gray-600">Prestasi</span>
+
+                  <span className="font-semibold text-gray-900">{prestasi}</span>
                 </div>
               </div>
 
-              <div className="bg-gray-100 px-4 py-2 border-t">
-                <div className="text-xs text-gray-600">
-                  Update : {dataHafalan[i]?.update || "-"}
-                </div>
+              <div className="border-t border-gray-100 bg-gray-50 px-4 py-2 text-xs text-gray-500">
+                Update: {dataHafalan[i]?.update || "-"}
               </div>
             </div>
           );

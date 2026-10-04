@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
+import { Megaphone } from "lucide-react";
 import { api } from "../api";
+import { Skeleton } from "../components/Skeleton";
+import RichTextEditor from "../components/laporan/RichTextEditor";
+import { isHtmlContent } from "../utils/berita";
+
+// Gaya input seragam dengan halaman admin lainnya
+const inputCls =
+  "w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-800 shadow-sm transition focus:border-purple-400 focus:outline-none focus:ring-4 focus:ring-purple-100 disabled:bg-gray-100 disabled:text-gray-500";
 
 export default function Pengumuman() {
   const [data, setData] = useState([]);
@@ -214,6 +222,15 @@ export default function Pengumuman() {
   // =========================================================
 
   const renderIsiPreview = (isi) => {
+    if (isHtmlContent(isi)) {
+      return (
+        <div
+          className="isi-berita text-justify leading-6"
+          dangerouslySetInnerHTML={{ __html: isi }}
+        />
+      );
+    }
+
     const teks = normalisasiIsi(isi);
 
     if (!teks) {
@@ -255,29 +272,35 @@ export default function Pengumuman() {
   // =========================================================
 
   return (
-    <div className="p-4 space-y-6">
-      {/* =====================================================
-          JUDUL HALAMAN
-      ===================================================== */}
+    <div className="mx-auto w-full max-w-5xl min-w-0 space-y-5 p-3 md:p-6">
+      {/* HEADER */}
+      <div className="flex items-start gap-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm md:p-6">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-100 text-orange-700">
+          <Megaphone size={22} />
+        </div>
 
-      <h1 className="text-xl font-light">PENGUMUMAN</h1>
+        <div>
+          <h1 className="text-xl font-semibold text-gray-900">Pengumuman</h1>
 
-      {/* =====================================================
-          FORM
-      ===================================================== */}
+          <p className="mt-0.5 text-sm text-gray-500">
+            Buat dan atur pengumuman yang tampil untuk santri dan orang tua.
+          </p>
+        </div>
+      </div>
 
+      {/* FORM */}
       <form
         onSubmit={handleSubmit}
-        className="
-          border
-          p-4
-          rounded
-          bg-white
-          space-y-3
-        "
+        className="space-y-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm md:p-6"
       >
+        <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+          <h2 className="text-sm font-semibold text-gray-800">
+            {isEdit ? "Edit Pengumuman" : "Tambah Pengumuman"}
+          </h2>
+        </div>
+
         {submitting && (
-          <div className="rounded border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700">
+          <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
             <div className="flex items-center gap-2">
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
               <span>Menyimpan data dan menerjemahkan konten...</span>
@@ -285,123 +308,64 @@ export default function Pengumuman() {
           </div>
         )}
 
-        <input
-          name="judul"
-          value={form.judul}
-          onChange={handleChange}
-          placeholder="Judul"
-          disabled={submitting}
-          className="
-            border
-            border-gray-300
-            p-2
-            w-full
-            rounded
-            focus:outline-none
-            focus:ring-2
-            focus:ring-blue-300
-            disabled:opacity-60
-          "
-        />
+        <div>
+          <label className="mb-1.5 block text-xs font-medium text-gray-600">Judul</label>
 
-        {/* ===================================================
-            ISI PENGUMUMAN
-        =================================================== */}
+          <input
+            name="judul"
+            value={form.judul}
+            onChange={handleChange}
+            placeholder="Judul"
+            disabled={submitting}
+            className={inputCls}
+          />
+        </div>
 
-        <textarea
-          name="isi"
-          value={form.isi}
-          onChange={handleChange}
-          placeholder="Isi pengumuman"
-          rows={12}
-          disabled={submitting}
-          className="
-            border
-            border-gray-300
-            p-3
-            w-full
-            rounded
-            resize-y
-            leading-7
-            focus:outline-none
-            focus:ring-2
-            focus:ring-blue-300
-            disabled:opacity-60
-          "
-        />
+        <div>
+          <label className="mb-1.5 block text-xs font-medium text-gray-600">Isi Pengumuman</label>
 
-        <p className="text-xs text-gray-500">
-          Tip: gunakan satu baris kosong untuk memisahkan paragraf.
-        </p>
+          <RichTextEditor
+            value={form.isi}
+            height={320}
+            onChange={(html) => setForm((prev) => ({ ...prev, isi: html }))}
+          />
+        </div>
 
-        {/* ===================================================
-            TANGGAL BERAKHIR
-        =================================================== */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-gray-600">Berlaku sampai</label>
 
-        <input
-          type="date"
-          name="tanggal_berakhir"
-          value={form.tanggal_berakhir}
-          onChange={handleChange}
-          disabled={submitting}
-          className="
-            border
-            border-gray-300
-            p-2
-            w-full
-            rounded
-            focus:outline-none
-            focus:ring-2
-            focus:ring-blue-300
-            disabled:opacity-60
-          "
-        />
+            <input
+              type="date"
+              name="tanggal_berakhir"
+              value={form.tanggal_berakhir}
+              onChange={handleChange}
+              disabled={submitting}
+              className={inputCls}
+            />
+          </div>
 
-        {/* ===================================================
-            STATUS
-        =================================================== */}
+          <div>
+            <label className="mb-1.5 block text-xs font-medium text-gray-600">Status</label>
 
-        <select
-          name="status"
-          value={form.status}
-          onChange={handleChange}
-          disabled={submitting}
-          className="
-            border
-            border-gray-300
-            p-2
-            w-full
-            rounded
-            focus:outline-none
-            focus:ring-2
-            focus:ring-blue-300
-            disabled:opacity-60
-          "
-        >
-          <option value="Aktif">Aktif</option>
+            <select
+              name="status"
+              value={form.status}
+              onChange={handleChange}
+              disabled={submitting}
+              className={inputCls}
+            >
+              <option value="Aktif">Aktif</option>
+              <option value="Nonaktif">Nonaktif</option>
+            </select>
+          </div>
+        </div>
 
-          <option value="Nonaktif">Nonaktif</option>
-        </select>
-
-        {/* ===================================================
-            BUTTON
-        =================================================== */}
-
-        <div className="flex gap-2">
+        <div className="flex gap-2 border-t border-gray-100 pt-4">
           <button
             type="submit"
             disabled={submitting}
-            className="
-              bg-blue-500
-              hover:bg-blue-600
-              text-white
-              px-4
-              py-2
-              rounded
-              transition
-              disabled:opacity-60
-              disabled:cursor-not-allowed
-            "
+            className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {submitting ? "Menyimpan..." : isEdit ? "Update" : "Simpan"}
           </button>
@@ -411,17 +375,7 @@ export default function Pengumuman() {
               type="button"
               onClick={resetForm}
               disabled={submitting}
-              className="
-                bg-gray-400
-                hover:bg-gray-500
-                text-white
-                px-4
-                py-2
-                rounded
-                transition
-                disabled:opacity-60
-                disabled:cursor-not-allowed
-              "
+              className="rounded-xl border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               Batal
             </button>
@@ -429,22 +383,31 @@ export default function Pengumuman() {
         </div>
       </form>
 
-      {/* =====================================================
-          LIST PENGUMUMAN
-      ===================================================== */}
-
+      {/* LIST */}
       {loading ? (
-        <p>Loading...</p>
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+              <div className="flex items-start justify-between gap-3">
+                <Skeleton className="h-5 w-1/2" />
+
+                <Skeleton className="h-5 w-16 rounded-full" />
+              </div>
+
+              <div className="mt-4 space-y-2">
+                <Skeleton className="h-3 w-full" />
+
+                <Skeleton className="h-3 w-11/12" />
+
+                <Skeleton className="h-3 w-2/3" />
+              </div>
+
+              <Skeleton className="mt-4 h-3 w-40" />
+            </div>
+          ))}
+        </div>
       ) : data.length === 0 ? (
-        <div
-          className="
-            border
-            p-5
-            rounded
-            bg-white
-            text-gray-500
-          "
-        >
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 text-center text-sm text-gray-500 shadow-sm">
           Belum ada pengumuman.
         </div>
       ) : (
@@ -452,62 +415,33 @@ export default function Pengumuman() {
           {data.map((item) => (
             <div
               key={item.id}
-              className="
-                border
-                p-4
-                rounded
-                bg-white
-                shadow-sm
-              "
+              className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition hover:shadow-md"
             >
-              {/* =============================================
-                  JUDUL + STATUS
-              ============================================= */}
-
-              <div className="flex justify-between items-start gap-3">
-                <h2 className="font-bold">{item.judul}</h2>
+              <div className="flex items-start justify-between gap-3">
+                <h2 className="font-semibold text-gray-900">{item.judul}</h2>
 
                 <span
-                  className="
-                    text-sm
-                    whitespace-nowrap
-                  "
+                  className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium ${
+                    item.status === "Aktif"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-gray-100 text-gray-600"
+                  }`}
                 >
                   {item.status}
                 </span>
               </div>
 
-              {/* =============================================
-                  ISI
-              ============================================= */}
+              <div className="mt-3 w-full text-sm text-gray-700">{renderIsiPreview(item.isi)}</div>
 
-              <div className="mt-3 w-full">{renderIsiPreview(item.isi)}</div>
-
-              {/* =============================================
-                  TANGGAL
-              ============================================= */}
-
-              <p className="text-sm text-gray-500">
+              <p className="mt-3 text-xs text-gray-500">
                 Berlaku sampai: {item.tanggal_berakhir || "-"}
               </p>
 
-              {/* =============================================
-                  BUTTON
-              ============================================= */}
-
-              <div className="flex gap-2 mt-3">
+              <div className="mt-4 flex gap-2 border-t border-gray-100 pt-3">
                 <button
                   type="button"
                   onClick={() => handleEdit(item)}
-                  className="
-                    bg-yellow-500
-                    hover:bg-yellow-600
-                    text-white
-                    px-3
-                    py-1
-                    rounded
-                    transition
-                  "
+                  className="rounded-lg border border-yellow-200 bg-yellow-50 px-3 py-1.5 text-xs font-medium text-yellow-700 transition hover:bg-yellow-100"
                 >
                   Edit
                 </button>
@@ -515,15 +449,7 @@ export default function Pengumuman() {
                 <button
                   type="button"
                   onClick={() => handleDelete(item.id)}
-                  className="
-                    bg-red-500
-                    hover:bg-red-600
-                    text-white
-                    px-3
-                    py-1
-                    rounded
-                    transition
-                  "
+                  className="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-600 transition hover:bg-red-100"
                 >
                   Hapus
                 </button>

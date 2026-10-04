@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import QRCode from "qrcode";
+import { Skeleton } from "../components/Skeleton";
 import { Printer, Search, UserRound, Users, CreditCard } from "lucide-react";
+
+// Gaya input seragam dengan halaman admin lainnya
+const inputCls =
+  "w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-800 shadow-sm transition focus:border-purple-400 focus:outline-none focus:ring-4 focus:ring-purple-100";
 import { api } from "../api";
 
 export default function KartuQRSantri() {
@@ -126,298 +131,220 @@ export default function KartuQRSantri() {
   };
 
   return (
-    <div className="p-4 md:p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* HEADER HALAMAN */}
-        <div className="mb-6 no-print">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center">
-              <CreditCard size={24} />
-            </div>
+    <div className="mx-auto w-full max-w-7xl min-w-0 space-y-5 p-3 md:p-6">
+      {/* HEADER */}
+      <div className="flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between md:p-6 no-print">
+        <div className="flex items-start gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-purple-100 text-purple-600">
+            <CreditCard size={22} />
+          </div>
 
-            <div>
-              <h1 className="text-sm md:text-3xl font-extralight text-gray-800">
-                Kartu QR Absensi
-              </h1>
+          <div>
+            <h1 className="text-xl font-semibold text-gray-900">Kartu QR Absensi</h1>
 
-              <p className="text-sm text-gray-500 mt-1">
-                Kartu ID Card untuk absensi santri dan guru.
-              </p>
-            </div>
+            <p className="mt-0.5 text-sm text-gray-500">
+              Kartu ID Card untuk absensi santri dan guru.
+            </p>
           </div>
         </div>
 
-        {/* FILTER */}
-        <div className="bg-white rounded-2xl shadow p-4 md:p-5 mb-6 no-print">
-          <div className="flex flex-col md:flex-row md:items-center gap-3">
-            {/* SANTRI / GURU */}
-            <div className="flex gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={() => handleTipeChange("santri")}
-                className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border transition ${
-                  tipe === "santri"
-                    ? "bg-gray-500 text-white border-gray-500"
-                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-                }`}
-              >
-                <UserRound size={18} />
-                Santri
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleTipeChange("guru")}
-                className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border transition ${
-                  tipe === "guru"
-                    ? "bg-gray-500 text-white border-gray-600"
-                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-                }`}
-              >
-                <Users size={18} />
-                Guru
-              </button>
-            </div>
-
-            {/* SEARCH */}
-            <div className="relative flex-1 min-w-0">
-              <Search
-                size={18}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              />
-
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={
-                  tipe === "santri"
-                    ? "Cari nama / NIS / kelas..."
-                    : "Cari nama guru / NIG..."
-                }
-                className="
-                  w-full
-                  border border-gray-300
-                  rounded-lg
-                  pl-10 pr-3 py-3
-                  text-sm
-                  focus:outline-none
-                  focus:ring-2
-                  focus:ring-purple-300
-                "
-              />
-            </div>
-
-            {/* CETAK */}
-            <button
-              type="button"
-              onClick={handleCetak}
-              disabled={loading || dataFiltered.length === 0}
-              className="
-                inline-flex
-                items-center
-                justify-center
-                gap-2
-                px-5
-                py-3
-                rounded-lg
-                bg-gray-500
-                text-white
-                hover:bg-purple-700
-                transition
-                disabled:opacity-40
-                disabled:cursor-not-allowed
-                shrink-0
-              "
-            >
-              <Printer size={18} />
-              Cetak
-            </button>
-          </div>
-
-          <div className="mt-3 text-xs text-gray-500">
-            Menampilkan{" "}
-            <span className="font-semibold text-gray-700">
-              {dataFiltered.length}
-            </span>{" "}
-            {tipe === "santri" ? "santri" : "guru"}
-          </div>
-        </div>
-
-        {/* ERROR */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-sm text-red-700 mb-6 no-print">
-            {error}
-          </div>
-        )}
-
-        {/* LOADING */}
-        {loading && (
-          <div className="bg-white rounded-xl shadow p-8 text-center text-gray-500 no-print">
-            Memuat data dan membuat QR Code...
-          </div>
-        )}
-
-        {/* EMPTY */}
-        {!loading && !error && dataFiltered.length === 0 && (
-          <div className="bg-white rounded-xl shadow p-8 text-center text-gray-500 no-print">
-            {search
-              ? "Data yang dicari tidak ditemukan."
-              : `Data ${tipe === "santri" ? "santri" : "guru"} belum tersedia.`}
-          </div>
-        )}
-
-        {/* KARTU */}
-        {!loading && !error && dataFiltered.length > 0 && (
-          <div
-            className="
-              grid
-              grid-cols-1
-              sm:grid-cols-2
-              lg:grid-cols-3
-              gap-6
-              print-card-container
-            "
+        {/* TIPE */}
+        <div className="grid grid-cols-2 gap-2 rounded-xl bg-gray-100 p-1.5 md:inline-grid">
+          <button
+            type="button"
+            onClick={() => handleTipeChange("santri")}
+            className={`inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition ${
+              tipe === "santri" ? "bg-purple-600 text-white shadow-sm" : "text-gray-600 hover:bg-white"
+            }`}
           >
-            {dataFiltered.map((item, index) => {
-              const isSantri = tipe === "santri";
+            <UserRound size={16} />
+            Santri
+          </button>
 
-              const nama = isSantri
-                ? item?.nama || "-"
-                : item?.nama_guru || "-";
+          <button
+            type="button"
+            onClick={() => handleTipeChange("guru")}
+            className={`inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition ${
+              tipe === "guru" ? "bg-purple-600 text-white shadow-sm" : "text-gray-600 hover:bg-white"
+            }`}
+          >
+            <Users size={16} />
+            Guru
+          </button>
+        </div>
+      </div>
 
-              const kode = isSantri
-                ? String(item?.nis || "").trim()
-                : String(item?.nig || "").trim();
+      {/* FILTER */}
+      <div className="space-y-3 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm md:p-5 no-print">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center">
+          <div className="relative min-w-0 flex-1">
+            <Search
+              size={17}
+              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+            />
 
-              const kelas = isSantri ? item?.kelas || "-" : null;
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={
+                tipe === "santri"
+                  ? "Cari nama / NIS / kelas..."
+                  : "Cari nama guru / NIG..."
+              }
+              className={`${inputCls} pl-10`}
+            />
+          </div>
 
-              const foto = getFotoUrl(item?.foto);
+          <button
+            type="button"
+            onClick={handleCetak}
+            disabled={loading || dataFiltered.length === 0}
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-purple-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <Printer size={17} />
+            Cetak
+          </button>
+        </div>
 
-              const qrKey = `${tipe}-${kode}`;
-              const qrCode = qrCodes[qrKey];
+        <div className="text-xs text-gray-500">
+          Menampilkan{" "}
+          <span className="font-semibold text-gray-700">{dataFiltered.length}</span>{" "}
+          {tipe === "santri" ? "santri" : "guru"}
+        </div>
+      </div>
 
-              return (
-                <div
-                  key={kode || index}
-                  className="flex justify-center print-card-wrapper"
-                >
-                  <div
-                    className="
-                      w-full
-                      max-w-[360px]
-                      bg-white
-                      border
-                      border-gray-200
-                      rounded-2xl
-                      shadow-md
-                      overflow-hidden
-                      print-card
-                    "
-                  >
-                    {/* HEADER KARTU */}
-                    <div className="bg-green-600 text-white px-5 py-4 text-center">
-                      <div className="text-xl font-bold tracking-wide whitespace-nowrap">
-                        TPQ HAIRUNISSA
-                      </div>
+      {/* ERROR */}
+      {error && (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 no-print">
+          {error}
+        </div>
+      )}
 
-                      <div className="text-xs mt-1 opacity-90 tracking-wide">
-                        KARTU ABSENSI PENGAJIAN
-                      </div>
+      {/* LOADING */}
+      {loading && (
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 no-print">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="mx-auto w-full max-w-[360px] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-md"
+            >
+              <Skeleton className="h-16 w-full rounded-none" />
+
+              <div className="flex flex-col items-center gap-3 px-5 py-4">
+                <Skeleton className="h-24 w-24 rounded-full" />
+
+                <Skeleton className="h-5 w-40" />
+
+                <Skeleton className="h-4 w-28" />
+
+                <Skeleton className="h-[175px] w-[175px] rounded-xl" />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* EMPTY */}
+      {!loading && !error && dataFiltered.length === 0 && (
+        <div className="rounded-2xl border border-gray-200 bg-white p-8 text-center text-gray-500 shadow-sm no-print">
+          {search
+            ? "Data yang dicari tidak ditemukan."
+            : `Data ${tipe === "santri" ? "santri" : "guru"} belum tersedia.`}
+        </div>
+      )}
+
+      {/* KARTU */}
+      {!loading && !error && dataFiltered.length > 0 && (
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 print-card-container">
+          {dataFiltered.map((item, index) => {
+            const isSantri = tipe === "santri";
+
+            const nama = isSantri ? item?.nama || "-" : item?.nama_guru || "-";
+
+            const kode = isSantri
+              ? String(item?.nis || "").trim()
+              : String(item?.nig || "").trim();
+
+            const kelas = isSantri ? item?.kelas || "-" : null;
+
+            const foto = getFotoUrl(item?.foto);
+
+            const qrKey = `${tipe}-${kode}`;
+            const qrCode = qrCodes[qrKey];
+
+            return (
+              <div key={kode || index} className="flex justify-center print-card-wrapper">
+                <div className="w-full max-w-[360px] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-md print-card">
+                  {/* HEADER KARTU */}
+                  <div className="bg-gradient-to-r from-green-600 to-green-500 px-5 py-4 text-center text-white">
+                    <div className="whitespace-nowrap text-xl font-bold tracking-wide">
+                      TPQ HAIRUNISSA
                     </div>
 
-                    {/* ISI KARTU */}
-                    <div className="px-5 py-4 text-center">
-                      {/* FOTO */}
-                      <div className="flex justify-center mb-3">
-                        {foto ? (
-                          <img
-                            src={foto}
-                            alt={`Foto ${nama}`}
-                            className="
-                              w-24
-                              h-24
-                              rounded-full
-                              object-cover
-                              border-4
-                              border-white
-                              shadow-md
-                              ring-2
-                              ring-purple-100
-                            "
-                          />
-                        ) : (
-                          <div
-                            className="
-                              w-24
-                              h-24
-                              rounded-full
-                              bg-gray-100
-                              border-4
-                              border-white
-                              shadow-md
-                              ring-2
-                              ring-gray-200
-                              flex
-                              items-center
-                              justify-center
-                              text-xs
-                              text-gray-400
-                            "
-                          >
-                            No Foto
-                          </div>
-                        )}
-                      </div>
+                    <div className="mt-1 text-xs tracking-wide opacity-90">
+                      KARTU ABSENSI PENGAJIAN
+                    </div>
+                  </div>
 
-                      {/* NAMA */}
-                      <h2 className="text-lg font-bold text-gray-800 uppercase break-words">
-                        {nama}
-                      </h2>
+                  {/* ISI KARTU */}
+                  <div className="px-5 py-4 text-center">
+                    {/* FOTO */}
+                    <div className="mb-3 flex justify-center">
+                      {foto ? (
+                        <img
+                          src={foto}
+                          alt={`Foto ${nama}`}
+                          className="h-24 w-24 rounded-full border-4 border-white object-cover shadow-md ring-2 ring-purple-100"
+                        />
+                      ) : (
+                        <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-white bg-gray-100 text-xs text-gray-400 shadow-md ring-2 ring-gray-200">
+                          No Foto
+                        </div>
+                      )}
+                    </div>
 
-                      {/* ID + KELAS */}
-                      <div className="mt-1 text-sm font-medium text-gray-600 whitespace-nowrap">
-                        <span className="font-semibold text-gray-800">
-                          ID : {kode || "-"}
-                        </span>
+                    {/* NAMA */}
+                    <h2 className="break-words text-lg font-bold uppercase text-gray-900">
+                      {nama}
+                    </h2>
 
-                        {isSantri && (
-                          <>
-                            <span className="mx-1">|</span>
-                            <span>Kelas {kelas}</span>
-                          </>
-                        )}
-                      </div>
+                    {/* ID + KELAS */}
+                    <div className="mt-1 whitespace-nowrap text-sm text-gray-600">
+                      <span className="font-semibold text-gray-800">ID : {kode || "-"}</span>
 
-                      {/* QR CODE */}
-                      <div className="mt-3 flex justify-center">
-                        {qrCode ? (
-                          <div className="p-1.5 border border-gray-200 rounded-lg bg-white">
-                            <img
-                              src={qrCode}
-                              alt={`QR Absensi ${nama}`}
-                              className="w-[175px] h-[175px]"
-                            />
-                          </div>
-                        ) : (
-                          <div className="w-[175px] h-[175px] flex items-center justify-center border border-red-200 rounded-lg text-xs text-red-500">
-                            QR tidak tersedia
-                          </div>
-                        )}
-                      </div>
+                      {isSantri && (
+                        <>
+                          <span className="mx-1 text-gray-300">|</span>
+                          <span>Kelas {kelas}</span>
+                        </>
+                      )}
+                    </div>
 
-                      {/* CATATAN */}
-                      <div className="mt-2 text-[10px] text-gray-400 leading-tight">
-                        Kartu QR wajib dibawa setiap masuk pengajian.
-                      </div>
+                    {/* QR CODE */}
+                    <div className="mt-3 flex justify-center">
+                      {qrCode ? (
+                        <div className="rounded-xl border border-gray-200 bg-white p-1.5 shadow-sm">
+                          <img src={qrCode} alt={`QR Absensi ${nama}`} className="h-[175px] w-[175px]" />
+                        </div>
+                      ) : (
+                        <div className="flex h-[175px] w-[175px] items-center justify-center rounded-xl border border-red-200 bg-red-50 text-xs text-red-500">
+                          QR tidak tersedia
+                        </div>
+                      )}
+                    </div>
+
+                    {/* CATATAN */}
+                    <div className="mt-2 text-[10px] leading-tight text-gray-400">
+                      Kartu QR wajib dibawa setiap masuk pengajian.
                     </div>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* PRINT STYLE */}
       <style>

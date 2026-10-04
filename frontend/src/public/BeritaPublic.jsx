@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
+import { SkeletonCard } from "../components/Skeleton";
+import { isiToPlainText } from "../utils/berita";
 import { Link, useOutletContext } from "react-router-dom";
 import heroImage from "../assets/hero-putih04.jpg";
 import { ChevronRight, User, CalendarDays } from "lucide-react";
 
 export default function BeritaPublic() {
+  const [loading, setLoading] = useState(true);
+
   const { language } = useOutletContext();
 
   const [berita, setBerita] = useState([]);
@@ -18,6 +22,8 @@ export default function BeritaPublic() {
       } catch (err) {
         console.error("Gagal mengambil berita:", err);
         setBerita([]);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -127,7 +133,13 @@ export default function BeritaPublic() {
             </p>
           </div>
 
-          {displayBerita.length === 0 ? (
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <SkeletonCard />
+
+              <SkeletonCard />
+            </div>
+          ) : displayBerita.length === 0 ? (
             <div className="bg-white/35 backdrop-blur-md border border-white/30 rounded-3xl shadow-lg p-10 text-center">
               {t.noNews}
             </div>
@@ -173,7 +185,7 @@ export default function BeritaPublic() {
                     </div>
 
                     <p className="mt-4 text-gray-700 text-sm md:text-base leading-5 md:leading-6 text-justify">
-                      {displayBerita[0].isi?.substring(0, 300)}
+                      {isiToPlainText(displayBerita[0].isi).substring(0, 300)}
                       ...
                     </p>
 

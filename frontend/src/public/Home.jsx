@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useOutletContext } from "react-router-dom";
 import { api } from "../api";
+import { Skeleton } from "../components/Skeleton";
 
 import heroImage from "../assets/hero-putih04.jpg";
 import logoTPQ from "../assets/logo-tpq.png";
@@ -269,11 +270,23 @@ export default function Home() {
 
   if (loadingPengaturan) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f6faf7]">
-        <div className="text-center">
-          <div className="w-10 h-10 border-4 border-green-200 border-t-green-600 rounded-full animate-spin mx-auto"></div>
+      <div className="min-h-screen bg-[#f6faf7] p-6 md:p-10">
+        <div className="max-w-6xl mx-auto space-y-6">
+          <Skeleton className="h-72 w-full rounded-3xl" />
 
-          <p className="mt-4 text-gray-500 text-sm">Memuat Home TPQ...</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Skeleton className="h-28 w-full rounded-2xl" />
+
+            <Skeleton className="h-28 w-full rounded-2xl" />
+
+            <Skeleton className="h-28 w-full rounded-2xl" />
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-40 w-full rounded-2xl" />
+            ))}
+          </div>
         </div>
       </div>
     );

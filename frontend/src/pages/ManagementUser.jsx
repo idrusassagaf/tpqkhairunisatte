@@ -14,6 +14,7 @@ import {
   Shield,
 } from "lucide-react";
 import { api } from "../api";
+import { Skeleton } from "../components/Skeleton";
 
 export default function ManagementUser() {
   const [users, setUsers] = useState([]);
@@ -352,7 +353,7 @@ export default function ManagementUser() {
                 <p className="text-xs text-gray-500">Total User</p>
 
                 <p className="text-2xl font-bold text-gray-800">
-                  {loading ? "-" : users.length}
+                  {loading ? <Skeleton className="h-7 w-12" /> : users.length}
                 </p>
               </div>
             </div>
@@ -554,8 +555,20 @@ export default function ManagementUser() {
           </div>
 
           {loading ? (
-            <div className="p-10 text-center text-sm text-gray-500">
-              Memuat data user...
+            <div className="space-y-4 p-4 md:p-5">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-4">
+                  <Skeleton className="h-10 w-10 shrink-0 rounded-xl" />
+
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-40" />
+
+                    <Skeleton className="h-3 w-56" />
+                  </div>
+
+                  <Skeleton className="hidden h-6 w-20 rounded-lg md:block" />
+                </div>
+              ))}
             </div>
           ) : users.length === 0 ? (
             <div className="p-10 text-center">

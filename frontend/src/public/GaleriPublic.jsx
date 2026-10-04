@@ -2,12 +2,15 @@ import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 
 import { api } from "../api";
+import { Skeleton, SkeletonCard } from "../components/Skeleton";
 
 import heroImage from "../assets/hero-putih04.jpg";
 
 import { ChevronDown } from "lucide-react";
 
 export default function GaleriPublic() {
+  const [loading, setLoading] = useState(true);
+
   const { language } = useOutletContext();
 
   const [data, setData] = useState([]);
@@ -58,6 +61,8 @@ export default function GaleriPublic() {
       setData(res.data.data || []);
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -116,7 +121,13 @@ export default function GaleriPublic() {
             md:px-6
           "
         >
-          {translatedData.length > 0 && (
+          {loading ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {Array.from({ length: 10 }).map((_, i) => (
+                <Skeleton key={i} className="h-40 w-full rounded-2xl" />
+              ))}
+            </div>
+          ) : translatedData.length > 0 && (
             <div
               className="
                 bg-white/20

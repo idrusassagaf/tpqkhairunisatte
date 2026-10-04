@@ -1,12 +1,19 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
-import { Eye, Download, FileSpreadsheet, FileText } from "lucide-react";
+import { SkeletonRows } from "../components/Skeleton";
+import { Eye, Download, FileSpreadsheet, FileText, BookOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
+// Gaya input seragam dengan halaman admin lainnya
+const inputCls =
+  "w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-800 shadow-sm transition focus:border-purple-400 focus:outline-none focus:ring-4 focus:ring-purple-100";
+
 export default function ProgresHafalan() {
+  const [loading, setLoading] = useState(true);
+
   const [santri, setSantri] = useState([]);
   const [hafalanByNis, setHafalanByNis] = useState({});
   const [search, setSearch] = useState("");
@@ -57,6 +64,8 @@ export default function ProgresHafalan() {
       setHafalanByNis(grouped);
     } catch (err) {
       console.error("Gagal ambil data santri:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -383,125 +392,70 @@ export default function ProgresHafalan() {
   // =========================================================
 
   return (
-    <div className="p-4">
-      <div className="bg-white rounded-2xl shadow p-0 overflow-x-auto">
-        {/* =====================================================
-            TITLE
-        ===================================================== */}
+    <div className="mx-auto w-full max-w-7xl min-w-0 space-y-5 p-3 md:p-6">
+      {/* HEADER */}
+      <div className="flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between md:p-6">
+        <div className="flex items-start gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-purple-100 text-purple-600">
+            <BookOpen size={22} />
+          </div>
 
-        <h1 className="text-lg font-light tracking-wide text-black ml-2 mb-4">
-          PROGRES HAFALAN
-        </h1>
+          <div>
+            <h1 className="text-xl font-semibold text-gray-900">Progres Hafalan</h1>
 
-        {/* =====================================================
-            SEARCH + DOWNLOAD
-        ===================================================== */}
+            <p className="mt-0.5 text-sm text-gray-500">
+              Rekap hafalan yang sudah dan belum lancar setiap santri.
+            </p>
+          </div>
+        </div>
 
-        <div className="mb-4 flex flex-col sm:flex-row gap-2">
-          {/* SEARCH */}
-
+        {/* SEARCH + DOWNLOAD */}
+        <div className="flex flex-col gap-2 sm:flex-row">
           <input
             type="text"
             placeholder="Cari nama / NIS / kelas..."
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
-
               setCurrentPage(1);
             }}
-            className="
-              border rounded-lg px-3 py-2
-              text-xs w-full md:w-72
-              focus:outline-none focus:ring-2
-              focus:ring-purple-300
-            "
+            className={`${inputCls} sm:w-72`}
           />
-
-          {/* DOWNLOAD */}
 
           <div className="relative">
             <button
               type="button"
               onClick={() => setShowDownload((prev) => !prev)}
-              className="
-                w-full sm:w-auto
-                inline-flex items-center justify-center
-                gap-2 px-4 py-2
-                rounded-lg
-                bg-blue-600
-                text-white
-                text-sm
-                font-medium
-                hover:bg-blue-700
-                transition
-              "
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 sm:w-auto"
             >
               <Download size={17} />
               Download
             </button>
 
             {showDownload && (
-              <div
-                className="
-                  absolute
-                  left-0 sm:right-0 sm:left-auto
-                  mt-2
-                  w-full sm:w-52
-                  bg-white
-                  border border-gray-200
-                  rounded-xl
-                  shadow-lg
-                  z-50
-                  overflow-hidden
-                "
-              >
-                {/* =================================================
-                    EXCEL
-                ================================================= */}
-
+              <div className="absolute left-0 z-50 mt-2 w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg sm:left-auto sm:right-0 sm:w-52">
                 <button
                   type="button"
                   onClick={handleDownloadExcel}
-                  className="
-                    w-full
-                    flex items-center gap-3
-                    px-4 py-3
-                    text-sm text-gray-700
-                    hover:bg-gray-50
-                    transition
-                  "
+                  className="flex w-full items-center gap-3 px-4 py-3 text-sm text-gray-700 transition hover:bg-gray-50"
                 >
                   <FileSpreadsheet size={18} className="text-green-600" />
 
                   <div className="text-left">
                     <div className="font-medium">Excel</div>
-
                     <div className="text-xs text-gray-400">.xlsx</div>
                   </div>
                 </button>
 
-                {/* =================================================
-                    PDF
-                ================================================= */}
-
                 <button
                   type="button"
                   onClick={handleDownloadPDF}
-                  className="
-                    w-full
-                    flex items-center gap-3
-                    px-4 py-3
-                    text-sm text-gray-700
-                    hover:bg-gray-50
-                    transition
-                    border-t
-                  "
+                  className="flex w-full items-center gap-3 border-t px-4 py-3 text-sm text-gray-700 transition hover:bg-gray-50"
                 >
                   <FileText size={18} className="text-red-600" />
 
                   <div className="text-left">
                     <div className="font-medium">PDF</div>
-
                     <div className="text-xs text-gray-400">.pdf</div>
                   </div>
                 </button>
@@ -509,183 +463,123 @@ export default function ProgresHafalan() {
             )}
           </div>
         </div>
+      </div>
 
-        {/* =====================================================
-            DESKTOP TABLE
-        ===================================================== */}
-
-        <table className="hidden md:table w-full border text-xs text-black">
-          <thead className="bg-gray-100 text-black">
-            <tr>
-              <th className="p-1 border w-16">No.</th>
-
-              <th className="p-1 border">Nama Santri</th>
-
-              <th className="p-1 border">NIS</th>
-
-              <th className="p-1 border">Kelas</th>
-
-              <th className="p-1 border text-center">Sudah Lancar</th>
-
-              <th className="p-1 border text-center">Belum Lancar</th>
-
-              <th className="p-1 border text-center">Lihat Hafalan</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {santri.length === 0 ? (
+      <div className="space-y-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm md:p-6">
+        {/* DESKTOP TABLE */}
+        <div className="hidden overflow-x-auto rounded-xl border border-gray-200 md:block">
+          <table className="w-full text-sm text-gray-700">
+            <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
               <tr>
-                <td colSpan="7" className="text-center p-6 text-gray-500">
-                  Data santri belum tersedia
-                </td>
+                <th className="w-16 px-4 py-3 text-center font-semibold">No.</th>
+                <th className="px-4 py-3 text-left font-semibold">Nama Santri</th>
+                <th className="px-4 py-3 text-left font-semibold">NIS</th>
+                <th className="px-4 py-3 text-left font-semibold">Kelas</th>
+                <th className="px-4 py-3 text-center font-semibold">Sudah Lancar</th>
+                <th className="px-4 py-3 text-center font-semibold">Belum Lancar</th>
+                <th className="px-4 py-3 text-center font-semibold">Lihat Progres</th>
               </tr>
-            ) : (
-              paginatedSantri.map((s, i) => (
-                <tr key={i} className="border-t hover:bg-gray-50">
-                  {/* NO */}
+            </thead>
 
-                  <td className="p-1 border text-center">{i + 1}</td>
-
-                  {/* NAMA */}
-
-                  <td className="p-1 border font-medium">{s.nama}</td>
-
-                  {/* NIS */}
-
-                  <td className="p-1 border">{s.nis}</td>
-
-                  {/* KELAS */}
-
-                  <td className="p-1 border">{s.kelas}</td>
-
-                  {/* LANCAR */}
-
-                  <td className="p-1 border text-center font-medium text-green-700">
-                    {getJumlahHafalan(s.nis, "Lancar")}
-                    -Hafalan
-                  </td>
-
-                  {/* BELUM */}
-
-                  <td className="p-1 border text-center font-medium text-red-700">
-                    {getJumlahHafalan(s.nis, "Belum")}
-                    -Hafalan
-                  </td>
-
-                  {/* LIHAT PROGRES */}
-
-                  <td className="p-1 border text-center">
-                    <button
-                      onClick={() =>
-                        navigate(`/dashboard/progres-hafalan/${s.nis}`)
-                      }
-                      className="
-                        inline-flex
-                        items-center
-                        justify-center
-                        w-6 h-6
-                        rounded-full
-                        bg-purple-100
-                        hover:bg-purple-200
-                        text-purple-700
-                        transition
-                      "
-                    >
-                      <Eye size={18} />
-                    </button>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="7" className="p-0">
+                    <SkeletonRows rows={6} cols={5} />
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : santri.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="px-4 py-8 text-center text-gray-500">
+                    Data santri belum tersedia
+                  </td>
+                </tr>
+              ) : (
+                paginatedSantri.map((s, i) => (
+                  <tr
+                    key={i}
+                    className="border-t border-gray-100 transition hover:bg-purple-50/40"
+                  >
+                    <td className="px-4 py-3 text-center text-gray-500">{i + 1}</td>
 
-        {/* =====================================================
-            MOBILE CARD
-        ===================================================== */}
+                    <td className="px-4 py-3 font-semibold text-gray-900">{s.nama}</td>
 
-        <div className="md:hidden space-y-3 mt-4">
-          {paginatedSantri.map((s, i) => {
+                    <td className="px-4 py-3 whitespace-nowrap">{s.nis}</td>
+
+                    <td className="px-4 py-3 whitespace-nowrap">{s.kelas || "-"}</td>
+
+                    <td className="px-4 py-3 text-center">
+                      <span className="inline-flex rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700">
+                        {getJumlahHafalan(s.nis, "Lancar")} Hafalan
+                      </span>
+                    </td>
+
+                    <td className="px-4 py-3 text-center">
+                      <span className="inline-flex rounded-full bg-red-100 px-2.5 py-1 text-xs font-medium text-red-700">
+                        {getJumlahHafalan(s.nis, "Belum")} Hafalan
+                      </span>
+                    </td>
+
+                    <td className="px-4 py-3 text-center">
+                      <button
+                        type="button"
+                        aria-label={`Lihat progres hafalan ${s.nama}`}
+                        onClick={() => navigate(`/dashboard/progres-hafalan/${s.nis}`)}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-purple-200 bg-purple-50 text-purple-700 transition hover:bg-purple-100"
+                      >
+                        <Eye size={16} />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* MOBILE CARD */}
+        <div className="space-y-3 md:hidden">
+          {loading ? (
+            <SkeletonRows rows={5} cols={3} />
+          ) : paginatedSantri.map((s, i) => {
             const lancar = getJumlahHafalan(s.nis, "Lancar");
-
             const belum = getJumlahHafalan(s.nis, "Belum");
 
             return (
               <div
                 key={i}
-                className="
-                  bg-white
-                  border
-                  rounded-2xl
-                  shadow-sm
-                  p-3
-                "
+                className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm"
               >
-                {/* BARIS ATAS */}
-
-                <div className="flex items-start justify-between gap-2">
-                  {/* KIRI */}
-
-                  <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
                     <div className="flex gap-2">
-                      <span className="font-semibold text-black">{i + 1}.</span>
+                      <span className="font-semibold text-gray-500">{i + 1}.</span>
 
-                      <span
-                        className="
-                          font-semibold
-                          text-black
-                          truncate
-                        "
-                      >
-                        {s.nama}
+                      <span className="truncate font-semibold text-gray-900">{s.nama}</span>
+                    </div>
+
+                    <div className="mt-1 ml-6 text-xs text-gray-500">
+                      NIS {s.nis} · Kelas {s.kelas || "-"}
+                    </div>
+
+                    <div className="mt-3 ml-6 flex flex-wrap gap-2">
+                      <span className="inline-flex rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700">
+                        {lancar} Lancar
+                      </span>
+
+                      <span className="inline-flex rounded-full bg-red-100 px-2.5 py-1 text-xs font-medium text-red-700">
+                        {belum} Belum
                       </span>
                     </div>
-
-                    <div
-                      className="
-                        text-xs
-                        text-gray-600
-                        mt-1
-                        ml-6
-                      "
-                    >
-                      NIS {s.nis} |K-{s.kelas}
-                    </div>
                   </div>
-
-                  {/* TENGAH */}
-
-                  <div
-                    className="
-                      text-center
-                      text-xs
-                      font-semibold
-                      min-w-[50px]
-                    "
-                  >
-                    <div className="text-black mt-1">{lancar}- Lcr</div>
-
-                    <div className="text-black mt-2">{belum}- Blm</div>
-                  </div>
-
-                  {/* KANAN */}
 
                   <button
-                    onClick={() =>
-                      navigate(`/dashboard/progres-hafalan/${s.nis}`)
-                    }
-                    className="
-                      w-9 h-9
-                      rounded-full
-                      bg-purple-100
-                      text-purple-700
-                      flex items-center
-                      justify-center
-                      shrink-0
-                    "
+                    type="button"
+                    aria-label={`Lihat progres hafalan ${s.nama}`}
+                    onClick={() => navigate(`/dashboard/progres-hafalan/${s.nis}`)}
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-purple-200 bg-purple-50 text-purple-700 transition hover:bg-purple-100"
                   >
-                    <Eye size={15} />
+                    <Eye size={16} />
                   </button>
                 </div>
               </div>
@@ -693,94 +587,48 @@ export default function ProgresHafalan() {
           })}
         </div>
 
-        {/* =====================================================
-            PAGINATION
-        ===================================================== */}
-
+        {/* PAGINATION */}
         {filteredSantri.length > 0 && (
-          <div
-            className="
-            flex
-            flex-col
-            md:flex-row
-            items-center
-            justify-between
-            gap-3
-            pt-4
-          "
-          >
-            {/* INFO DATA */}
-
+          <div className="flex flex-col items-center justify-between gap-3 border-t border-gray-100 pt-4 md:flex-row">
             <div className="text-xs text-gray-500">
               Menampilkan {startIndex + 1}–
               {Math.min(startIndex + itemsPerPage, filteredSantri.length)} dari{" "}
               {filteredSantri.length} santri
             </div>
 
-            {/* BUTTON PAGINATION */}
-
             {totalPages > 1 && (
-              <div className="flex items-center gap-1">
-                {/* SEBELUMNYA */}
-
+              <div className="flex flex-wrap items-center justify-center gap-1">
                 <button
                   type="button"
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(prev - 1, 1))
-                  }
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className="
-                    px-3 py-1.5
-                    text-xs
-                    rounded
-                    border
-                    bg-white
-                    disabled:opacity-40
-                    disabled:cursor-not-allowed
-                    hover:bg-gray-50
-                  "
+                  className="rounded-lg border bg-white px-3 py-1.5 text-xs transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   Sebelumnya
                 </button>
 
-                {/* NOMOR HALAMAN */}
-
-                {Array.from(
-                  { length: totalPages },
-                  (_, index) => index + 1,
-                ).map((page) => (
-                  <button
-                    key={page}
-                    type="button"
-                    onClick={() => setCurrentPage(page)}
-                    className={`px-3 py-1.5 text-xs rounded border ${
-                      currentPage === page
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "bg-white text-gray-700 hover:bg-gray-50"
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
-
-                {/* BERIKUTNYA */}
+                {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+                  (page) => (
+                    <button
+                      key={page}
+                      type="button"
+                      onClick={() => setCurrentPage(page)}
+                      className={`min-w-[32px] rounded-lg border px-3 py-1.5 text-xs transition ${
+                        currentPage === page
+                          ? "border-purple-600 bg-purple-600 text-white"
+                          : "bg-white text-gray-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ),
+                )}
 
                 <button
                   type="button"
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                  }
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
-                  className="
-                    px-3 py-1.5
-                    text-xs
-                    rounded
-                    border
-                    bg-white
-                    disabled:opacity-40
-                    disabled:cursor-not-allowed
-                    hover:bg-gray-50
-                  "
+                  className="rounded-lg border bg-white px-3 py-1.5 text-xs transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   Berikutnya
                 </button>

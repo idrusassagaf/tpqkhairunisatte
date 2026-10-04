@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, Link, useOutletContext } from "react-router-dom";
 import { api } from "../api";
+import { Skeleton } from "../components/Skeleton";
+import { isHtmlContent, isiToPlainText } from "../utils/berita";
 import heroImage from "../assets/hero-putih04.jpg";
 
 const API_ROOT_URL = (
@@ -55,6 +57,7 @@ export default function DetailBerita() {
   const { language } = useOutletContext();
 
   const [berita, setBerita] = useState(null);
+  const [loadingBerita, setLoadingBerita] = useState(true);
   const [showShare, setShowShare] = useState(false);
 
   const isArabic = language === "ar";
@@ -109,6 +112,9 @@ export default function DetailBerita() {
 
         console.error(err);
         setBerita(null);
+      })
+      .finally(() => {
+        if (mounted) setLoadingBerita(false);
       });
 
     return () => {
@@ -206,7 +212,7 @@ export default function DetailBerita() {
     const penulis = displayBerita.penulis || t.admin;
 
     return `${displayBerita.judul}
-${displayBerita.isi}
+${isiToPlainText(displayBerita.isi)}
 
 ${
   language === "en" ? "Author" : language === "ar" ? "الكاتب" : "Penulis"
@@ -281,9 +287,7 @@ ${getBeritaUrl()}`;
       ? `${baseUrl}/storage/${berita.foto}`
       : `${baseUrl}/logo-tpq.png`;
     const title = displayBerita.judul || "Berita TPQ Hairunnisa";
-    const description = String(displayBerita.isi || "")
-      .replace(/\s+/g, " ")
-      .trim();
+    const description = isiToPlainText(displayBerita.isi);
 
     const setMeta = (selector, attr, value) => {
       let el = document.querySelector(selector);
@@ -328,6 +332,28 @@ ${getBeritaUrl()}`;
 
     document.title = title;
   }, [berita, displayBerita]);
+
+  if (loadingBerita) {
+    return (
+      <div className="bg-[#f8faf8] min-h-screen p-6 md:p-10" dir={isArabic ? "rtl" : "ltr"}>
+        <div className="max-w-3xl mx-auto space-y-4">
+          <Skeleton className="h-8 w-2/3" />
+
+          <Skeleton className="h-4 w-1/3" />
+
+          <Skeleton className="mt-6 h-72 w-full rounded-2xl" />
+
+          <div className="space-y-2 pt-4">
+            <Skeleton className="h-3 w-full" />
+
+            <Skeleton className="h-3 w-11/12" />
+
+            <Skeleton className="h-3 w-3/4" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!berita) {
     return (
@@ -574,19 +600,26 @@ ${getBeritaUrl()}`;
         "
       >
         <div className="bg-white rounded-3xl shadow-md p-5 md:p-8">
-          <div
-            className="
-              text-black
-              text-justify
-              leading-5
-              md:leading-8
-              whitespace-pre-line
-              text-sm
-              md:text-base
-            "
-          >
-            {displayBerita?.isi}
-          </div>
+          {isHtmlContent(displayBerita?.isi) ? (
+            <div
+              className="isi-berita text-black text-justify leading-6 md:leading-8 text-sm md:text-base"
+              dangerouslySetInnerHTML={{ __html: displayBerita.isi }}
+            />
+          ) : (
+            <div
+              className="
+                text-black
+                text-justify
+                leading-5
+                md:leading-8
+                whitespace-pre-line
+                text-sm
+                md:text-base
+              "
+            >
+              {displayBerita?.isi}
+            </div>
+          )}
         </div>
       </section>
 

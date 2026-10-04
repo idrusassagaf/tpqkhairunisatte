@@ -1,9 +1,23 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
-import { Eye } from "lucide-react";
+import { Skeleton, SkeletonRows } from "../components/Skeleton";
+import { Eye, TrendingUp, BookOpen, BookMarked } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+// Input angka Juz/Ayat/Hal di tabel Al-Qur'an dibuat lebih besar supaya mudah diisi
+const numCls =
+  "w-full min-w-[56px] rounded-lg border border-gray-200 bg-white px-2 py-2 text-center text-sm text-gray-800 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100";
+
+// Dropdown diatur secara global di styles/forms.css
+const inputCls =
+  "w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-3 text-sm text-gray-800 shadow-sm transition focus:border-purple-400 focus:outline-none focus:ring-4 focus:ring-purple-100";
+
+const cellCls =
+  "w-full min-w-0 rounded-lg border border-gray-200 bg-white py-1.5 pl-2 pr-2 text-xs text-gray-800 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100";
+
 export default function MasterProgres() {
+  const [loadingData, setLoadingData] = useState(true);
+
   const navigate = useNavigate();
 
   const [tab, setTab] = useState("iqra");
@@ -155,6 +169,8 @@ export default function MasterProgres() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(mergedData));
     } catch (err) {
       console.error("Gagal ambil master data:", err);
+    } finally {
+      setLoadingData(false);
     }
   };
 
@@ -479,37 +495,42 @@ export default function MasterProgres() {
   };
 
   return (
-    <div className="w-full max-w-full min-w-0 space-y-4 p-2 md:p-4 overflow-x-hidden">
-      {/* ================= TITLE ================= */}
-      <h1 className="text-lg font-light text-black tracking-wide">
-        MASTER PROGRES
-      </h1>
+    <div className="mx-auto w-full max-w-full min-w-0 space-y-5 overflow-x-hidden p-3 md:p-6">
+      {/* ================= HEADER ================= */}
+      <div className="flex items-start gap-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm md:p-6">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-purple-100 text-purple-600">
+          <TrendingUp size={22} />
+        </div>
+
+        <div>
+          <h1 className="text-xl font-semibold text-gray-900">Master Progres</h1>
+
+          <p className="mt-0.5 text-sm text-gray-500">
+            Catat progres belajar Iqra dan Al-Qur’an setiap santri.
+          </p>
+        </div>
+      </div>
 
       {/* ================= TAB ================= */}
-      <div className="flex gap-2 flex-wrap">
-        <button
-          type="button"
-          onClick={() => setTab("iqra")}
-          className={`px-4 py-2 rounded border text-sm ${
-            tab === "iqra"
-              ? "bg-purple-600 text-white"
-              : "bg-white hover:bg-gray-100"
-          }`}
-        >
-          Progres Iqra
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setTab("quran")}
-          className={`px-4 py-2 rounded border text-sm ${
-            tab === "quran"
-              ? "bg-purple-600 text-white"
-              : "bg-white hover:bg-gray-100"
-          }`}
-        >
-          Progres Al-Qur’an
-        </button>
+      <div className="grid grid-cols-2 gap-2 rounded-2xl border border-gray-200 bg-white p-1.5 shadow-sm md:inline-grid">
+        {[
+          { key: "iqra", label: "Progres Iqra", icon: BookOpen },
+          { key: "quran", label: "Progres Al-Qur’an", icon: BookMarked },
+        ].map(({ key, label, icon: Icon }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setTab(key)}
+            className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition ${
+              tab === key
+                ? "bg-purple-600 text-white shadow-sm"
+                : "text-gray-600 hover:bg-gray-100"
+            }`}
+          >
+            <Icon size={16} />
+            {label}
+          </button>
+        ))}
       </div>
 
       {/* ===================================================== */}
@@ -518,9 +539,9 @@ export default function MasterProgres() {
 
       {tab === "iqra" && (
         <>
-          <div className="w-[calc(100%+8px)] -ml-1 md:w-auto md:ml-0 bg-transparent md:bg-white md:rounded-xl md:shadow p-0 md:p-4 overflow-x-auto">
+          <div className="w-[calc(100%+8px)] -ml-1 md:w-auto md:ml-0 md:rounded-2xl md:border md:border-gray-200 md:bg-white md:p-5 md:shadow-sm overflow-x-auto">
             {/* ================= FILTER IQRA ================= */}
-            <div className="mb-4 flex flex-col md:flex-row flex-wrap gap-2">
+            <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-stretch">
               {/* SEARCH */}
               <input
                 type="text"
@@ -530,7 +551,7 @@ export default function MasterProgres() {
                   setSearchIqra(e.target.value);
                   setCurrentPageIqra(1);
                 }}
-                className="border p-2 rounded w-full md:w-64 text-sm min-h-[44px]"
+                className={`${inputCls} md:flex-[2]`}
               />
 
               {/* FILTER JILID */}
@@ -540,7 +561,7 @@ export default function MasterProgres() {
                   setFilterJilid(e.target.value);
                   setCurrentPageIqra(1);
                 }}
-                className="border p-2 rounded text-xs w-full md:w-auto min-h-[44px]"
+                className={`${inputCls} md:flex-1`}
               >
                 <option value="">Semua Jilid</option>
                 <option value="Iqra 1">Iqra 1</option>
@@ -558,7 +579,7 @@ export default function MasterProgres() {
                   setFilterProgres(e.target.value);
                   setCurrentPageIqra(1);
                 }}
-                className="border p-2 rounded text-xs min-h-[44px]"
+                className={`${inputCls} md:flex-1`}
               >
                 <option value="">Semua Progres</option>
                 <option value="Lancar">Lancar</option>
@@ -572,7 +593,7 @@ export default function MasterProgres() {
                   setFilterPrestasi(e.target.value);
                   setCurrentPageIqra(1);
                 }}
-                className="border p-2 rounded text-xs min-h-[44px]"
+                className={`${inputCls} md:flex-1`}
               >
                 <option value="">Semua Prestasi</option>
                 <option value="Di-Lanjut">Di-Lanjut</option>
@@ -583,7 +604,7 @@ export default function MasterProgres() {
               <button
                 type="button"
                 onClick={handleSave}
-                className="bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 text-xs px-4 py-2 rounded min-h-[44px]"
+                className="whitespace-nowrap rounded-xl bg-purple-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-purple-700 md:flex-none"
               >
                 Simpan Data
               </button>
@@ -591,28 +612,34 @@ export default function MasterProgres() {
 
             {/* ================= DESKTOP IQRA ================= */}
             <div className="hidden md:block overflow-x-auto">
-              <table className="w-full table-fixed text-xs border border-gray-200">
-                <thead className="bg-gray-100 text-left text-gray-900">
+              <table className="w-full table-fixed text-sm text-gray-700">
+                <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
                   <tr>
-                    <th className="p-1.5 border w-[15%]">Nama Santri</th>
-                    <th className="p-1.5 border w-[8%]">NIS</th>
-                    <th className="p-1.5 border w-[14%]">Guru</th>
-                    <th className="p-1.5 border w-[8%]">NIG</th>
-                    <th className="p-1.5 border w-[8%]">Kelas</th>
-                    <th className="p-1.5 border w-[9%]">Jilid</th>
-                    <th className="p-1.5 border w-[6%]">Hal.</th>
-                    <th className="p-1.5 border w-[10%]">Progres</th>
-                    <th className="p-1.5 border w-[8%]">Prestasi</th>
-                    <th className="p-1.5 border w-[14%]">Update</th>
+                    <th className="px-3 py-3 font-semibold w-[15%]">Nama Santri</th>
+                    <th className="px-3 py-3 font-semibold w-[8%]">NIS</th>
+                    <th className="px-3 py-3 font-semibold w-[14%]">Guru</th>
+                    <th className="px-3 py-3 font-semibold w-[8%]">NIG</th>
+                    <th className="px-3 py-3 font-semibold w-[8%]">Kelas</th>
+                    <th className="px-3 py-3 font-semibold w-[9%]">Jilid</th>
+                    <th className="px-3 py-3 font-semibold w-[6%]">Hal.</th>
+                    <th className="px-3 py-3 font-semibold w-[10%]">Progres</th>
+                    <th className="px-3 py-3 font-semibold w-[8%]">Prestasi</th>
+                    <th className="px-3 py-3 font-semibold w-[14%]">Update</th>
                   </tr>
                 </thead>
 
                 <tbody>
-                  {santriIqra.length === 0 ? (
+                  {loadingData ? (
+                    <tr>
+                      <td colSpan="10" className="p-0">
+                        <SkeletonRows rows={6} cols={6} />
+                      </td>
+                    </tr>
+                  ) : santriIqra.length === 0 ? (
                     <tr>
                       <td
                         colSpan="10"
-                        className="text-center p-4 text-gray-500"
+                        className="px-3 py-6 text-center text-gray-500"
                       >
                         Tidak ada data santri Iqra
                       </td>
@@ -637,22 +664,22 @@ export default function MasterProgres() {
                       return (
                         <tr
                           key={s.nis || i}
-                          className="border-t hover:bg-gray-50"
+                          className="border-t border-gray-100 transition hover:bg-purple-50/40"
                         >
                           {/* NAMA */}
-                          <td className="p-2 border align-middle font-semibold text-gray-800 truncate">
+                          <td className="px-3 py-2 align-middle font-semibold text-gray-800 truncate">
                             {s.nama}
                           </td>
 
                           {/* NIS */}
-                          <td className="p-2 border align-middle whitespace-nowrap">
+                          <td className="px-3 py-2 align-middle whitespace-nowrap">
                             {s.nis}
                           </td>
 
                           {/* GURU */}
-                          <td className="p-2 border align-middle">
+                          <td className="px-3 py-2 align-middle">
                             <select
-                              className="border p-1.5 rounded text-xs w-full min-w-0"
+                              className={cellCls}
                               value={progresData[`guru_${s.nis}`] || ""}
                               onChange={(e) =>
                                 handleProgresChange(
@@ -675,19 +702,19 @@ export default function MasterProgres() {
                           </td>
 
                           {/* NIG */}
-                          <td className="p-2 border align-middle whitespace-nowrap">
+                          <td className="px-3 py-2 align-middle whitespace-nowrap">
                             {dataGuru?.nig || "-"}
                           </td>
 
                           {/* KELAS */}
-                          <td className="p-2 border align-middle whitespace-nowrap">
+                          <td className="px-3 py-2 align-middle whitespace-nowrap">
                             {s.kelas || "-"}
                           </td>
 
                           {/* JILID */}
-                          <td className="p-2 border align-middle">
+                          <td className="px-3 py-2 align-middle">
                             <select
-                              className="border p-1.5 rounded text-xs w-full min-w-0"
+                              className={cellCls}
                               value={progresData[`jilid_${s.nis}`] || ""}
                               onChange={(e) =>
                                 handleProgresChange(
@@ -707,10 +734,10 @@ export default function MasterProgres() {
                           </td>
 
                           {/* HALAMAN */}
-                          <td className="p-2 border align-middle">
+                          <td className="px-3 py-2 align-middle">
                             <input
                               type="number"
-                              className="border p-1.5 rounded text-xs w-full min-w-0"
+                              className={cellCls}
                               placeholder="0"
                               value={progresData[`hal_${s.nis}`] || ""}
                               onChange={(e) =>
@@ -723,9 +750,9 @@ export default function MasterProgres() {
                           </td>
 
                           {/* PROGRES */}
-                          <td className="p-2 border align-middle">
+                          <td className="px-3 py-2 align-middle">
                             <select
-                              className="border p-1.5 rounded text-xs w-full min-w-0"
+                              className={cellCls}
                               value={progres}
                               onChange={(e) =>
                                 handleProgresChange(s.nis, e.target.value)
@@ -738,12 +765,12 @@ export default function MasterProgres() {
                           </td>
 
                           {/* PRESTASI */}
-                          <td className="p-2 border align-middle font-medium whitespace-nowrap">
+                          <td className="px-3 py-2 align-middle font-medium whitespace-nowrap">
                             {prestasi}
                           </td>
 
                           {/* UPDATE */}
-                          <td className="p-2 border align-middle text-gray-500 whitespace-nowrap">
+                          <td className="px-3 py-2 align-middle text-gray-500 whitespace-nowrap">
                             {new Date().toLocaleDateString("id-ID", {
                               day: "2-digit",
                               month: "2-digit",
@@ -760,7 +787,9 @@ export default function MasterProgres() {
 
             {/* ================= MOBILE IQRA ================= */}
             <div className="md:hidden space-y-3">
-              {paginatedSantriIqra.map((s, i) => {
+              {loadingData ? (
+                <SkeletonRows rows={4} cols={3} />
+              ) : paginatedSantriIqra.map((s, i) => {
                 const namaGuru = progresData[`guru_${s.nis}`] || "-";
 
                 const dataGuru = guru.find((g) => g.nama_guru === namaGuru);
@@ -777,7 +806,7 @@ export default function MasterProgres() {
                 return (
                   <div
                     key={s.nis || i}
-                    className="w-full max-w-full bg-blue-50 border border-blue-200 rounded-2xl shadow overflow-hidden"
+                    className="w-full max-w-full overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm"
                   >
                     {/* HEADER */}
                     <div className="bg-gray-300 text-black text-center px-3 py-2.5">
@@ -800,7 +829,7 @@ export default function MasterProgres() {
                           </span>
 
                           <select
-                            className="flex-1 min-w-0 border rounded-lg px-2 py-1.5 text-xs bg-white"
+                            className={`flex-1 ${cellCls}`}
                             value={progresData[`jilid_${s.nis}`] || ""}
                             onChange={(e) =>
                               handleProgresChange(
@@ -828,7 +857,7 @@ export default function MasterProgres() {
 
                           <input
                             type="number"
-                            className="w-14 border rounded-lg px-2 py-1.5 text-xs bg-white"
+                            className={`w-14 ${cellCls}`}
                             placeholder="0"
                             value={progresData[`hal_${s.nis}`] || ""}
                             onChange={(e) =>
@@ -849,7 +878,7 @@ export default function MasterProgres() {
                           </span>
 
                           <select
-                            className="flex-1 min-w-0 border rounded-lg px-2 py-1.5 text-xs bg-white"
+                            className={`flex-1 ${cellCls}`}
                             value={progresData[`guru_${s.nis}`] || ""}
                             onChange={(e) =>
                               handleProgresChange(
@@ -884,7 +913,7 @@ export default function MasterProgres() {
                           </span>
 
                           <select
-                            className="flex-1 min-w-0 border rounded-lg px-2 py-1.5 text-xs bg-white"
+                            className={`flex-1 ${cellCls}`}
                             value={progresData[s.nis] || ""}
                             onChange={(e) =>
                               handleProgresChange(s.nis, e.target.value)
@@ -987,9 +1016,9 @@ export default function MasterProgres() {
 
       {tab === "quran" && (
         <>
-          <div className="w-[calc(100%+8px)] -ml-1 md:w-auto md:ml-0 bg-transparent md:bg-white md:rounded-xl md:shadow p-0 md:p-4 overflow-x-auto">
+          <div className="w-[calc(100%+8px)] -ml-1 md:w-auto md:ml-0 md:rounded-2xl md:border md:border-gray-200 md:bg-white md:p-5 md:shadow-sm overflow-x-auto">
             {/* ================= FILTER QURAN ================= */}
-            <div className="mb-4 flex flex-col md:flex-row flex-wrap items-stretch gap-2">
+            <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-stretch">
               {/* SEARCH */}
               <input
                 type="text"
@@ -999,7 +1028,7 @@ export default function MasterProgres() {
                   setSearchQuran(e.target.value);
                   setCurrentPageQuran(1);
                 }}
-                className="border p-2 rounded text-xs w-full md:w-64 min-h-[44px]"
+                className={`${inputCls} md:flex-[2]`}
               />
 
               {/* FILTER JUZ */}
@@ -1009,7 +1038,7 @@ export default function MasterProgres() {
                   setFilterJuzQuran(e.target.value);
                   setCurrentPageQuran(1);
                 }}
-                className="border p-2 rounded text-xs min-h-[44px]"
+                className={`${inputCls} md:flex-1`}
               >
                 <option value="">Semua Juz</option>
 
@@ -1029,7 +1058,7 @@ export default function MasterProgres() {
                   setFilterSurahQuran(e.target.value);
                   setCurrentPageQuran(1);
                 }}
-                className="border p-2 rounded text-xs min-h-[44px]"
+                className={`${inputCls} md:flex-1`}
               />
 
               {/* FILTER PROGRES */}
@@ -1039,7 +1068,7 @@ export default function MasterProgres() {
                   setFilterProgresQuran(e.target.value);
                   setCurrentPageQuran(1);
                 }}
-                className="border p-2 rounded text-xs min-h-[44px]"
+                className={`${inputCls} md:flex-1`}
               >
                 <option value="">Semua Progres</option>
                 <option value="Belum">Belum</option>
@@ -1053,7 +1082,7 @@ export default function MasterProgres() {
                   setFilterPrestasiQuran(e.target.value);
                   setCurrentPageQuran(1);
                 }}
-                className="border p-2 rounded text-xs min-h-[44px]"
+                className={`${inputCls} md:flex-1`}
               >
                 <option value="">Semua Prestasi</option>
                 <option value="Di-Lanjut">Di-Lanjut</option>
@@ -1064,7 +1093,7 @@ export default function MasterProgres() {
               <button
                 type="button"
                 onClick={handleSave}
-                className="bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 text-xs px-4 py-2 rounded min-h-[44px]"
+                className="whitespace-nowrap rounded-xl bg-purple-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-purple-700 md:flex-none"
               >
                 Simpan Data
               </button>
@@ -1072,30 +1101,36 @@ export default function MasterProgres() {
 
             {/* ================= DESKTOP QURAN ================= */}
             <div className="hidden md:block overflow-x-auto">
-              <table className="w-full table-fixed border text-xs">
-                <thead className="bg-gray-100 text-left text-gray-900">
+              <table className="w-full table-fixed text-sm text-gray-700">
+                <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
                   <tr>
-                    <th className="p-1.5 border w-[13%]">Nama Santri</th>
-                    <th className="p-1.5 border w-[7%]">NIS</th>
-                    <th className="p-1.5 border w-[12%]">Guru</th>
-                    <th className="p-1.5 border w-[7%]">NIG</th>
-                    <th className="p-1.5 border w-[7%]">Kelas</th>
-                    <th className="p-1.5 border w-[5%]">Juz</th>
-                    <th className="p-1.5 border w-[14%]">Surah</th>
-                    <th className="p-1.5 border w-[5%]">Ayat</th>
-                    <th className="p-1.5 border w-[5%]">Hal.</th>
-                    <th className="p-1.5 border w-[9%]">Progres</th>
-                    <th className="p-1.5 border w-[7%]">Prestasi</th>
-                    <th className="p-1.5 border w-[9%]">Update</th>
+                    <th className="px-3 py-3 font-semibold w-[11%]">Nama Santri</th>
+                    <th className="px-3 py-3 font-semibold w-[7%]">NIS</th>
+                    <th className="px-3 py-3 font-semibold w-[11%]">Guru</th>
+                    <th className="px-3 py-3 font-semibold w-[7%]">NIG</th>
+                    <th className="px-3 py-3 font-semibold w-[7%]">Kelas</th>
+                    <th className="px-3 py-3 font-semibold w-[7%]">Juz</th>
+                    <th className="px-3 py-3 font-semibold w-[12%]">Surah</th>
+                    <th className="px-3 py-3 font-semibold w-[7%]">Ayat</th>
+                    <th className="px-3 py-3 font-semibold w-[7%]">Hal.</th>
+                    <th className="px-3 py-3 font-semibold w-[9%]">Progres</th>
+                    <th className="px-3 py-3 font-semibold w-[7%]">Prestasi</th>
+                    <th className="px-3 py-3 font-semibold w-[8%]">Update</th>
                   </tr>
                 </thead>
 
                 <tbody>
-                  {santriQuran.length === 0 ? (
+                  {loadingData ? (
+                    <tr>
+                      <td colSpan="12" className="p-0">
+                        <SkeletonRows rows={6} cols={6} />
+                      </td>
+                    </tr>
+                  ) : santriQuran.length === 0 ? (
                     <tr>
                       <td
                         colSpan="12"
-                        className="text-center p-4 text-gray-500"
+                        className="px-3 py-6 text-center text-gray-500"
                       >
                         Tidak ada data santri Al-Qur’an
                       </td>
@@ -1121,22 +1156,22 @@ export default function MasterProgres() {
                       return (
                         <tr
                           key={s.nis || i}
-                          className="border-t hover:bg-gray-50"
+                          className="border-t border-gray-100 transition hover:bg-purple-50/40"
                         >
                           {/* NAMA */}
-                          <td className="p-2 border align-middle font-semibold truncate">
+                          <td className="px-3 py-2 align-middle font-semibold truncate">
                             {s.nama}
                           </td>
 
                           {/* NIS */}
-                          <td className="p-2 border align-middle whitespace-nowrap">
+                          <td className="px-3 py-2 align-middle whitespace-nowrap">
                             {s.nis}
                           </td>
 
                           {/* GURU */}
-                          <td className="p-2 border align-middle">
+                          <td className="px-3 py-2 align-middle">
                             <select
-                              className="border p-1.5 rounded text-xs w-full min-w-0"
+                              className={cellCls}
                               value={progresData[`quran_guru_${s.nis}`] || ""}
                               onChange={(e) =>
                                 handleProgresChange(
@@ -1159,22 +1194,22 @@ export default function MasterProgres() {
                           </td>
 
                           {/* NIG */}
-                          <td className="p-2 border align-middle whitespace-nowrap">
+                          <td className="px-3 py-2 align-middle whitespace-nowrap">
                             {dataGuru?.nig || "-"}
                           </td>
 
                           {/* KELAS */}
-                          <td className="p-2 border align-middle whitespace-nowrap">
+                          <td className="px-3 py-2 align-middle whitespace-nowrap">
                             {s.kelas || "-"}
                           </td>
 
                           {/* JUZ */}
-                          <td className="p-2 border align-middle">
+                          <td className="px-3 py-2 align-middle">
                             <input
                               type="number"
                               min="1"
                               max="30"
-                              className="border p-1.5 rounded text-xs w-full min-w-0"
+                              className={numCls}
                               value={progresData[`quran_juz_${s.nis}`] || ""}
                               onChange={(e) =>
                                 handleProgresChange(
@@ -1186,10 +1221,10 @@ export default function MasterProgres() {
                           </td>
 
                           {/* SURAH */}
-                          <td className="p-2 border align-middle">
+                          <td className="px-3 py-2 align-middle">
                             <input
                               type="text"
-                              className="border p-1.5 rounded text-xs w-full min-w-0"
+                              className={cellCls}
                               value={progresData[`quran_surah_${s.nis}`] || ""}
                               onChange={(e) =>
                                 handleProgresChange(
@@ -1201,10 +1236,10 @@ export default function MasterProgres() {
                           </td>
 
                           {/* AYAT */}
-                          <td className="p-2 border align-middle">
+                          <td className="px-3 py-2 align-middle">
                             <input
                               type="number"
-                              className="border p-1.5 rounded text-xs w-full min-w-0"
+                              className={numCls}
                               value={progresData[`quran_ayat_${s.nis}`] || ""}
                               onChange={(e) =>
                                 handleProgresChange(
@@ -1216,10 +1251,10 @@ export default function MasterProgres() {
                           </td>
 
                           {/* HALAMAN */}
-                          <td className="p-2 border align-middle">
+                          <td className="px-3 py-2 align-middle">
                             <input
                               type="number"
-                              className="border p-1.5 rounded text-xs w-full min-w-0"
+                              className={numCls}
                               value={progresData[`quran_hal_${s.nis}`] || ""}
                               onChange={(e) =>
                                 handleProgresChange(
@@ -1231,9 +1266,9 @@ export default function MasterProgres() {
                           </td>
 
                           {/* PROGRES */}
-                          <td className="p-2 border align-middle">
+                          <td className="px-3 py-2 align-middle">
                             <select
-                              className="border p-1.5 rounded text-xs w-full min-w-0"
+                              className={cellCls}
                               value={progres}
                               onChange={(e) =>
                                 handleProgresChange(
@@ -1249,12 +1284,12 @@ export default function MasterProgres() {
                           </td>
 
                           {/* PRESTASI */}
-                          <td className="p-2 border align-middle font-medium whitespace-nowrap">
+                          <td className="px-3 py-2 align-middle font-medium whitespace-nowrap">
                             {prestasi}
                           </td>
 
                           {/* UPDATE */}
-                          <td className="p-2 border align-middle text-gray-500 whitespace-nowrap">
+                          <td className="px-3 py-2 align-middle text-gray-500 whitespace-nowrap">
                             {new Date().toLocaleDateString("id-ID", {
                               day: "2-digit",
                               month: "2-digit",
@@ -1270,7 +1305,9 @@ export default function MasterProgres() {
             </div>
             {/* ================= MOBILE QURAN ================= */}
             <div className="md:hidden space-y-3 mt-4">
-              {paginatedSantriQuran.map((s, i) => {
+              {loadingData ? (
+                <SkeletonRows rows={4} cols={3} />
+              ) : paginatedSantriQuran.map((s, i) => {
                 const namaGuru = progresData[`quran_guru_${s.nis}`] || "-";
 
                 const dataGuru = guru.find((g) => g.nama_guru === namaGuru);
@@ -1287,7 +1324,7 @@ export default function MasterProgres() {
                 return (
                   <div
                     key={s.nis || i}
-                    className="w-full max-w-full bg-blue-50 border border-blue-200 rounded-2xl shadow overflow-hidden"
+                    className="w-full max-w-full overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm"
                   >
                     {/* HEADER */}
                     <div className="bg-gray-300 text-black text-center px-3 py-2.5">
@@ -1313,7 +1350,7 @@ export default function MasterProgres() {
                             type="number"
                             min="1"
                             max="30"
-                            className="flex-1 min-w-0 border rounded-lg px-2 py-1.5 text-xs bg-white"
+                            className={`flex-1 ${cellCls}`}
                             value={progresData[`quran_juz_${s.nis}`] || ""}
                             onChange={(e) =>
                               handleProgresChange(
@@ -1333,7 +1370,7 @@ export default function MasterProgres() {
 
                           <input
                             type="text"
-                            className="flex-1 min-w-0 border rounded-lg px-2 py-1.5 text-xs bg-white"
+                            className={`flex-1 ${cellCls}`}
                             value={progresData[`quran_surah_${s.nis}`] || ""}
                             onChange={(e) =>
                               handleProgresChange(
@@ -1354,7 +1391,7 @@ export default function MasterProgres() {
 
                           <input
                             type="number"
-                            className="flex-1 min-w-0 border rounded-lg px-2 py-1.5 text-xs bg-white"
+                            className={`flex-1 ${cellCls}`}
                             value={progresData[`quran_ayat_${s.nis}`] || ""}
                             onChange={(e) =>
                               handleProgresChange(
@@ -1374,7 +1411,7 @@ export default function MasterProgres() {
 
                           <input
                             type="number"
-                            className="flex-1 min-w-0 border rounded-lg px-2 py-1.5 text-xs bg-white"
+                            className={`flex-1 ${cellCls}`}
                             value={progresData[`quran_hal_${s.nis}`] || ""}
                             onChange={(e) =>
                               handleProgresChange(
@@ -1394,7 +1431,7 @@ export default function MasterProgres() {
                           </span>
 
                           <select
-                            className="flex-1 min-w-0 border rounded-lg px-2 py-1.5 text-xs bg-white"
+                            className={`flex-1 ${cellCls}`}
                             value={progresData[`quran_guru_${s.nis}`] || ""}
                             onChange={(e) =>
                               handleProgresChange(
@@ -1429,7 +1466,7 @@ export default function MasterProgres() {
                           </span>
 
                           <select
-                            className="flex-1 min-w-0 border rounded-lg px-2 py-1.5 text-xs bg-white"
+                            className={`flex-1 ${cellCls}`}
                             value={progresData[`quran_progres_${s.nis}`] || ""}
                             onChange={(e) =>
                               handleProgresChange(

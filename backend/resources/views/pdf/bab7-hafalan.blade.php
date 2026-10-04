@@ -51,7 +51,7 @@ $label = $labels[$pdfLanguage] ?? $labels['id'];
 
 <p style="text-align:justify; line-height:1.8;">
 
-    {{ $setting->narasi['bab7'] ?? '' }}
+    {!! $setting->narasi['bab7'] ?? '' !!}
 
 </p>
 

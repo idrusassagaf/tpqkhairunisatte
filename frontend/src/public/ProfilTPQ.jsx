@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { api } from "../api";
+import { Skeleton } from "../components/Skeleton";
 import videoTPQ from "../assets/video/clip2tpq.mp4";
 import heroImage from "../assets/hero-putih04.jpg";
 
@@ -124,13 +125,17 @@ export default function ProfilTPQ() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f6faf7] flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-10 h-10 mx-auto mb-4 border-4 border-green-200 border-t-green-600 rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-[#f6faf7] p-6 md:p-10" dir={isArabic ? "rtl" : "ltr"}>
+        <div className="max-w-5xl mx-auto space-y-6">
+          <Skeleton className="h-10 w-1/2" />
 
-          <p className="text-gray-500 text-sm" dir={isArabic ? "rtl" : "ltr"}>
-            {t.loading}
-          </p>
+          <Skeleton className="h-56 w-full rounded-3xl" />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Skeleton className="h-32 w-full rounded-2xl" />
+
+            <Skeleton className="h-32 w-full rounded-2xl" />
+          </div>
         </div>
       </div>
     );

@@ -1,10 +1,13 @@
-import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Download } from "lucide-react";
 import { useEffect, useState } from "react";
 import { api } from "../api";
+import { Skeleton } from "../components/Skeleton";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 export default function KalenderPengajian() {
+  const [loading, setLoading] = useState(true);
+
   const [currentDate, setCurrentDate] = useState(new Date());
   const [jadwal, setJadwal] = useState({});
   const [selectedDate, setSelectedDate] = useState(null);
@@ -18,6 +21,8 @@ export default function KalenderPengajian() {
       setJadwal(res.data);
     } catch (err) {
       console.error("Gagal mengambil jadwal", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -211,156 +216,162 @@ export default function KalenderPengajian() {
   };
 
   return (
-    <div className="p-4 space-y-6">
-      <h1 className="text-xl font-light">KALENDER TPQ</h1>
+    <div className="mx-auto w-full max-w-4xl min-w-0 space-y-5 p-3 md:p-6">
+      {/* HEADER */}
+      <div className="flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm md:flex-row md:items-center md:justify-between md:p-6">
+        <div className="flex items-start gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-green-100 text-green-700">
+            <CalendarDays size={22} />
+          </div>
 
-      {/* KONTROL BULAN */}
-      <div className="bg-white rounded-xl shadow p-4">
+          <div>
+            <h1 className="text-xl font-semibold text-gray-900">Kalender TPQ</h1>
+
+            <p className="mt-0.5 text-sm text-gray-500">
+              Atur hari mengaji dan hari libur setiap bulan.
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={downloadPDF}
+          className="inline-flex items-center justify-center gap-2 rounded-xl border border-green-200 bg-green-50 px-4 py-2.5 text-sm font-medium text-green-700 transition hover:bg-green-100"
+        >
+          <Download size={16} />
+          Download
+        </button>
+      </div>
+
+      <div className="space-y-5 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm md:p-6">
+        {/* KONTROL BULAN */}
         <div className="flex items-center justify-between">
           <button
+            type="button"
             onClick={prevMonth}
-            className="p-2 rounded-lg border hover:bg-gray-100"
+            aria-label="Bulan sebelumnya"
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-600 transition hover:bg-gray-50"
           >
-            <ChevronLeft />
+            <ChevronLeft size={18} />
           </button>
 
-          <h2 className="text-xl font-semibold capitalize">{bulanTahun}</h2>
+          <h2 className="text-lg font-semibold capitalize text-gray-900">{bulanTahun}</h2>
 
           <button
+            type="button"
             onClick={nextMonth}
-            className="p-2 rounded-lg border hover:bg-gray-100"
+            aria-label="Bulan berikutnya"
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-600 transition hover:bg-gray-50"
           >
-            <ChevronRight />
+            <ChevronRight size={18} />
           </button>
         </div>
-      </div>
 
-      {/* PANEL PILIH STATUS */}
-      {selectedDate && (
-        <div className="bg-white rounded-xl shadow p-4">
-          <h3 className="font-semibold mb-3">
-            Tanggal Dipilih : {selectedDate}
-          </h3>
-
-          <div className="flex gap-3">
-            <button
-              onClick={() => setStatus("mengaji")}
-              className="bg-green-500 text-white px-4 py-2 rounded-lg"
-            >
-              Mengaji
-            </button>
-
-            <button
-              onClick={() => setStatus("libur")}
-              className="bg-red-500 text-white px-4 py-2 rounded-lg"
-            >
-              Libur
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* KALENDER */}
-      <div className="bg-white rounded-2xl shadow p-4">
-        <div className="grid grid-cols-7 gap-2 mb-2">
-          {["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"].map((hari) => (
-            <div
-              key={hari}
-              className="text-center text-xs font-semibold text-gray-700 py-1"
-            >
-              {hari}
+        {/* PILIH STATUS */}
+        {selectedDate && (
+          <div className="flex flex-col gap-3 rounded-xl border border-purple-100 bg-purple-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-sm text-gray-700">
+              Tanggal dipilih: <span className="font-semibold text-gray-900">{selectedDate}</span>
             </div>
-          ))}
-        </div>
 
-        <div className="grid grid-cols-7 gap-2">
-          {Array.from({ length: offset }).map((_, i) => (
-            <div key={`empty-${i}`} />
-          ))}
-
-          {Array.from({ length: jumlahHari }).map((_, index) => {
-            const tglKey = buatKey(tahun, bulan + 1, index + 1);
-            const statusTanggal = jadwal[tglKey];
-
-            return (
-              <div
-                key={index}
-                onClick={() => pilihTanggal(index + 1)}
-                className="
-  h-14
-  border
-  rounded-lg
-  p-1
-  transition
-  cursor-pointer
-  flex
-  flex-col
-  items-center
-  justify-center
-  hover:bg-gray-50
-"
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setStatus("mengaji")}
+                className="rounded-xl bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-green-700"
               >
-                {/* angka tanggal */}
-                <div
-                  className={`
-    w-7
-    h-7
-    rounded-full
-    flex
-    items-center
-    justify-center
-    text-sm
-    font-bold
-    transition-all
+                Mengaji
+              </button>
 
-    ${isToday(index + 1) ? "bg-gray-400 text-white shadow-md" : "text-gray-800"}
-  `}
-                >
-                  {index + 1}
-                </div>
+              <button
+                type="button"
+                onClick={() => setStatus("libur")}
+                className="rounded-xl bg-red-500 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-red-600"
+              >
+                Libur
+              </button>
+            </div>
+          </div>
+        )}
 
-                {/* PREVIEW STATUS */}
-                {statusTanggal === "mengaji" && (
-                  <div className="mt-1 w-5 h-5 rounded-full bg-green-500 text-white text-[10px] font-bold flex items-center justify-center">
-                    M
-                  </div>
-                )}
-
-                {statusTanggal === "libur" && (
-                  <div className="mt-1 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
-                    L
-                  </div>
-                )}
+        {/* KALENDER */}
+        <div>
+          <div className="mb-2 grid grid-cols-7 gap-2">
+            {["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"].map((hari) => (
+              <div
+                key={hari}
+                className="py-1 text-center text-xs font-semibold uppercase tracking-wide text-gray-500"
+              >
+                {hari}
               </div>
-            );
-          })}
+            ))}
+          </div>
+
+          <div className="grid grid-cols-7 gap-2">
+            {Array.from({ length: offset }).map((_, i) => (
+              <div key={`empty-${i}`} />
+            ))}
+
+            {loading
+            ? Array.from({ length: 35 }).map((_, i) => (
+                <Skeleton key={i} className="h-14 rounded-xl" />
+              ))
+            : Array.from({ length: jumlahHari }).map((_, index) => {
+              const tglKey = buatKey(tahun, bulan + 1, index + 1);
+              const statusTanggal = jadwal[tglKey];
+              const today = isToday(index + 1);
+              const dipilih = selectedDate === tglKey;
+
+              return (
+                <button
+                  type="button"
+                  key={index}
+                  onClick={() => pilihTanggal(index + 1)}
+                  className={`flex h-14 flex-col items-center justify-center rounded-xl border transition ${
+                    dipilih
+                      ? "border-purple-400 bg-purple-50 ring-2 ring-purple-200"
+                      : "border-gray-100 hover:border-gray-300 hover:bg-gray-50"
+                  }`}
+                >
+                  <span
+                    className={`flex h-7 w-7 items-center justify-center rounded-full text-sm font-semibold ${
+                      today ? "bg-gray-800 text-white" : "text-gray-800"
+                    }`}
+                  >
+                    {index + 1}
+                  </span>
+
+                  {statusTanggal === "mengaji" && (
+                    <span className="mt-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-green-500 text-[10px] font-bold text-white">
+                      M
+                    </span>
+                  )}
+
+                  {statusTanggal === "libur" && (
+                    <span className="mt-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                      L
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
 
-      {/* KETERANGAN */}
-      <div className="bg-white rounded-2xl shadow p-4">
-        <div className="flex flex-wrap items-center justify-center gap-8">
+        {/* KETERANGAN */}
+        <div className="flex flex-wrap items-center justify-center gap-6 border-t border-gray-100 pt-4">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center font-bold">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-green-500 text-xs font-bold text-white">
               M
-            </div>
-            <span className="text-sm font-medium">Mengaji</span>
+            </span>
+            <span className="text-sm text-gray-700">Mengaji</span>
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center font-bold">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
               L
-            </div>
-            <span className="text-sm font-medium">Libur</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={downloadPDF}
-              className="border border-green-500 text-green-600 px-4 py-2 rounded-xl hover:bg-green-50"
-            >
-              ⬇ Download
-            </button>
+            </span>
+            <span className="text-sm text-gray-700">Libur</span>
           </div>
         </div>
       </div>

@@ -28,6 +28,7 @@ import {
 import { useEffect, useState } from "react";
 
 import { api } from "../api";
+import { Skeleton } from "./Skeleton";
 
 export default function Sidebar({ open, setOpen }) {
   // =========================================================
@@ -151,6 +152,7 @@ export default function Sidebar({ open, setOpen }) {
 
   const [countSantri, setCountSantri] = useState(0);
   const [countGuru, setCountGuru] = useState(0);
+  const [loadingCount, setLoadingCount] = useState(true);
 
   useEffect(() => {
     fetchCounts();
@@ -193,6 +195,8 @@ export default function Sidebar({ open, setOpen }) {
       setCountGuru(guru.length);
     } catch (err) {
       console.error("Gagal ambil count:", err);
+    } finally {
+      setLoadingCount(false);
     }
   };
 
@@ -239,13 +243,13 @@ export default function Sidebar({ open, setOpen }) {
   const navItemClass = ({ isActive }, sidebarOpen) => {
     return `
       group relative flex items-center
-      ${sidebarOpen ? "gap-2 ml-3" : "justify-center"}
-      px-2 py-1 rounded-md text-sm
+      ${sidebarOpen ? "gap-3 px-3" : "justify-center px-0"}
+      py-2 rounded-xl text-sm font-medium
       transition-all duration-200
       ${
         isActive
-          ? "bg-white/70 text-purple-700 shadow-sm"
-          : "text-gray-700 hover:bg-white/50"
+          ? "bg-white/80 text-purple-700 shadow-sm ring-1 ring-purple-100"
+          : "text-gray-700 hover:bg-white/60 hover:text-gray-900"
       }
     `;
   };
@@ -253,12 +257,12 @@ export default function Sidebar({ open, setOpen }) {
   const sectionBtnClass = (sidebarOpen) => `
     relative group
     flex items-center
-    ${sidebarOpen ? "justify-between px-5" : "justify-center"}
+    ${sidebarOpen ? "justify-between px-3" : "justify-center"}
     w-full
-    py-1 mt-2
-    text-xs font-light tracking-widest
-    text-gray-800
-    h-9
+    py-2 mt-3
+    text-[11px] font-semibold uppercase tracking-[0.18em]
+    text-gray-500 hover:text-purple-700
+    transition
   `;
 
   // =========================================================
@@ -298,8 +302,22 @@ export default function Sidebar({ open, setOpen }) {
             HEADER
         ==================================================== */}
 
-        <div className="p-4 font-semibold border-b text-center text-gray-800">
-          {open ? "TPQ SYSTEM" : "TPQ"}
+        <div className="flex items-center justify-center gap-2.5 border-b border-white/60 px-4 py-4">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-purple-500 text-sm font-bold text-white shadow-md">
+            T
+          </div>
+
+          {open && (
+            <div className="min-w-0">
+              <div className="text-sm font-bold leading-tight tracking-wide text-gray-900">
+                TPQ SYSTEM
+              </div>
+
+              <div className="text-[10px] tracking-wide text-gray-500">
+                Hairunissa Ternate
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ===================================================
@@ -393,7 +411,7 @@ export default function Sidebar({ open, setOpen }) {
             MENU
         ==================================================== */}
 
-        <nav className="flex flex-col gap-1 p-4" onClick={handleMenuClick}>
+        <nav className="flex flex-col gap-0.5 p-3" onClick={handleMenuClick}>
           {/* =================================================
               DASHBOARD + MASTER
           ================================================== */}
@@ -467,8 +485,12 @@ export default function Sidebar({ open, setOpen }) {
                       <span>{item.name}</span>
 
                       {badge !== null && (
-                        <span className="text-[10px] px-2 py-[1px] rounded-full bg-purple-400 text-white">
-                          {badge}
+                        <span className="text-[10px] px-2 py-[1px] rounded-full bg-purple-600 text-white font-semibold">
+                          {loadingCount ? (
+                            <span className="inline-block h-3 w-6 animate-pulse rounded bg-white/70" />
+                          ) : (
+                            badge
+                          )}
                         </span>
                       )}
                     </div>
@@ -528,8 +550,12 @@ export default function Sidebar({ open, setOpen }) {
                       <span>{item.name}</span>
 
                       {badge !== null && (
-                        <span className="text-[10px] px-2 py-[1px] rounded-full bg-purple-400 text-white">
-                          {badge}
+                        <span className="text-[10px] px-2 py-[1px] rounded-full bg-purple-600 text-white font-semibold">
+                          {loadingCount ? (
+                            <span className="inline-block h-3 w-6 animate-pulse rounded bg-white/70" />
+                          ) : (
+                            badge
+                          )}
                         </span>
                       )}
                     </div>

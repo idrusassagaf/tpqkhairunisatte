@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api";
+import { Skeleton } from "../components/Skeleton";
 import {
   Users,
   UserRound,
@@ -177,7 +178,7 @@ export default function Dashboard() {
 
                       <div className="mt-2">
                         {loading ? (
-                          <div className="h-8 w-16 rounded bg-gray-200 animate-pulse" />
+                          <Skeleton className="h-8 w-16" />
                         ) : (
                           <span className="text-3xl font-bold text-gray-800">
                             {item.value}
@@ -230,7 +231,7 @@ export default function Dashboard() {
                   <span className="text-gray-600">Iqra</span>
 
                   <span className="font-semibold text-gray-800">
-                    {loading ? "-" : jumlahIqra}
+                    {loading ? <Skeleton className="ml-auto h-4 w-8" /> : jumlahIqra}
                   </span>
                 </div>
 
@@ -254,7 +255,7 @@ export default function Dashboard() {
                   <span className="text-gray-600">Al-Qur'an</span>
 
                   <span className="font-semibold text-gray-800">
-                    {loading ? "-" : jumlahQuran}
+                    {loading ? <Skeleton className="ml-auto h-4 w-8" /> : jumlahQuran}
                   </span>
                 </div>
 
@@ -297,7 +298,7 @@ export default function Dashboard() {
                 <div className="text-xs text-blue-600">Laki-laki</div>
 
                 <div className="mt-1 text-2xl font-bold text-blue-800">
-                  {loading ? "-" : jumlahLaki}
+                  {loading ? <Skeleton className="h-7 w-12" /> : jumlahLaki}
                 </div>
 
                 <div className="text-[11px] text-blue-500 mt-1">Santri</div>
@@ -307,7 +308,7 @@ export default function Dashboard() {
                 <div className="text-xs text-pink-600">Perempuan</div>
 
                 <div className="mt-1 text-2xl font-bold text-pink-800">
-                  {loading ? "-" : jumlahPerempuan}
+                  {loading ? <Skeleton className="h-7 w-12" /> : jumlahPerempuan}
                 </div>
 
                 <div className="text-[11px] text-pink-500 mt-1">Santri</div>

@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { api } from "../api";
+import { Skeleton, SkeletonRows } from "../components/Skeleton";
+
+// Gaya input seragam dengan halaman admin lainnya
+const inputCls =
+  "w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-800 shadow-sm transition focus:border-green-400 focus:outline-none focus:ring-4 focus:ring-green-100";
 
 import logoTPQ from "../assets/logo-tpq.png";
 
@@ -1263,13 +1268,39 @@ export default function RaportSantri() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-10 h-10 border-4 border-green-200 border-t-green-600 rounded-full animate-spin mx-auto" />
+      <div className="space-y-5 p-3 md:p-6">
+        <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+          <div className="flex items-center gap-3">
+            <Skeleton className="h-11 w-11 rounded-xl" />
 
-          <p className="mt-4 text-sm text-gray-500">
-            Memuat data raport santri...
-          </p>
+            <div className="space-y-2">
+              <Skeleton className="h-5 w-40" />
+
+              <Skeleton className="h-3 w-64" />
+            </div>
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+            <Skeleton className="h-11 w-full" />
+
+            <Skeleton className="h-11 w-full" />
+
+            <Skeleton className="h-11 w-full" />
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+          <Skeleton className="mb-4 h-5 w-48" />
+
+          <div className="grid grid-cols-1 gap-x-8 gap-y-4 md:grid-cols-2">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="flex justify-between gap-4 border-b border-gray-100 pb-2">
+                <Skeleton className="h-4 w-28" />
+
+                <Skeleton className="h-4 w-36" />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -1303,7 +1334,7 @@ export default function RaportSantri() {
             </div>
 
             <div>
-              <h1 className="text-ms md:text-2xl font-extralight text-gray-800">
+              <h1 className="text-xl font-semibold text-gray-900">
                 Raport Santri
               </h1>
 
@@ -1336,7 +1367,7 @@ export default function RaportSantri() {
                   value={searchSantri}
                   onChange={(e) => setSearchSantri(e.target.value)}
                   placeholder="Cari nama santri..."
-                  className="w-full border border-gray-300 rounded-lg pl-10 pr-3 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className={`${inputCls} pl-10`}
                 />
               </div>
 
@@ -1405,7 +1436,7 @@ export default function RaportSantri() {
             <select
               value={selectedNis}
               onChange={(e) => setSelectedNis(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
+              className={inputCls}
             >
               {santri.map((item) => (
                 <option key={item.nis} value={item.nis}>
@@ -1423,7 +1454,7 @@ export default function RaportSantri() {
             <select
               value={bulan}
               onChange={(e) => setBulan(Number(e.target.value))}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
+              className={inputCls}
             >
               {namaBulan.map((nama, index) => (
                 <option key={index + 1} value={index + 1}>
@@ -1441,7 +1472,7 @@ export default function RaportSantri() {
             <select
               value={tahun}
               onChange={(e) => setTahun(Number(e.target.value))}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
+              className={inputCls}
             >
               {[tahun - 1, tahun, tahun + 1].map((item) => (
                 <option key={item} value={item}>

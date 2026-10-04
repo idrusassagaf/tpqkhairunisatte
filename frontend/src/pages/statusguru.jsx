@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { Download, FileSpreadsheet, FileText } from "lucide-react";
+import { Download, FileSpreadsheet, FileText, Wallet } from "lucide-react";
 
 import * as XLSX from "xlsx";
 
@@ -9,8 +9,15 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 import { api } from "../api";
+import { SkeletonRows } from "../components/Skeleton";
+
+// Gaya input seragam dengan halaman admin lainnya
+const inputCls =
+  "w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-800 shadow-sm transition focus:border-purple-400 focus:outline-none focus:ring-4 focus:ring-purple-100";
 
 export default function StatusGuru() {
+  const [loading, setLoading] = useState(true);
+
   const [guru, setGuru] = useState([]);
   const [search, setSearch] = useState("");
   const [filterPeriode, setFilterPeriode] = useState("");
@@ -73,6 +80,8 @@ export default function StatusGuru() {
       setGuru(res?.data?.data?.guru || []);
     } catch (err) {
       console.error("Gagal ambil data:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -579,75 +588,48 @@ export default function StatusGuru() {
   };
 
   return (
-    <div className="p-4 space-y-4">
-      {/* ================= TITLE ================= */}
-      <div className="bg-white rounded-2xl shadow p-4">
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
-          <div>
-            <h1 className="text-xl font-light tracking-wide text-black">
-              STATUS DAN GAJI GURU
-            </h1>
+    <div className="mx-auto w-full max-w-7xl min-w-0 space-y-5 overflow-x-hidden p-3 md:p-6">
+      {/* HEADER */}
+      <div className="flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm md:flex-row md:items-start md:justify-between md:p-6">
+        <div className="flex items-start gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+            <Wallet size={22} />
+          </div>
 
-            <p className="text-xs text-gray-500 mt-1">
+          <div>
+            <h1 className="text-xl font-semibold text-gray-900">Status dan Gaji Guru</h1>
+
+            <p className="mt-0.5 text-sm text-gray-500">
               Monitoring aktivitas kehadiran dan gaji guru per bulan.
             </p>
           </div>
+        </div>
 
-          {/* TOTAL GAJI */}
-          <div
-            className="
-              text-left md:text-right
-              border border-gray-500
-              bg-gray-100
-              rounded-xl
-              px-4 py-2
-            "
-          >
-            <p className="text-xs text-gray-800 tracking-wide">
-              Jumlah Total Gaji
-            </p>
+        {/* TOTAL GAJI */}
+        <div className="rounded-xl border border-green-100 bg-green-50 px-4 py-3 text-left md:text-right">
+          <p className="text-xs font-medium text-gray-600">Jumlah Total Gaji</p>
 
-            <h2 className="text-lg font-bold text-green-700">
-              {formatRupiah(totalGaji)}
-            </h2>
-          </div>
+          <h2 className="mt-0.5 text-lg font-bold text-green-700">
+            {formatRupiah(totalGaji)}
+          </h2>
         </div>
       </div>
 
-      {/* ================= SEARCH + FILTER ================= */}
-      <div className="bg-white rounded-2xl shadow p-4">
-        <div className="flex flex-col md:flex-row gap-3">
-          {/* SEARCH */}
+      <div className="space-y-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm md:p-6">
+        {/* SEARCH + FILTER + DOWNLOAD */}
+        <div className="flex flex-col gap-3 md:flex-row md:items-center">
           <input
             type="text"
             placeholder="Cari nama guru / NIG..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="
-              border rounded-xl
-              px-4 py-2
-              w-full md:w-72
-              text-sm
-              focus:outline-none
-              focus:ring-2
-              focus:ring-purple-300
-            "
+            className={`${inputCls} md:w-72`}
           />
 
-          {/* FILTER PERIODE */}
           <select
             value={filterPeriode}
             onChange={(e) => setFilterPeriode(e.target.value)}
-            className="
-              border rounded-xl
-              px-4 py-2
-              text-xs
-              tracking-wide
-              w-full md:w-56
-              focus:outline-none
-              focus:ring-2
-              focus:ring-purple-300
-            "
+            className={`${inputCls} md:w-56`}
           >
             {bulanList.map((bulan, index) => {
               const nomor = String(index + 1).padStart(2, "0");
@@ -656,100 +638,46 @@ export default function StatusGuru() {
 
               return (
                 <option key={nomor} value={tahun + "-" + nomor}>
-                  {bulan.toUpperCase().split("").join(" ")} - {tahun}
+                  {bulan} {tahun}
                 </option>
               );
             })}
           </select>
 
-          {/* ================= DOWNLOAD ================= */}
-          <div className="relative">
+          <div className="relative md:ml-auto">
             <button
               type="button"
               onClick={() => setShowDownload((prev) => !prev)}
-              className="
-                w-full md:w-auto
-                inline-flex
-                items-center
-                justify-center
-                gap-2
-                px-4 py-2
-                rounded-xl
-                bg-blue-600
-                text-white
-                text-sm
-                font-medium
-                hover:bg-blue-700
-                transition
-              "
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 md:w-auto"
             >
               <Download size={17} />
               Download
             </button>
 
             {showDownload && (
-              <div
-                className="
-                  absolute
-                  right-0
-                  mt-2
-                  w-full md:w-52
-                  bg-white
-                  border
-                  border-gray-200
-                  rounded-xl
-                  shadow-lg
-                  z-50
-                  overflow-hidden
-                "
-              >
-                {/* ================= EXCEL ================= */}
+              <div className="absolute right-0 z-50 mt-2 w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg md:w-52">
                 <button
                   type="button"
                   onClick={downloadExcel}
-                  className="
-                    w-full
-                    flex
-                    items-center
-                    gap-3
-                    px-4 py-3
-                    text-sm
-                    text-gray-700
-                    hover:bg-gray-50
-                    transition
-                  "
+                  className="flex w-full items-center gap-3 px-4 py-3 text-sm text-gray-700 transition hover:bg-gray-50"
                 >
                   <FileSpreadsheet size={18} className="text-green-600" />
 
                   <div className="text-left">
                     <div className="font-medium">Excel</div>
-
                     <div className="text-xs text-gray-400">.xlsx</div>
                   </div>
                 </button>
 
-                {/* ================= PDF ================= */}
                 <button
                   type="button"
                   onClick={downloadPDF}
-                  className="
-                    w-full
-                    flex
-                    items-center
-                    gap-3
-                    px-4 py-3
-                    text-sm
-                    text-gray-700
-                    hover:bg-gray-50
-                    transition
-                    border-t
-                  "
+                  className="flex w-full items-center gap-3 border-t px-4 py-3 text-sm text-gray-700 transition hover:bg-gray-50"
                 >
                   <FileText size={18} className="text-red-600" />
 
                   <div className="text-left">
                     <div className="font-medium">PDF</div>
-
                     <div className="text-xs text-gray-400">.pdf</div>
                   </div>
                 </button>
@@ -757,116 +685,92 @@ export default function StatusGuru() {
             )}
           </div>
         </div>
-      </div>
 
-      {/* ================= DESKTOP TABLE ================= */}
-      <div className="hidden md:flex justify-center bg-white rounded shadow overflow-x-auto">
-        <table className="w-[95%] border text-xs text-black">
-          <thead className="bg-gray-200 text-black">
-            <tr>
-              <th className="px-2 py-2 border w-14">No</th>
-
-              <th className="px-2 py-2 border text-left">Nama Guru</th>
-
-              <th className="px-2 py-2 border">NIG</th>
-
-              <th className="px-2 py-2 border">Total Santri</th>
-
-              <th className="px-2 py-2 border">Kehadiran & Absensi</th>
-
-              <th className="px-2 py-2 border">Status</th>
-
-              <th className="px-2 py-2 border">Gaji Per-Guru</th>
-
-              <th className="px-2 py-2 border">Aksi</th>
-
-              <th className="px-2 py-2 border">Update</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {filteredGuru.length === 0 ? (
+        {loading ? (
+        <SkeletonRows rows={6} cols={5} />
+      ) : (
+        <>
+        {/* DESKTOP TABLE */}
+        <div className="hidden overflow-x-auto rounded-xl border border-gray-200 md:block">
+          <table className="w-full text-sm text-gray-700">
+            <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
               <tr>
-                <td colSpan="9" className="text-center p-6 text-gray-500">
-                  Data guru belum tersedia
-                </td>
+                <th className="w-14 px-3 py-3 text-center font-semibold">No</th>
+                <th className="px-3 py-3 text-left font-semibold">Nama Guru</th>
+                <th className="px-3 py-3 text-center font-semibold">NIG</th>
+                <th className="px-3 py-3 text-center font-semibold">Total Santri</th>
+                <th className="px-3 py-3 text-center font-semibold">Kehadiran &amp; Absensi</th>
+                <th className="px-3 py-3 text-center font-semibold">Status</th>
+                <th className="px-3 py-3 text-center font-semibold">Gaji Per-Guru</th>
+                <th className="px-3 py-3 text-center font-semibold">Aksi</th>
+                <th className="px-3 py-3 text-center font-semibold">Update</th>
               </tr>
-            ) : (
-              paginatedGuru.map((g, i) => {
-                const dataPeriode = statusData[g.nig]?.[filterPeriode] || {};
+            </thead>
 
-                const kehadiran = dataPeriode.kehadiran || "";
+            <tbody>
+              {filteredGuru.length === 0 ? (
+                <tr>
+                  <td colSpan="9" className="px-4 py-8 text-center text-gray-500">
+                    Data guru belum tersedia
+                  </td>
+                </tr>
+              ) : (
+                paginatedGuru.map((g, i) => {
+                  const dataPeriode = statusData[g.nig]?.[filterPeriode] || {};
 
-                const status = getStatusGuru(kehadiran);
+                  const kehadiran = dataPeriode.kehadiran || "";
 
-                const gaji = getGajiGuru(status);
+                  const status = getStatusGuru(kehadiran);
 
-                return (
-                  <tr key={i} className="border-t hover:bg-gray-50">
-                    {/* NO */}
-                    <td className="px-2 py-1 border text-center">
-                      {startIndex + i + 1}
-                    </td>
+                  const gaji = getGajiGuru(status);
 
-                    {/* NAMA */}
-                    <td className="px-2 py-1 border font-medium">
-                      {g.nama_guru}
-                    </td>
+                  return (
+                    <tr
+                      key={i}
+                      className="border-t border-gray-100 transition hover:bg-amber-50/40"
+                    >
+                      <td className="px-3 py-2.5 text-center text-gray-500">
+                        {startIndex + i + 1}
+                      </td>
 
-                    {/* NIG */}
-                    <td className="px-2 py-1 border text-center">
-                      {g.nig || "-"}
-                    </td>
+                      <td className="px-3 py-2.5 font-semibold text-gray-900">
+                        {g.nama_guru}
+                      </td>
 
-                    {/* TOTAL SANTRI */}
-                    <td className="px-2 py-1 border text-center">
-                      <input
-                        type="number"
-                        value={dataPeriode.totalSantri || ""}
-                        onChange={(e) =>
-                          handleChange(g.nig, "totalSantri", e.target.value)
-                        }
-                        className="
-                          border rounded
-                          px-2 py-1
-                          w-20 text-xs
-                          text-center
-                        "
-                      />
-                    </td>
+                      <td className="px-3 py-2.5 text-center whitespace-nowrap">
+                        {g.nig || "-"}
+                      </td>
 
-                    {/* KEHADIRAN */}
-                    <td className="px-2 py-1 border text-center">
-                      <select
-                        value={kehadiran}
-                        onChange={(e) =>
-                          handleChange(g.nig, "kehadiran", e.target.value)
-                        }
-                        className="
-                          border rounded
-                          px-2 py-1
-                          text-xs
-                        "
-                      >
-                        <option value="">Pilih</option>
+                      <td className="px-3 py-2.5 text-center">
+                        <input
+                          type="number"
+                          value={dataPeriode.totalSantri || ""}
+                          onChange={(e) =>
+                            handleChange(g.nig, "totalSantri", e.target.value)
+                          }
+                          className="w-20 rounded-lg border border-gray-200 px-2 py-1.5 text-center text-xs focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100"
+                        />
+                      </td>
 
-                        <option value="Hadir Penuh">Hadir Penuh</option>
+                      <td className="px-3 py-2.5 text-center">
+                        <select
+                          value={kehadiran}
+                          onChange={(e) =>
+                            handleChange(g.nig, "kehadiran", e.target.value)
+                          }
+                          className="rounded-lg border border-gray-200 py-1.5 pl-2 pr-7 text-xs focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100"
+                        >
+                          <option value="">Pilih</option>
+                          <option value="Hadir Penuh">Hadir Penuh</option>
+                          <option value="Kurang 5 Hr">Kurang 5 Hr</option>
+                          <option value="Kurang 10 Hr">Kurang 10 Hr</option>
+                          <option value="Diatas 10 Hr">Diatas 10 Hr</option>
+                        </select>
+                      </td>
 
-                        <option value="Kurang 5 Hr">Kurang 5 Hr</option>
-
-                        <option value="Kurang 10 Hr">Kurang 10 Hr</option>
-
-                        <option value="Diatas 10 Hr">Diatas 10 Hr</option>
-                      </select>
-                    </td>
-
-                    {/* STATUS */}
-                    <td className="px-2 py-1 border text-center">
-                      <span
-                        className={`
-                          px-3 py-1 rounded-full
-                          text-xs font-medium
-                          ${
+                      <td className="px-3 py-2.5 text-center">
+                        <span
+                          className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
                             status === "Sangat Aktif"
                               ? "bg-green-100 text-green-700"
                               : status === "Aktif"
@@ -876,226 +780,160 @@ export default function StatusGuru() {
                                   : status === "Tidak Aktif"
                                     ? "bg-red-100 text-red-700"
                                     : "bg-gray-100 text-gray-600"
-                          }
-                        `}
-                      >
-                        {status}
-                      </span>
-                    </td>
+                          }`}
+                        >
+                          {status}
+                        </span>
+                      </td>
 
-                    {/* GAJI */}
-                    <td className="px-2 py-1 border text-center">
-                      <span className="font-semibold text-green-700">
-                        {formatRupiah(gaji)}
-                      </span>
-                    </td>
+                      <td className="px-3 py-2.5 text-center">
+                        <span className="font-semibold text-green-700">
+                          {formatRupiah(gaji)}
+                        </span>
+                      </td>
 
-                    {/* AKSI */}
-                    <td className="px-2 py-1 border text-center">
-                      <button
-                        onClick={handleSave}
-                        className="
-                          bg-purple-600
-                          hover:bg-purple-700
-                          text-white
-                          px-3 py-1
-                          rounded
-                          text-xs
-                        "
-                      >
-                        Simpan
-                      </button>
-                    </td>
+                      <td className="px-3 py-2.5 text-center">
+                        <button
+                          type="button"
+                          onClick={handleSave}
+                          className="rounded-lg bg-purple-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm transition hover:bg-purple-700"
+                        >
+                          Simpan
+                        </button>
+                      </td>
 
-                    {/* UPDATE */}
-                    <td className="px-2 py-1 border text-center text-xs text-gray-500">
-                      {dataPeriode.update || "-"}
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
+                      <td className="px-3 py-2.5 text-center text-xs text-gray-500 whitespace-nowrap">
+                        {dataPeriode.update || "-"}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
 
-      {/* ================= MOBILE CARD ================= */}
-      <div className="md:hidden space-y-3">
-        {paginatedGuru.map((g, i) => {
-          const dataPeriode = statusData[g.nig]?.[filterPeriode] || {};
+        {/* MOBILE CARD */}
+        <div className="w-full space-y-3 md:hidden">
+          {paginatedGuru.map((g, i) => {
+            const dataPeriode = statusData[g.nig]?.[filterPeriode] || {};
 
-          const kehadiran = dataPeriode.kehadiran || "";
+            const kehadiran = dataPeriode.kehadiran || "";
 
-          const status = getStatusGuru(kehadiran);
+            const status = getStatusGuru(kehadiran);
 
-          return (
-            <div
-              key={i}
-              className="
-          w-full
-          max-w-full
-          bg-white
-          border
-          rounded-xl
-          shadow-sm
-          overflow-hidden
-        "
-            >
-              {/* DATA GURU */}
+            return (
               <div
-                className="
-            px-3
-            py-3
-            text-sm
-            text-black
-            leading-5
-            space-y-1
-          "
+                key={i}
+                className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm"
               >
-                {/* NAMA */}
-                <div className="bg-gray-300 -mx-3 -mt-3 px-3 py-2 font-semibold text-black">
-                  {startIndex + i + 1}. {g.nama_guru}
+                <div className="bg-amber-50 px-4 py-3">
+                  <div className="font-semibold text-gray-900">
+                    {startIndex + i + 1}. {g.nama_guru}
+                  </div>
+
+                  <div className="mt-0.5 text-xs text-gray-500">
+                    NIG {g.nig || "-"}
+                  </div>
                 </div>
 
-                {/* NIG + TOTAL SANTRI */}
-                <div className="text-xs text-gray-700">
-                  <span className="font-medium">NIG :</span> {g.nig || "-"}
-                  <span className="mx-1">|</span>
-                  <span className="font-medium">Total Santri :</span>{" "}
-                  <input
-                    type="number"
-                    value={dataPeriode.totalSantri || ""}
-                    onChange={(e) =>
-                      handleChange(g.nig, "totalSantri", e.target.value)
-                    }
-                    className="
-                inline-block
-                w-12
-                border-0
-                border-b
-                border-gray-300
-                rounded-none
-                px-1
-                py-0
-                text-xs
-                text-center
-                focus:outline-none
-                focus:ring-0
-              "
-                  />
+                <div className="space-y-3 p-4 text-sm text-gray-700">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-xs font-medium text-gray-600">Total Santri</span>
+
+                    <input
+                      type="number"
+                      value={dataPeriode.totalSantri || ""}
+                      onChange={(e) =>
+                        handleChange(g.nig, "totalSantri", e.target.value)
+                      }
+                      className="w-20 rounded-lg border border-gray-200 px-2 py-1.5 text-center text-xs focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100"
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-xs font-medium text-gray-600">Kehadiran</span>
+
+                    <select
+                      value={kehadiran}
+                      onChange={(e) =>
+                        handleChange(g.nig, "kehadiran", e.target.value)
+                      }
+                      className="min-w-0 flex-1 rounded-lg border border-gray-200 py-1.5 pl-2 pr-7 text-xs focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100"
+                    >
+                      <option value="">Pilih</option>
+                      <option value="Hadir Penuh">Hadir Penuh</option>
+                      <option value="Kurang 5 Hr">Kurang 5 Hr</option>
+                      <option value="Kurang 10 Hr">Kurang 10 Hr</option>
+                      <option value="Diatas 10 Hr">Diatas 10 Hr</option>
+                    </select>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-3 text-xs">
+                    <span className="font-medium text-gray-600">Status</span>
+
+                    <span
+                      className={`rounded-full px-2.5 py-1 font-medium ${
+                        status === "Sangat Aktif"
+                          ? "bg-green-100 text-green-700"
+                          : status === "Aktif"
+                            ? "bg-blue-100 text-blue-700"
+                            : status === "Kurang Aktif"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : status === "Tidak Aktif"
+                                ? "bg-red-100 text-red-700"
+                                : "bg-gray-100 text-gray-600"
+                      }`}
+                    >
+                      {status}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-3 text-xs">
+                    <span className="font-medium text-gray-600">Gaji</span>
+
+                    <span className="font-bold text-green-700">
+                      {formatRupiah(getGajiGuru(status))}
+                    </span>
+                  </div>
+
+                  <div className="text-xs text-gray-500">
+                    Update : {dataPeriode.update || "-"}
+                  </div>
                 </div>
 
-                {/* KEHADIRAN */}
-                <div className="flex items-center gap-1 text-xs min-w-0">
-                  <span className="font-medium shrink-0">Kehadiran :</span>
-
-                  <select
-                    value={kehadiran}
-                    onChange={(e) =>
-                      handleChange(g.nig, "kehadiran", e.target.value)
-                    }
-                    className="
-                flex-1
-                min-w-0
-                border-0
-                bg-transparent
-                px-1
-                py-0
-                text-xs
-                font-medium
-                text-black
-                focus:outline-none
-                focus:ring-0
-              "
+                <div className="border-t border-gray-100 bg-gray-50 px-4 py-2.5">
+                  <button
+                    type="button"
+                    onClick={handleSave}
+                    className="w-full text-center text-xs font-semibold text-purple-700 transition hover:text-purple-800"
                   >
-                    <option value="">Pilih</option>
-                    <option value="Hadir Penuh">Hadir Penuh</option>
-                    <option value="Kurang 5 Hr">Kurang 5 Hr</option>
-                    <option value="Kurang 10 Hr">Kurang 10 Hr</option>
-                    <option value="Diatas 10 Hr">Diatas 10 Hr</option>
-                  </select>
-                </div>
-
-                {/* STATUS */}
-                <div className="text-xs">
-                  <span className="font-medium">Status :</span>{" "}
-                  <span
-                    className={`
-                font-medium
-                ${
-                  status === "Sangat Aktif"
-                    ? "text-green-700"
-                    : status === "Aktif"
-                      ? "text-blue-700"
-                      : status === "Kurang Aktif"
-                        ? "text-yellow-700"
-                        : status === "Tidak Aktif"
-                          ? "text-red-700"
-                          : "text-gray-600"
-                }
-              `}
-                  >
-                    {status}
-                  </span>
-                </div>
-
-                {/* GAJI */}
-                <div className="text-xs">
-                  <span className="font-medium">Gaji :</span>{" "}
-                  <span className="font-bold text-green-700">
-                    {formatRupiah(getGajiGuru(status))}
-                  </span>
-                </div>
-
-                {/* UPDATE */}
-                <div className="text-xs text-gray-500">
-                  Update : {dataPeriode.update || "-"}
+                    Simpan Status
+                  </button>
                 </div>
               </div>
+            );
+          })}
+        </div>
 
-              {/* SIMPAN STATUS */}
-              <div className="border-t border-b bg-gray-200 px-3 py-2">
-                <button
-                  onClick={handleSave}
-                  className="
-              w-full
-              text-center
-              text-xs
-              font-medium
-              text-purple-600
-              hover:text-purple-700
-            "
-                >
-                  Simpan Status
-                </button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+        </>
+      )}
 
-      {/* ================= PAGINATION ================= */}
-      {filteredGuru.length > 0 && (
-        <div className="bg-white rounded-2xl shadow p-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            {/* INFO DATA */}
+      {/* PAGINATION */}
+        {filteredGuru.length > 0 && (
+          <div className="flex flex-col items-center justify-between gap-4 border-t border-gray-100 pt-4 md:flex-row">
             <div className="text-xs text-gray-500">
               Menampilkan{" "}
-              <span className="font-semibold text-gray-700">
-                {startIndex + 1}
-              </span>{" "}
-              -{" "}
+              <span className="font-semibold text-gray-700">{startIndex + 1}</span>{" "}
+              –{" "}
               <span className="font-semibold text-gray-700">
                 {Math.min(startIndex + itemsPerPage, filteredGuru.length)}
               </span>{" "}
               dari{" "}
-              <span className="font-semibold text-gray-700">
-                {filteredGuru.length}
-              </span>{" "}
+              <span className="font-semibold text-gray-700">{filteredGuru.length}</span>{" "}
               guru
             </div>
 
-            {/* JUMLAH DATA */}
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500">Tampilkan</span>
 
@@ -1105,92 +943,58 @@ export default function StatusGuru() {
                   setItemsPerPage(Number(e.target.value));
                   setCurrentPage(1);
                 }}
-                className="
-                  border rounded-lg
-                  px-2 py-1
-                  text-xs
-                  focus:outline-none
-                  focus:ring-2
-                  focus:ring-purple-300
-                "
+                className="rounded-lg border border-gray-200 py-1.5 pl-2 pr-7 text-xs focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-100"
               >
                 <option value={5}>5</option>
-
                 <option value={10}>10</option>
-
                 <option value={20}>20</option>
-
                 <option value={50}>50</option>
               </select>
 
               <span className="text-xs text-gray-500">data</span>
             </div>
 
-            {/* NAVIGASI */}
             <div className="flex items-center gap-1">
-              {/* PREVIOUS */}
               <button
+                type="button"
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="
-                  px-3 py-1
-                  border rounded-lg
-                  text-xs
-                  disabled:opacity-40
-                  disabled:cursor-not-allowed
-                  hover:bg-gray-100
-                "
+                className="rounded-lg border bg-white px-3 py-1.5 text-xs transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 ‹
               </button>
 
-              {/* NOMOR HALAMAN */}
-              {Array.from(
-                {
-                  length: totalPages,
-                },
-                (_, index) => index + 1,
-              ).map((page) => (
-                <button
-                  key={page}
-                  onClick={() => setCurrentPage(page)}
-                  className={`
-                    px-3 py-1
-                    rounded-lg
-                    text-xs
-                    border
-                    ${
+              {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+                (page) => (
+                  <button
+                    key={page}
+                    type="button"
+                    onClick={() => setCurrentPage(page)}
+                    className={`min-w-[32px] rounded-lg border px-3 py-1.5 text-xs transition ${
                       currentPage === page
-                        ? "bg-purple-600 text-white border-purple-600"
-                        : "bg-white text-gray-700 hover:bg-gray-100"
-                    }
-                  `}
-                >
-                  {page}
-                </button>
-              ))}
+                        ? "border-purple-600 bg-purple-600 text-white"
+                        : "bg-white text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ),
+              )}
 
-              {/* NEXT */}
               <button
+                type="button"
                 onClick={() =>
                   setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                 }
                 disabled={currentPage === totalPages}
-                className="
-                  px-3 py-1
-                  border rounded-lg
-                  text-xs
-                  disabled:opacity-40
-                  disabled:cursor-not-allowed
-                  hover:bg-gray-100
-                "
+                className="rounded-lg border bg-white px-3 py-1.5 text-xs transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 ›
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

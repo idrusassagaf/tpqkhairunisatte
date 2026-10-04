@@ -1,8 +1,23 @@
 import { useState, useEffect } from "react";
-import { PencilLine, Trash2 } from "lucide-react";
+import { PencilLine, Trash2, Users, GraduationCap, Database } from "lucide-react";
 import { api } from "../api";
+import { Skeleton, SkeletonRows } from "../components/Skeleton";
+
+const inputCls =
+  "w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-800 shadow-sm transition focus:border-purple-400 focus:outline-none focus:ring-4 focus:ring-purple-100";
+
+const readonlyCls =
+  "w-full rounded-xl border border-gray-200 bg-gray-100 px-3 py-2.5 text-sm text-gray-500";
+
+const cardCls =
+  "rounded-2xl border border-gray-200 bg-white p-4 shadow-sm md:p-6";
+
+const labelCls = "mb-1.5 block text-xs font-medium text-gray-600";
 
 export default function MasterData() {
+  const [loadingSantri, setLoadingSantri] = useState(true);
+  const [loadingGuru, setLoadingGuru] = useState(true);
+
   // ================= SANTRI =================
   const [form, setForm] = useState({
     nama: "",
@@ -340,6 +355,8 @@ export default function MasterData() {
 
   // ================= FETCH DATA =================
   const fetchSantri = async () => {
+    setLoadingSantri(true);
+
     try {
       const res = await api.get("/master-data");
 
@@ -349,10 +366,14 @@ export default function MasterData() {
     } catch (err) {
       console.error(err);
       setDataSantri([]);
+    } finally {
+      setLoadingSantri(false);
     }
   };
 
   const fetchGuru = async () => {
+    setLoadingGuru(true);
+
     try {
       const res = await api.get("/master-data");
 
@@ -362,6 +383,8 @@ export default function MasterData() {
     } catch (err) {
       console.error(err);
       setDataGuru([]);
+    } finally {
+      setLoadingGuru(false);
     }
   };
 
@@ -601,48 +624,44 @@ export default function MasterData() {
   // =========================================================
 
   return (
-    <div className="w-full max-w-full min-w-0 space-y-4 p-2 md:p-4 overflow-x-hidden">
-      <h1 className="text-lg font-light text-black tracking-wider">
-        MASTER DATA
-      </h1>
+    <div className="mx-auto w-full max-w-7xl min-w-0 space-y-5 overflow-x-hidden p-3 md:p-6">
+      {/* HEADER */}
+      <div className="flex items-start gap-3 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm md:p-6">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-purple-100 text-purple-600">
+          <Database size={22} />
+        </div>
+
+        <div>
+          <h1 className="text-xl font-semibold text-gray-900">Master Data</h1>
+
+          <p className="mt-0.5 text-sm text-gray-500">
+            Kelola data santri dan guru TPQ Hairunissa.
+          </p>
+        </div>
+      </div>
 
       {/* TAB */}
-      <div className="grid grid-cols-2 md:flex gap-4">
-        <button
-          onClick={() => setTab("santri")}
-          className={`px-4 py-2 font-light rounded ${
-            tab === "santri" ? "bg-purple-600 text-white" : "bg-gray-200"
-          }`}
-        >
-          Form Santri
-        </button>
-
-        <button
-          onClick={() => setTab("guru")}
-          className={`px-4 py-2 font-light rounded ${
-            tab === "guru" ? "bg-purple-600 text-white" : "bg-gray-200"
-          }`}
-        >
-          Form Guru
-        </button>
-
-        <button
-          onClick={() => setTab("viewSantri")}
-          className={`px-4 py-2 font-light rounded ${
-            tab === "viewSantri" ? "bg-green-600 text-white" : "bg-gray-200"
-          }`}
-        >
-          View Santri
-        </button>
-
-        <button
-          onClick={() => setTab("viewGuru")}
-          className={`px-4 py-2 font-light rounded ${
-            tab === "viewGuru" ? "bg-blue-600 text-white" : "bg-gray-200"
-          }`}
-        >
-          View Guru
-        </button>
+      <div className="grid grid-cols-2 gap-2 rounded-2xl border border-gray-200 bg-white p-1.5 shadow-sm md:inline-grid md:grid-cols-4">
+        {[
+          { key: "santri", label: "Form Santri", icon: Users, active: "bg-purple-600" },
+          { key: "guru", label: "Form Guru", icon: GraduationCap, active: "bg-purple-600" },
+          { key: "viewSantri", label: "View Santri", icon: Users, active: "bg-green-600" },
+          { key: "viewGuru", label: "View Guru", icon: GraduationCap, active: "bg-blue-600" },
+        ].map(({ key, label, icon: Icon, active }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setTab(key)}
+            className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition ${
+              tab === key
+                ? `${active} text-white shadow-sm`
+                : "text-gray-600 hover:bg-gray-100"
+            }`}
+          >
+            <Icon size={16} />
+            {label}
+          </button>
+        ))}
       </div>
 
       {/* ===================================================== */}
@@ -650,150 +669,204 @@ export default function MasterData() {
       {/* ===================================================== */}
 
       {tab === "santri" && (
-        <div className="w-[calc(100%-8px)] mx-auto md:w-auto md:mx-0 bg-white p-3 md:p-4 rounded-xl shadow-sm md:border">
+        <div className={cardCls}>
+          <div className="mb-5 border-b pb-3">
+            <h2 className="text-base font-semibold text-gray-900">
+              {editSantriId ? "Edit Data Santri" : "Tambah Data Santri"}
+            </h2>
+
+            <p className="mt-0.5 text-sm text-gray-500">
+              Isi data santri dan orang tua berdasarkan dokumen resmi KTP/Kartu
+              Keluarga dan keterangan orang tua.
+            </p>
+          </div>
+
           <div className="md:max-w-4xl md:mx-auto">
             <form
               onSubmit={handleSubmit}
-              className="w-full max-w-full min-w-0 grid md:grid-cols-2 gap-3 md:gap-4 text-xs"
+              className="grid min-w-0 w-full max-w-full grid-cols-1 gap-4 md:grid-cols-2"
             >
-              <div className="hidden md:block md:col-span-2 font-extralight text-black border-b pb-1">
-                Isi Data Santri dan Orangtua berdasarkan dokumen resmi KTP/Kartu
-                Keluarga dan keterangan orangtua
+              <div>
+                <label className={labelCls}>Nama Santri</label>
+                <input
+                  name="nama"
+                  placeholder="Nama Santri"
+                  value={form.nama}
+                  onChange={handleChange}
+                  className={inputCls}
+                />
               </div>
 
-              <input
-                name="nama"
-                placeholder="Nama Santri"
-                value={form.nama}
-                onChange={handleChange}
-                className="border p-2 md:px-2 md:py-1.5 rounded md:text-sm font-extralight"
-              />
+              <div>
+                <label className={labelCls}>NIS</label>
+                <input value={form.nis} readOnly className={readonlyCls} />
+              </div>
 
-              <input
-                value={form.nis}
-                readOnly
-                className="border p-2 rounded bg-gray-100"
-              />
+              <div>
+                <label className={labelCls}>Jenis Kelamin</label>
+                <select
+                  name="jenis_kelamin"
+                  value={form.jenis_kelamin}
+                  onChange={handleChange}
+                  className={inputCls}
+                >
+                  <option value="L">Laki-laki</option>
+                  <option value="P">Perempuan</option>
+                </select>
+              </div>
 
-              <select
-                name="jenis_kelamin"
-                value={form.jenis_kelamin}
-                onChange={handleChange}
-                className="border p-2 rounded"
-              >
-                <option value="L">Laki-laki</option>
-                <option value="P">Perempuan</option>
-              </select>
-
-              <input
-                type="date"
-                value={form.tanggal_lahir}
-                onChange={handleTanggalSantri}
-                className="border p-2 rounded"
-              />
-
-              <input
-                value={form.usia}
-                readOnly
-                className="border p-2 rounded bg-gray-100"
-              />
-
-              <select
-                value={form.kelas || ""}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    kelas: e.target.value,
-                  })
-                }
-                className="border p-2 rounded w-full font-light"
-              >
-                <option value="">Pilih Kelas</option>
-                <option value="Iqra">Iqra</option>
-                <option value="Al Quran">Al Quran</option>
-              </select>
-
-              <input
-                name="alamat"
-                placeholder="Alamat"
-                value={form.alamat}
-                onChange={handleChange}
-                className="border p-2 rounded md:col-span-2"
-              />
-
-              <input
-                type="file"
-                onChange={handleFotoSantri}
-                className="border p-2 rounded md:col-span-2"
-              />
-
-              {form.foto && (
-                <img
-                  src={URL.createObjectURL(form.foto)}
-                  alt="preview"
-                  className="w-24 h-24 object-cover rounded border md:col-span-2"
+              <div>
+                <label className={labelCls}>Tanggal Lahir</label>
+                <input
+                  type="date"
+                  value={form.tanggal_lahir}
+                  onChange={handleTanggalSantri}
+                  className={inputCls}
                 />
-              )}
+              </div>
 
-              <input
-                name="nama_ayah"
-                placeholder="Nama Ayah"
-                value={form.nama_ayah}
-                onChange={handleChange}
-                className="border p-2 rounded"
-              />
+              <div>
+                <label className={labelCls}>Usia</label>
+                <input value={form.usia} readOnly className={readonlyCls} />
+              </div>
 
-              <input
-                name="pekerjaan_ayah"
-                placeholder="Pekerjaan Ayah"
-                value={form.pekerjaan_ayah}
-                onChange={handleChange}
-                className="border p-2 rounded"
-              />
+              <div>
+                <label className={labelCls}>Kelas</label>
+                <select
+                  value={form.kelas || ""}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      kelas: e.target.value,
+                    })
+                  }
+                  className={inputCls}
+                >
+                  <option value="">Pilih Kelas</option>
+                  <option value="Iqra">Iqra</option>
+                  <option value="Al Quran">Al Quran</option>
+                </select>
+              </div>
 
-              <input
-                name="nama_ibu"
-                placeholder="Nama Ibu"
-                value={form.nama_ibu}
-                onChange={handleChange}
-                className="border p-2 rounded"
-              />
+              <div className="md:col-span-2">
+                <label className={labelCls}>Alamat</label>
+                <input
+                  name="alamat"
+                  placeholder="Alamat"
+                  value={form.alamat}
+                  onChange={handleChange}
+                  className={inputCls}
+                />
+              </div>
 
-              <input
-                name="pekerjaan_ibu"
-                placeholder="Pekerjaan Ibu"
-                value={form.pekerjaan_ibu}
-                onChange={handleChange}
-                className="border p-2 rounded"
-              />
+              <div className="md:col-span-2">
+                <label className={labelCls}>Foto</label>
+                <div className="flex flex-wrap items-center gap-4 rounded-xl border border-dashed border-gray-300 bg-gray-50 p-3">
+                  <input
+                    type="file"
+                    onChange={handleFotoSantri}
+                    className="min-w-0 flex-1 text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-purple-100 file:px-3 file:py-2 file:text-purple-700 hover:file:bg-purple-200"
+                  />
 
-              <input
-                name="kontak"
-                placeholder="Nomor Kontak"
-                value={form.kontak}
-                onChange={handleChange}
-                className="border p-2 rounded md:col-span-2"
-              />
+                  {form.foto && (
+                    <img
+                      src={URL.createObjectURL(form.foto)}
+                      alt="preview"
+                      className="h-20 w-20 rounded-xl border object-cover"
+                    />
+                  )}
+                </div>
+              </div>
 
-              <select
-                value={form.status_orangtua}
-                onChange={handleStatusOrtu}
-                className="border p-2 rounded"
+              <div className="md:col-span-2 border-t pt-4">
+                <h3 className="text-sm font-semibold text-gray-800">
+                  Data Orang Tua
+                </h3>
+              </div>
+
+              <div>
+                <label className={labelCls}>Nama Ayah</label>
+                <input
+                  name="nama_ayah"
+                  placeholder="Nama Ayah"
+                  value={form.nama_ayah}
+                  onChange={handleChange}
+                  className={inputCls}
+                />
+              </div>
+
+              <div>
+                <label className={labelCls}>Pekerjaan Ayah</label>
+                <input
+                  name="pekerjaan_ayah"
+                  placeholder="Pekerjaan Ayah"
+                  value={form.pekerjaan_ayah}
+                  onChange={handleChange}
+                  className={inputCls}
+                />
+              </div>
+
+              <div>
+                <label className={labelCls}>Nama Ibu</label>
+                <input
+                  name="nama_ibu"
+                  placeholder="Nama Ibu"
+                  value={form.nama_ibu}
+                  onChange={handleChange}
+                  className={inputCls}
+                />
+              </div>
+
+              <div>
+                <label className={labelCls}>Pekerjaan Ibu</label>
+                <input
+                  name="pekerjaan_ibu"
+                  placeholder="Pekerjaan Ibu"
+                  value={form.pekerjaan_ibu}
+                  onChange={handleChange}
+                  className={inputCls}
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className={labelCls}>Nomor Kontak</label>
+                <input
+                  name="kontak"
+                  placeholder="Nomor Kontak"
+                  value={form.kontak}
+                  onChange={handleChange}
+                  className={inputCls}
+                />
+              </div>
+
+              <div>
+                <label className={labelCls}>Status Orang Tua</label>
+                <select
+                  value={form.status_orangtua}
+                  onChange={handleStatusOrtu}
+                  className={inputCls}
+                >
+                  <option value="">Pilih Status</option>
+                  <option value="ayah_wafat">Ayah Wafat</option>
+                  <option value="ibu_wafat">Ibu Wafat</option>
+                  <option value="keduanya_wafat">Keduanya Wafat</option>
+                  <option value="keduanya_hidup">Keduanya Hidup</option>
+                </select>
+              </div>
+
+              <div>
+                <label className={labelCls}>Status Anak</label>
+                <input
+                  value={form.status_anak}
+                  readOnly
+                  className={readonlyCls}
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="md:col-span-2 mt-2 rounded-xl bg-purple-600 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-purple-700"
               >
-                <option value="">Status Orang Tua</option>
-                <option value="ayah_wafat">Ayah Wafat</option>
-                <option value="ibu_wafat">Ibu Wafat</option>
-                <option value="keduanya_wafat">Keduanya Wafat</option>
-                <option value="keduanya_hidup">Keduanya Hidup</option>
-              </select>
-
-              <input
-                value={form.status_anak}
-                readOnly
-                className="border p-2 rounded bg-gray-100"
-              />
-
-              <button className="md:col-span-2 bg-purple-600 text-white py-2 rounded">
                 {editSantriId ? "Update Data Santri" : "Simpan Data Santri"}
               </button>
             </form>
@@ -806,91 +879,130 @@ export default function MasterData() {
       {/* ===================================================== */}
 
       {tab === "guru" && (
-        <div className="w-[calc(100%-8px)] mx-auto md:w-auto md:mx-0 bg-white p-3 md:p-4 rounded-xl shadow-sm md:border">
+        <div className={cardCls}>
+          <div className="mb-5 border-b pb-3">
+            <h2 className="text-base font-semibold text-gray-900">
+              {editGuruId ? "Edit Data Guru" : "Tambah Data Guru"}
+            </h2>
+
+            <p className="mt-0.5 text-sm text-gray-500">
+              Isi data guru TPQ Hairunissa dengan lengkap.
+            </p>
+          </div>
+
           <div className="md:max-w-4xl md:mx-auto">
             <form
               onSubmit={handleSubmitGuru}
-              className="w-full max-w-full min-w-0 grid md:grid-cols-2 gap-3 md:gap-4 text-sm"
+              className="grid min-w-0 w-full max-w-full grid-cols-1 gap-4 md:grid-cols-2"
             >
-              <input
-                name="nama_guru"
-                placeholder="Nama Guru"
-                value={formGuru.nama_guru}
-                onChange={handleChangeGuru}
-                className="border p-2 rounded"
-              />
-
-              <input
-                name="nig"
-                value={formGuru.nig}
-                readOnly
-                className="border p-2 rounded bg-gray-100"
-              />
-
-              <select
-                name="jenis_kelamin"
-                value={formGuru.jenis_kelamin}
-                onChange={handleChangeGuru}
-                className="border p-2 rounded"
-              >
-                <option value="L">Laki-laki</option>
-                <option value="P">Perempuan</option>
-              </select>
-
-              <input
-                type="date"
-                value={formGuru.tanggal_lahir}
-                onChange={handleTanggalGuru}
-                className="border p-2 rounded"
-              />
-
-              <input
-                value={formGuru.usia}
-                readOnly
-                className="border p-2 rounded bg-gray-100"
-              />
-
-              <input
-                name="pendidikan"
-                placeholder="Pendidikan"
-                value={formGuru.pendidikan}
-                onChange={handleChangeGuru}
-                className="border p-2 rounded"
-              />
-
-              <input
-                name="pekerjaan"
-                placeholder="Pekerjaan"
-                value={formGuru.pekerjaan}
-                onChange={handleChangeGuru}
-                className="border p-2 rounded"
-              />
-
-              <input
-                name="kontak"
-                placeholder="Nomor Kontak"
-                value={formGuru.kontak}
-                onChange={handleChangeGuru}
-                className="border p-2 rounded"
-              />
-
-              <input
-                type="file"
-                onChange={handleFotoGuru}
-                className="border p-2 rounded"
-              />
-
-              {formGuru.foto && (
-                <img
-                  src={URL.createObjectURL(formGuru.foto)}
-                  alt="preview"
-                  className="w-24 h-24 object-cover rounded border"
+              <div>
+                <label className={labelCls}>Nama Guru</label>
+                <input
+                  name="nama_guru"
+                  placeholder="Nama Guru"
+                  value={formGuru.nama_guru}
+                  onChange={handleChangeGuru}
+                  className={inputCls}
                 />
-              )}
+              </div>
+
+              <div>
+                <label className={labelCls}>NIG</label>
+                <input
+                  name="nig"
+                  value={formGuru.nig}
+                  readOnly
+                  className={readonlyCls}
+                />
+              </div>
+
+              <div>
+                <label className={labelCls}>Jenis Kelamin</label>
+                <select
+                  name="jenis_kelamin"
+                  value={formGuru.jenis_kelamin}
+                  onChange={handleChangeGuru}
+                  className={inputCls}
+                >
+                  <option value="L">Laki-laki</option>
+                  <option value="P">Perempuan</option>
+                </select>
+              </div>
+
+              <div>
+                <label className={labelCls}>Tanggal Lahir</label>
+                <input
+                  type="date"
+                  value={formGuru.tanggal_lahir}
+                  onChange={handleTanggalGuru}
+                  className={inputCls}
+                />
+              </div>
+
+              <div>
+                <label className={labelCls}>Usia</label>
+                <input
+                  value={formGuru.usia}
+                  readOnly
+                  className={readonlyCls}
+                />
+              </div>
+
+              <div>
+                <label className={labelCls}>Pendidikan</label>
+                <input
+                  name="pendidikan"
+                  placeholder="Pendidikan"
+                  value={formGuru.pendidikan}
+                  onChange={handleChangeGuru}
+                  className={inputCls}
+                />
+              </div>
+
+              <div>
+                <label className={labelCls}>Pekerjaan</label>
+                <input
+                  name="pekerjaan"
+                  placeholder="Pekerjaan"
+                  value={formGuru.pekerjaan}
+                  onChange={handleChangeGuru}
+                  className={inputCls}
+                />
+              </div>
+
+              <div>
+                <label className={labelCls}>Nomor Kontak</label>
+                <input
+                  name="kontak"
+                  placeholder="Nomor Kontak"
+                  value={formGuru.kontak}
+                  onChange={handleChangeGuru}
+                  className={inputCls}
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className={labelCls}>Foto</label>
+                <div className="flex flex-wrap items-center gap-4 rounded-xl border border-dashed border-gray-300 bg-gray-50 p-3">
+                  <input
+                    type="file"
+                    onChange={handleFotoGuru}
+                    className="min-w-0 flex-1 text-sm text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-100 file:px-3 file:py-2 file:text-blue-700 hover:file:bg-blue-200"
+                  />
+
+                  {formGuru.foto && (
+                    <img
+                      src={URL.createObjectURL(formGuru.foto)}
+                      alt="preview"
+                      className="h-20 w-20 rounded-xl border object-cover"
+                    />
+                  )}
+                </div>
+              </div>
 
               <button
                 type="submit"
-                className="md:col-span-2 bg-blue-600 text-white py-2 rounded"
+                className="md:col-span-2 mt-2 rounded-xl bg-blue-600 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700"
               >
                 {editGuruId ? "Update Data Guru" : "Simpan Data Guru"}
               </button>
@@ -904,9 +1016,9 @@ export default function MasterData() {
       {/* ===================================================== */}
 
       {tab === "viewSantri" && (
-        <div className="w-[calc(100%+8px)] -ml-1 md:w-auto md:ml-0 bg-transparent md:bg-white p-0 md:p-5 md:rounded-xl md:shadow">
+        <div className="space-y-4 md:rounded-2xl md:border md:border-gray-200 md:bg-white md:p-5 md:shadow-sm">
           {/* SEARCH */}
-          <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <input
               type="text"
               placeholder="Cari data santri..."
@@ -915,7 +1027,7 @@ export default function MasterData() {
                 setSearchSantri(e.target.value);
                 setSantriPage(1);
               }}
-              className="border p-2 rounded w-full md:w-64"
+              className={`${inputCls} md:w-72`}
             />
 
             <div className="text-xs text-gray-500">
@@ -926,7 +1038,9 @@ export default function MasterData() {
 
           {/* ================= MOBILE ================= */}
           <div className="block md:hidden space-y-3 mb-4">
-            {paginatedSantri.length === 0 ? (
+            {loadingSantri ? (
+              <SkeletonRows rows={4} cols={3} />
+            ) : paginatedSantri.length === 0 ? (
               <div className="text-center text-gray-500 py-4">
                 Data tidak ditemukan
               </div>
@@ -1022,22 +1136,28 @@ export default function MasterData() {
 
           {/* ================= DESKTOP ================= */}
           <div className="hidden md:block overflow-x-auto">
-            <table className="w-full text-xs text-black border">
-              <thead className="bg-gray-100">
+            <table className="w-full text-sm text-gray-700">
+              <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
                 <tr>
-                  <th className="p-2 text-left">Foto</th>
-                  <th className="p-2 text-left">Nama - NIS - Kelas</th>
-                  <th className="p-2 text-left">JK - Usia - Kelahiran</th>
-                  <th className="p-2 text-left">Alamat - Kontak</th>
-                  <th className="p-2 text-left">Ayah - Pekerjaan</th>
-                  <th className="p-2 text-left">Ibu - Pekerjaan</th>
-                  <th className="p-2 text-left">Status OT-Anak</th>
-                  <th className="p-2 text-center">Aksi</th>
+                  <th className="px-3 py-3 text-left font-semibold">Foto</th>
+                  <th className="px-3 py-3 text-left font-semibold">Nama - NIS - Kelas</th>
+                  <th className="px-3 py-3 text-left font-semibold">JK - Usia - Kelahiran</th>
+                  <th className="px-3 py-3 text-left font-semibold">Alamat - Kontak</th>
+                  <th className="px-3 py-3 text-left font-semibold">Ayah - Pekerjaan</th>
+                  <th className="px-3 py-3 text-left font-semibold">Ibu - Pekerjaan</th>
+                  <th className="px-3 py-3 text-left font-semibold">Status OT-Anak</th>
+                  <th className="px-3 py-3 text-center font-semibold">Aksi</th>
                 </tr>
               </thead>
 
               <tbody>
-                {paginatedSantri.length === 0 ? (
+                {loadingSantri ? (
+                  <tr>
+                    <td colSpan="8" className="p-0">
+                      <SkeletonRows rows={6} cols={6} />
+                    </td>
+                  </tr>
+                ) : paginatedSantri.length === 0 ? (
                   <tr>
                     <td colSpan="8" className="text-center p-4">
                       Data tidak ditemukan
@@ -1045,9 +1165,9 @@ export default function MasterData() {
                   </tr>
                 ) : (
                   paginatedSantri.map((d, i) => (
-                    <tr key={d.id || i} className="border-t hover:bg-gray-50">
+                    <tr key={d.id || i} className="border-t border-gray-100 transition hover:bg-purple-50/40">
                       {/* FOTO */}
-                      <td className="p-2">
+                      <td className="px-3 py-2.5 align-middle">
                         {d.foto ? (
                           <img
                             src={`${api.defaults.baseURL.replace(/\/api\/?$/, "")}/storage/${d.foto}`}
@@ -1062,7 +1182,7 @@ export default function MasterData() {
                       </td>
 
                       {/* NAMA */}
-                      <td className="p-2">
+                      <td className="px-3 py-2.5 align-middle">
                         <div className="font-semibold">{d.nama}</div>
 
                         <div className="text-xs text-gray-500">
@@ -1071,7 +1191,7 @@ export default function MasterData() {
                       </td>
 
                       {/* JK */}
-                      <td className="p-2">
+                      <td className="px-3 py-2.5 align-middle">
                         <div>
                           {d.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"},{" "}
                           {d.usia} Th
@@ -1083,7 +1203,7 @@ export default function MasterData() {
                       </td>
 
                       {/* ALAMAT */}
-                      <td className="p-2">
+                      <td className="px-3 py-2.5 align-middle">
                         <div>{d.alamat || "-"}</div>
 
                         <div className="text-xs text-gray-500">
@@ -1092,7 +1212,7 @@ export default function MasterData() {
                       </td>
 
                       {/* AYAH */}
-                      <td className="p-2">
+                      <td className="px-3 py-2.5 align-middle">
                         <div>{d.orang_tua?.nama_ayah || "-"}</div>
 
                         <div className="text-xs text-gray-500">
@@ -1101,7 +1221,7 @@ export default function MasterData() {
                       </td>
 
                       {/* IBU */}
-                      <td className="p-2">
+                      <td className="px-3 py-2.5 align-middle">
                         <div>{d.orang_tua?.nama_ibu || "-"}</div>
 
                         <div className="text-xs text-gray-500">
@@ -1110,7 +1230,7 @@ export default function MasterData() {
                       </td>
 
                       {/* STATUS */}
-                      <td className="p-2">
+                      <td className="px-3 py-2.5 align-middle">
                         <div>{d.status_orangtua || "-"}</div>
 
                         <div className="text-xs text-gray-500">
@@ -1119,7 +1239,7 @@ export default function MasterData() {
                       </td>
 
                       {/* AKSI */}
-                      <td className="p-2 text-center">
+                      <td className="px-3 py-2.5 text-center align-middle">
                         <div className="flex justify-center gap-2">
                           <button
                             type="button"
@@ -1231,9 +1351,9 @@ export default function MasterData() {
       {/* ===================================================== */}
 
       {tab === "viewGuru" && (
-        <div className="w-[calc(100%+8px)] -ml-1 md:w-auto md:ml-0 bg-transparent md:bg-white p-0 md:p-5 md:rounded-xl md:shadow">
+        <div className="space-y-4 md:rounded-2xl md:border md:border-gray-200 md:bg-white md:p-5 md:shadow-sm">
           {/* SEARCH */}
-          <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <input
               type="text"
               placeholder="Cari data guru..."
@@ -1242,7 +1362,7 @@ export default function MasterData() {
                 setSearchGuru(e.target.value);
                 setGuruPage(1);
               }}
-              className="border p-2 rounded w-full md:w-64"
+              className={`${inputCls} md:w-72`}
             />
 
             <div className="text-xs text-gray-500">
@@ -1252,7 +1372,9 @@ export default function MasterData() {
 
           {/* ================= MOBILE VIEW GURU ================= */}
           <div className="block md:hidden space-y-3 mb-4">
-            {paginatedGuru.length === 0 ? (
+            {loadingGuru ? (
+              <SkeletonRows rows={4} cols={3} />
+            ) : paginatedGuru.length === 0 ? (
               <div className="text-center text-gray-500 py-4">
                 Data guru kosong
               </div>
@@ -1336,20 +1458,26 @@ export default function MasterData() {
 
           {/* ================= DESKTOP VIEW GURU ================= */}
           <div className="hidden md:block overflow-x-auto">
-            <table className="w-full text-xs text-black border">
-              <thead className="bg-gray-100">
+            <table className="w-full text-sm text-gray-700">
+              <thead className="bg-gray-50 text-xs uppercase tracking-wide text-gray-500">
                 <tr>
-                  <th className="p-2 text-left">Foto</th>
-                  <th className="p-2 text-left">Nama - NIG</th>
-                  <th className="p-2 text-left">JK, Usia - Kelahiran</th>
-                  <th className="p-2 text-left">Pendidikan - Pekerjaan</th>
-                  <th className="p-2 text-left">Kontak</th>
-                  <th className="p-2 text-center">Aksi</th>
+                  <th className="px-3 py-3 text-left font-semibold">Foto</th>
+                  <th className="px-3 py-3 text-left font-semibold">Nama - NIG</th>
+                  <th className="px-3 py-3 text-left font-semibold">JK, Usia - Kelahiran</th>
+                  <th className="px-3 py-3 text-left font-semibold">Pendidikan - Pekerjaan</th>
+                  <th className="px-3 py-3 text-left font-semibold">Kontak</th>
+                  <th className="px-3 py-3 text-center font-semibold">Aksi</th>
                 </tr>
               </thead>
 
               <tbody>
-                {paginatedGuru.length === 0 ? (
+                {loadingGuru ? (
+                  <tr>
+                    <td colSpan="6" className="p-0">
+                      <SkeletonRows rows={6} cols={5} />
+                    </td>
+                  </tr>
+                ) : paginatedGuru.length === 0 ? (
                   <tr>
                     <td colSpan="6" className="text-center p-3">
                       Data guru kosong
@@ -1357,9 +1485,9 @@ export default function MasterData() {
                   </tr>
                 ) : (
                   paginatedGuru.map((g, i) => (
-                    <tr key={g.id || i} className="border-t hover:bg-gray-50">
+                    <tr key={g.id || i} className="border-t border-gray-100 transition hover:bg-blue-50/40">
                       {/* FOTO */}
-                      <td className="p-2">
+                      <td className="px-3 py-2.5 align-middle">
                         {g.foto ? (
                           <img
                             src={g.foto_url}
@@ -1374,14 +1502,14 @@ export default function MasterData() {
                       </td>
 
                       {/* NAMA */}
-                      <td className="p-2">
+                      <td className="px-3 py-2.5 align-middle">
                         <div className="font-semibold">{g.nama_guru}</div>
 
                         <div className="text-xs text-gray-500">{g.nig}</div>
                       </td>
 
                       {/* JK */}
-                      <td className="p-2">
+                      <td className="px-3 py-2.5 align-middle">
                         <div>
                           {g.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"}{" "}
                           {g.usia} Th
@@ -1393,7 +1521,7 @@ export default function MasterData() {
                       </td>
 
                       {/* PENDIDIKAN */}
-                      <td className="p-2">
+                      <td className="px-3 py-2.5 align-middle">
                         <div>{g.pendidikan || "-"}</div>
 
                         <div className="text-xs text-gray-500">
@@ -1402,10 +1530,10 @@ export default function MasterData() {
                       </td>
 
                       {/* KONTAK */}
-                      <td className="p-2">{g.kontak || "-"}</td>
+                      <td className="px-3 py-2.5 align-middle">{g.kontak || "-"}</td>
 
                       {/* AKSI */}
-                      <td className="p-2 text-center">
+                      <td className="px-3 py-2.5 text-center align-middle">
                         <div className="flex justify-center gap-2">
                           <button
                             type="button"
