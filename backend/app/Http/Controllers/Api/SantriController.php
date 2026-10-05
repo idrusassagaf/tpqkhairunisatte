@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Santri;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SantriController extends Controller
 {
@@ -34,7 +35,13 @@ class SantriController extends Controller
     // SIMPAN DATA
     public function store(Request $request)
     {
-        $santri = Santri::create($request->all());
+        $santri = DB::transaction(function () use ($request) {
+            // NIS selalu otomatis; nilai 'nis' dari client diabaikan.
+            return Santri::create(array_merge(
+                $request->except('nis'),
+                ['nis' => Santri::nisBerikutnya()]
+            ));
+        });
 
         return response()->json([
             'message' => 'berhasil disimpan',

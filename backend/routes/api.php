@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\GaleriTranslationController;
 use App\Http\Controllers\Api\ProfilTranslationController;
 use App\Http\Controllers\Api\LaporanPdfController;
 use App\Http\Controllers\Api\ProgresHafalanController;
+use App\Http\Controllers\Api\MasterHafalanController;
 use App\Http\Controllers\Api\LaporanSettingController;
 use App\Http\Controllers\Api\UserManagementController;
 use App\Http\Controllers\Api\PengaturanSistemController;
@@ -282,6 +283,11 @@ Route::middleware('auth:sanctum')->group(function () {
         [ProgresHafalanController::class, 'index']
     );
 
+    Route::get(
+        '/master-hafalan',
+        [ProgresHafalanController::class, 'masterHafalan']
+    );
+
 
     // ========================================================
     // CHANGE PASSWORD
@@ -291,6 +297,21 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post(
         '/change-password',
         [AuthController::class, 'changePassword']
+    );
+
+    // ========================================================
+    // PROFIL SAYA
+    // ADMIN + VIEWER
+    // ========================================================
+
+    Route::get(
+        '/profil-saya',
+        [AuthController::class, 'profile']
+    );
+
+    Route::post(
+        '/profil-saya',
+        [AuthController::class, 'updateProfile']
     );
 
 
@@ -318,6 +339,26 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete(
             '/master-data/{id}',
             [MasterDataController::class, 'destroy']
+        );
+
+
+        // ====================================================
+        // MASTER HAFALAN (JENIS HAFALAN) CRUD
+        // ====================================================
+
+        Route::post(
+            '/master-hafalan',
+            [MasterHafalanController::class, 'store']
+        );
+
+        Route::put(
+            '/master-hafalan/{id}',
+            [MasterHafalanController::class, 'update']
+        );
+
+        Route::delete(
+            '/master-hafalan/{id}',
+            [MasterHafalanController::class, 'destroy']
         );
 
 
@@ -457,6 +498,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post(
             '/jadwal',
             [JadwalPengajianController::class, 'store']
+        );
+
+        Route::delete(
+            '/jadwal/{tanggal}',
+            [JadwalPengajianController::class, 'destroy']
         );
 
 

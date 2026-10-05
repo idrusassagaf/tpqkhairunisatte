@@ -31,3 +31,72 @@ select {
   color: #7e22ce;
   text-decoration: underline;
 }
+
+/* Perpindahan halaman buku PDF (geser keluar-masuk) */
+@keyframes bookEnterFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(var(--jarak, 40px));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes bookEnterFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(calc(var(--jarak, 40px) * -1));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes bookExitToLeft {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(calc(var(--jarak, 40px) * -1));
+  }
+}
+
+@keyframes bookExitToRight {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(var(--jarak, 40px));
+  }
+}
+
+.book-enter-next {
+  animation-name: bookEnterFromRight;
+  animation-timing-function: ease-out;
+  animation-fill-mode: both;
+}
+
+.book-enter-prev {
+  animation-name: bookEnterFromLeft;
+  animation-timing-function: ease-out;
+  animation-fill-mode: both;
+}
+
+.book-exit-next {
+  animation-name: bookExitToLeft;
+  animation-timing-function: ease-in;
+  animation-fill-mode: both;
+}
+
+.book-exit-prev {
+  animation-name: bookExitToRight;
+  animation-timing-function: ease-in;
+  animation-fill-mode: both;
+}

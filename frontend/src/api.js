@@ -25,3 +25,30 @@ api.interceptors.request.use(
     return Promise.reject(error);
   },
 );
+
+// =========================================================
+// TOKEN TIDAK VALID (401)
+// =========================================================
+// Kalau server menolak token (misalnya sudah kedaluwarsa atau
+// dihapus), data login dibersihkan lalu user dikirim ke halaman login.
+// Permintaan /login sendiri dikecualikan supaya pesan error tetap tampil.
+// =========================================================
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error.response?.status;
+    const url = error.config?.url || "";
+
+    if (status === 401 && !url.includes("/login")) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+
+      if (!window.location.pathname.startsWith("/login")) {
+        window.location.replace("/login");
+      }
+    }
+
+    return Promise.reject(error);
+  },
+);

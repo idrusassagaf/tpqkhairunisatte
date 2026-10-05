@@ -126,8 +126,8 @@ class MasterDataController extends Controller
                 $usia = $today->diff($lahir)->y;
             }
 
-            // 🔥 AUTO NIS
-            $nis = $request->nis ?: 'S-' . rand(1000, 9999);
+            // 🔥 AUTO NIS (selalu otomatis, input NIS dari client diabaikan)
+            $nis = Santri::nisBerikutnya();
 
             // 🔥 AUTO STATUS ANAK
             $statusAnak = $request->status_anak;
@@ -300,9 +300,15 @@ class MasterDataController extends Controller
 
     public function storeGuru(Request $request)
     {
-        return response()->json([
-            'message' => 'OK'
+        // Pembuatan guru memakai logika yang sama dengan mode guru di store().
+        $request->validate([
+            'nama_guru' => 'required',
+            'tanggal_lahir' => 'required',
+            'jenis_kelamin' => 'required',
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
+
+        return $this->store($request);
     }
     public function destroy($id)
     {
@@ -362,6 +368,10 @@ class MasterDataController extends Controller
             'kontak' => $request->kontak,
         ]);
 
+        // Nama guru di data hafalan ikut diperbarui, karena hafalan merujuk ke ID guru.
+        \App\Models\ProgresHafalan::where('guru_id', $guru->id)
+            ->update(['nama_guru' => $guru->nama_guru, 'nig' => $guru->nig]);
+
         return response()->json([
             'message' => 'Guru berhasil diupdate',
             'data' => $guru
@@ -375,6 +385,15 @@ class MasterDataController extends Controller
             return response()->json([
                 'message' => 'Guru tidak ditemukan'
             ], 404);
+        }
+
+        // Guru yang sudah dipakai di data hafalan tidak boleh dihapus.
+        $terpakai = \App\Models\ProgresHafalan::where('guru_id', $guru->id)->count();
+        if ($terpakai > 0) {
+            return response()->json([
+                'message' => "Guru tidak bisa dihapus karena dipakai di {$terpakai} data progres hafalan",
+                'terpakai' => $terpakai,
+            ], 422);
         }
 
         $guru->delete();

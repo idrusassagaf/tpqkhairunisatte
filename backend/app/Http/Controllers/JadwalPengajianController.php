@@ -30,4 +30,26 @@ class JadwalPengajianController extends Controller
             'message' => 'success'
         ]);
     }
+
+    /**
+     * Menghapus status Mengaji / Libur pada satu tanggal.
+     */
+    public function destroy(string $tanggal)
+    {
+        $validator = validator(['tanggal' => $tanggal], [
+            'tanggal' => 'required|date_format:Y-m-d',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Format tanggal tidak valid.'
+            ], 422);
+        }
+
+        JadwalPengajian::where('tanggal', $tanggal)->delete();
+
+        return response()->json([
+            'message' => 'Status jadwal berhasil dihapus.'
+        ]);
+    }
 }

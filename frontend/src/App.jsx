@@ -2,47 +2,47 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useEffect } from "react";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Dashboard from "./pages/Dashboard";
-import MasterData from "./pages/MasterData";
-import DataSantri from "./pages/datasantri";
-import DataGuru from "./pages/databaseguru";
-import ProgresIqra from "./pages/progresiqra";
-import ProgresQuran from "./pages/progresquran";
-import StatusGuru from "./pages/statusguru";
-import MasterProgres from "./pages/MasterProgres";
+import Dashboard from "./pages/dashboard/Dashboard";
+import DataSantri from "./pages/dashboard/datasantri";
+import DataGuru from "./pages/dashboard/databaseguru";
+import ProgresIqra from "./pages/dashboard/progresiqra";
+import ProgresQuran from "./pages/dashboard/progresquran";
+import StatusGuru from "./pages/dashboard/statusguru";
+import MasterProgres from "./pages/dashboard/MasterProgres";
 
-import ProgresHafalan from "./pages/ProgresHafalan";
-import ProgresHafalanSantri from "./pages/ProgresHafalanSantri";
-import MasterHafalan from "./pages/MasterHafalan";
-import RaportSantri from "./pages/RaportSantri";
-import KehadiranSantri from "./pages/KehadiranSantri";
-import KehadiranGuru from "./pages/KehadiranGuru";
-import ScanAbsensi from "./pages/ScanAbsensi";
-import KartuQRSantri from "./pages/KartuQRSantri";
+import ProgresHafalan from "./pages/dashboard/ProgresHafalan";
+import ProgresHafalanSantri from "./pages/dashboard/ProgresHafalanSantri";
+import JenisHafalan from "./pages/dashboard/JenisHafalan";
+import RaportSantri from "./pages/dashboard/RaportSantri";
+import KehadiranSantri from "./pages/dashboard/KehadiranSantri";
+import KehadiranGuru from "./pages/dashboard/KehadiranGuru";
+import ScanAbsensi from "./pages/dashboard/ScanAbsensi";
+import KartuQRSantri from "./pages/dashboard/KartuQRSantri";
 
-import Berita from "./pages/Berita";
-import Pengumuman from "./pages/Pengumuman";
-import KalenderPengajian from "./pages/KalenderPengajian";
-import Galeri from "./pages/Galeri";
-import LaporanRingkas from "./pages/LaporanRingkas";
+import Berita from "./pages/dashboard/Berita";
+import BeritaForm from "./pages/dashboard/BeritaForm";
+import ProfilSaya from "./pages/dashboard/ProfilSaya";
+import Pengumuman from "./pages/dashboard/Pengumuman";
+import KalenderPengajian from "./pages/dashboard/KalenderPengajian";
+import Galeri from "./pages/dashboard/Galeri";
+import LaporanRingkas from "./pages/dashboard/LaporanRingkas";
 
-import ManagementUser from "./pages/ManagementUser";
-import ManagementPassword from "./pages/ManagementPassword";
-import PengaturanSistem from "./pages/PengaturanSistem";
+import ManagementUser from "./pages/dashboard/ManagementUser";
+import PengaturanSistem from "./pages/dashboard/PengaturanSistem";
 
-import PublicLayout from "./public/PublicLayout";
+import PublicLayout from "./pages/depan/PublicLayout";
 
-import Home from "./public/Home";
-import ProfilTPQ from "./public/ProfilTPQ";
-import BeritaPublic from "./public/BeritaPublic";
-import DetailBerita from "./public/DetailBerita";
-import PengumumanPublic from "./public/PengumumanPublic";
-import DetailPengumuman from "./public/DetailPengumuman";
-import KalenderPublic from "./public/KalenderPublic";
-import GaleriPublic from "./public/GaleriPublic";
-import LaporanPublic from "./public/LaporanPublic";
-import KontakPublic from "./public/KontakPublic";
-import LoginAdmin from "./public/LoginAdmin";
+import Home from "./pages/depan/Home";
+import ProfilTPQ from "./pages/depan/ProfilTPQ";
+import BeritaPublic from "./pages/depan/BeritaPublic";
+import DetailBerita from "./pages/depan/DetailBerita";
+import PengumumanPublic from "./pages/depan/PengumumanPublic";
+import DetailPengumuman from "./pages/depan/DetailPengumuman";
+import KalenderPublic from "./pages/depan/KalenderPublic";
+import GaleriPublic from "./pages/depan/GaleriPublic";
+import LaporanPublic from "./pages/depan/LaporanPublic";
+import KontakPublic from "./pages/depan/KontakPublic";
+import LoginAdmin from "./pages/depan/LoginAdmin";
 import NotificationCenter from "./components/NotificationCenter";
 
 const SITE_URL = "https://tpq-hairunnisa.site";
@@ -231,9 +231,8 @@ export default function App() {
         >
           <Route index element={<Dashboard />} />
 
-          <Route path="master-data" element={<MasterData />} />
           <Route path="master-progres" element={<MasterProgres />} />
-          <Route path="master-hafalan" element={<MasterHafalan />} />
+          <Route path="jenis-hafalan" element={<JenisHafalan />} />
 
           <Route path="data-santri" element={<DataSantri />} />
 
@@ -254,10 +253,6 @@ export default function App() {
           {/* ===================================================
               MASTER HAFALAN
           ==================================================== */}
-          <Route
-            path="master-hafalan/:nis"
-            element={<ProgresHafalanSantri />}
-          />
 
           {/* ===================================================
               PROGRES HAFALAN
@@ -273,6 +268,9 @@ export default function App() {
               INFORMASI
           ==================================================== */}
           <Route path="berita" element={<Berita />} />
+          <Route path="profil-saya" element={<ProfilSaya />} />
+          <Route path="berita/tambah" element={<BeritaForm />} />
+          <Route path="berita/:id/edit" element={<BeritaForm />} />
           <Route path="pengumuman" element={<Pengumuman />} />
           <Route path="kalender-pengajian" element={<KalenderPengajian />} />
           <Route path="galeri" element={<Galeri />} />
@@ -293,8 +291,6 @@ export default function App() {
               Proteksi API tetap dilakukan oleh AdminOnly.
           ==================================================== */}
           <Route path="management-user" element={<ManagementUser />} />
-
-          <Route path="management-password" element={<ManagementPassword />} />
 
           <Route path="pengaturan-sistem" element={<PengaturanSistem />} />
         </Route>

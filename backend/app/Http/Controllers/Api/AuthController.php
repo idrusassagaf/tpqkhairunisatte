@@ -7,6 +7,10 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
+use Illuminate\Validation\Rule;
+
+use Illuminate\Support\Facades\Storage;
+
 class AuthController extends Controller
 {
     // REGISTER
@@ -100,6 +104,55 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Password berhasil diubah.',
+        ]);
+    }
+
+    /**
+     * Data profil user yang sedang login.
+     */
+    public function profile(Request $request)
+    {
+        return response()->json([
+            'success' => true,
+            'data' => $request->user(),
+        ]);
+    }
+
+    /**
+     * Mengubah nama, email, dan foto profil user yang sedang login.
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => [
+                'required',
+                'email',
+                'max:255',
+                Rule::unique('users', 'email')->ignore($user->id),
+            ],
+            'foto' => ['nullable', 'image', 'max:4096'],
+        ]);
+
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+
+        if ($request->hasFile('foto')) {
+            if ($user->foto) {
+                Storage::disk('public')->delete($user->foto);
+            }
+
+            $user->foto = $request->file('foto')->store('profil', 'public');
+        }
+
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profil berhasil diperbarui.',
+            'data' => $user->fresh(),
         ]);
     }
 }

@@ -17,7 +17,6 @@ import {
   ChevronRight,
   CircleUser,
   UserCog,
-  KeyRound,
   Settings,
   User,
   ClipboardCheck,
@@ -68,19 +67,14 @@ export default function Sidebar({ open, setOpen }) {
         ...(isAdmin
           ? [
               {
-                name: "Master Data",
-                icon: Database,
-                to: "/dashboard/master-data",
-              },
-              {
                 name: "Master Progres",
                 icon: Database,
                 to: "/dashboard/master-progres",
               },
               {
-                name: "Master Hafalan",
-                icon: Database,
-                to: "/dashboard/master-hafalan",
+                name: "Jenis Hafalan",
+                icon: BookOpen,
+                to: "/dashboard/jenis-hafalan",
               },
             ]
           : []),
@@ -174,9 +168,11 @@ export default function Sidebar({ open, setOpen }) {
     };
 
     window.addEventListener("storage", refreshUser);
+    window.addEventListener("tpq-user-updated", refreshUser);
 
     return () => {
       window.removeEventListener("storage", refreshUser);
+      window.removeEventListener("tpq-user-updated", refreshUser);
     };
   }, []);
 
@@ -272,7 +268,7 @@ export default function Sidebar({ open, setOpen }) {
   return (
     <div
       className={`
-        fixed top-0 left-0 h-screen border-r z-50
+        fixed left-0 top-14 md:top-16 h-[calc(100vh-3.5rem)] md:h-[calc(100vh-4rem)] border-r z-40
         transition-all duration-300 overflow-hidden
         ${open ? "w-64" : "w-0 md:w-16"}
       `}
@@ -299,115 +295,6 @@ export default function Sidebar({ open, setOpen }) {
         `}
       >
         {/* ===================================================
-            HEADER
-        ==================================================== */}
-
-        <div className="flex items-center justify-center gap-2.5 border-b border-white/60 px-4 py-4">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-purple-500 text-sm font-bold text-white shadow-md">
-            T
-          </div>
-
-          {open && (
-            <div className="min-w-0">
-              <div className="text-sm font-bold leading-tight tracking-wide text-gray-900">
-                TPQ SYSTEM
-              </div>
-
-              <div className="text-[10px] tracking-wide text-gray-500">
-                Hairunissa Ternate
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* ===================================================
-            INFO USER LOGIN
-        ==================================================== */}
-
-        {open && user && (
-          <div className="px-4 pt-3 pb-2">
-            <div
-              className="
-                relative
-                overflow-hidden
-                rounded-2xl
-                px-3
-                py-3
-                border border-white/400
-                bg-white/30
-                backdrop-blur-1xl
-                shadow-xl
-              "
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-white/10 to-transparent pointer-events-none" />
-
-              <div className="relative flex items-center gap-3">
-                {/* FOTO USER */}
-
-                <div
-                  className="
-                    w-12
-                    h-12
-                    rounded-full
-                    overflow-hidden
-                    flex
-                    items-center
-                    justify-center
-                    shrink-0
-                    bg-white/10
-                    border-2
-                    border-gray-300
-                    shadow-sm
-                  "
-                >
-                  {userPhoto ? (
-                    <img
-                      src={userPhoto}
-                      alt={user.name || "User"}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.style.display = "none";
-                      }}
-                    />
-                  ) : (
-                    <User size={23} className="text-gray-600" />
-                  )}
-                </div>
-
-                {/* DATA USER */}
-
-                <div className="min-w-0">
-                  <div className="text-[11px] text-gray-600">Login sebagai</div>
-
-                  <div className="font-semibold text-sm text-gray-800 truncate">
-                    {user.name}
-                  </div>
-
-                  <div
-                    className={`
-                      inline-flex
-                      mt-1
-                      px-2
-                      py-[2px]
-                      rounded-full
-                      text-[10px]
-                      font-semibold
-                      ${
-                        isAdmin
-                          ? "bg-purple-100/80 text-purple-700"
-                          : "bg-gray-200/80 text-gray-600"
-                      }
-                    `}
-                  >
-                    {role}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ===================================================
             MENU
         ==================================================== */}
 
@@ -423,6 +310,7 @@ export default function Sidebar({ open, setOpen }) {
               <NavLink
                 key={i}
                 to={item.to}
+                end={item.to === "/dashboard"}
                 className={(props) => navItemClass(props, open)}
               >
                 <Icon size={18} />
@@ -827,21 +715,6 @@ export default function Sidebar({ open, setOpen }) {
                       <span>Management User</span>
                     ) : (
                       <span className={tooltipClass}>Management User</span>
-                    )}
-                  </NavLink>
-
-                  {/* MANAGEMENT PASSWORD */}
-
-                  <NavLink
-                    to="/dashboard/management-password"
-                    className={(props) => navItemClass(props, open)}
-                  >
-                    <KeyRound size={16} />
-
-                    {open ? (
-                      <span>Management Password</span>
-                    ) : (
-                      <span className={tooltipClass}>Management Password</span>
                     )}
                   </NavLink>
 

@@ -27,6 +27,9 @@ function loadTinymce() {
 export default function RichTextEditor({ value, onChange, height = 420 }) {
   const textareaRef = useRef(null);
   const editorRef = useRef(null);
+  const editorIdRef = useRef(
+    `tinymce-editor-${Math.random().toString(36).slice(2)}`,
+  );
 
   // Simpan callback terbaru supaya event TinyMCE tidak memakai callback lama
   const onChangeRef = useRef(onChange);
@@ -41,22 +44,44 @@ export default function RichTextEditor({ value, onChange, height = 420 }) {
   useEffect(() => {
     let cancelled = false;
 
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    textarea.id = editorIdRef.current;
+
     loadTinymce()
       .then((tinymce) => {
-        if (cancelled || !textareaRef.current) return;
+        if (cancelled || !textarea.isConnected) return;
+
+        tinymce.remove(`#${editorIdRef.current}`);
 
         tinymce.init({
-          target: textareaRef.current,
+          selector: `#${editorIdRef.current}`,
           base_url: "/tinymce",
           suffix: ".min",
+          skin: "oxide",
+          content_css: "/tinymce/skins/content/default/content.min.css",
           menubar: false,
           branding: false,
+          resize: true,
           height,
-          plugins: "lists link autolink code",
+          statusbar: true,
+          plugins:
+            "advlist autolink lists link image media table charmap preview anchor pagebreak searchreplace wordcount visualblocks code fullscreen insertdatetime help",
           toolbar:
-            "undo redo | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | removeformat code",
+            "undo redo | blocks | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image media table | forecolor backcolor | removeformat code preview fullscreen help",
+          toolbar_mode: "sliding",
+          contextmenu: "link image table",
+          quickbars_selection_toolbar:
+            "bold italic underline | h2 h3 blockquote quickimage quicktable",
+          quickbars_insert_toolbar: "image media quicktable",
+          forced_root_block: "p",
+          browser_spellcheck: true,
+          paste_data_images: true,
+          image_advtab: true,
+          image_caption: true,
+          media_live_embeds: true,
           content_style:
-            "body { font-family: Arial, sans-serif; font-size: 14px; line-height: 1.7; }",
+            "body { font-family: Arial, sans-serif; font-size: 14px; line-height: 1.8; color: #111827; } p { margin: 0 0 1rem; } ul, ol { padding-left: 1.25rem; } h1, h2, h3, h4, h5, h6 { line-height: 1.35; margin: 0 0 0.75rem; } img { max-width: 100%; height: auto; } table { border-collapse: collapse; width: 100%; } th, td { border: 1px solid #d1d5db; padding: 0.5rem; } a { color: #2563eb; text-decoration: underline; }",
           setup: (editor) => {
             editorRef.current = editor;
 
@@ -101,7 +126,11 @@ export default function RichTextEditor({ value, onChange, height = 420 }) {
 
   return (
     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-      <textarea ref={textareaRef} defaultValue={value || ""} />
+      <textarea
+        ref={textareaRef}
+        defaultValue={value || ""}
+        className="min-h-[240px] w-full"
+      />
     </div>
   );
 }
