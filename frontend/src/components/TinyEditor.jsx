@@ -29,11 +29,19 @@ const loadTinyMCE = () => {
   return scriptPromise;
 };
 
-export default function TinyEditor({ value, onChange, placeholder }) {
+export default function TinyEditor({
+  value,
+  onChange,
+  placeholder,
+  readOnly = false,
+}) {
   const elementRef = useRef(null);
   const editorRef = useRef(null);
   const onChangeRef = useRef(onChange);
   const valueRef = useRef(value);
+  const readOnlyRef = useRef(readOnly);
+
+  readOnlyRef.current = readOnly;
 
   onChangeRef.current = onChange;
   valueRef.current = value;
@@ -61,6 +69,7 @@ export default function TinyEditor({ value, onChange, placeholder }) {
 
           editor.on("init", () => {
             editor.setContent(valueRef.current || "");
+            editor.mode.set(readOnlyRef.current ? "readonly" : "design");
           });
 
           editor.on("input change keyup", () => {
@@ -79,6 +88,15 @@ export default function TinyEditor({ value, onChange, placeholder }) {
       }
     };
   }, []);
+
+  // Ikuti perubahan hak edit (mis. Viewer hanya bisa melihat)
+  useEffect(() => {
+    const editor = editorRef.current;
+
+    if (editor && editor.initialized) {
+      editor.mode.set(readOnly ? "readonly" : "design");
+    }
+  }, [readOnly]);
 
   // Sinkronkan isi jika form di-reset atau data diganti dari luar
   useEffect(() => {

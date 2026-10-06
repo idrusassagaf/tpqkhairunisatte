@@ -95,6 +95,17 @@ export default function LaporanRingkas() {
     );
   }
 
+  // Hanya Admin yang boleh mengubah narasi; Viewer hanya melihat
+  const isAdmin = (() => {
+    try {
+      return (
+        JSON.parse(localStorage.getItem("user") || "null")?.role === "Admin"
+      );
+    } catch {
+      return false;
+    }
+  })();
+
   return (
     <div className="-mx-2 px-1 py-2 md:mx-0 md:p-6">
       <div className="w-auto mx-2 md:w-full md:max-w-7xl md:mx-auto bg-white rounded-2xl shadow-xl border">
@@ -109,31 +120,36 @@ export default function LaporanRingkas() {
           </p>
         </div>
         <div className="p-3 md:p-8 space-y-6">
-          {/* BARIS ATAS */}
+          <fieldset
+            disabled={!isAdmin}
+            className="border-0 m-0 p-0 min-w-0 space-y-6"
+          >
+            {/* BARIS ATAS */}
 
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
-            <div className="col-span-1 md:col-span-6">
-              <label className="font-semibold block mb-2">Judul</label>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+              <div className="col-span-1 md:col-span-6">
+                <label className="font-semibold block mb-2">Judul</label>
 
-              <input
-                name="judul"
-                value={form.judul}
-                onChange={handleField}
-                className="w-full border rounded-xl px-4 py-3"
-              />
+                <input
+                  name="judul"
+                  value={form.judul}
+                  onChange={handleField}
+                  className="w-full border rounded-xl px-4 py-3"
+                />
+              </div>
+
+              <div className="col-span-1 md:col-span-6">
+                <label className="font-semibold block mb-2">Sub Judul</label>
+
+                <input
+                  name="sub_judul"
+                  value={form.sub_judul}
+                  onChange={handleField}
+                  className="w-full border rounded-xl px-4 py-3"
+                />
+              </div>
             </div>
-
-            <div className="col-span-1 md:col-span-6">
-              <label className="font-semibold block mb-2">Sub Judul</label>
-
-              <input
-                name="sub_judul"
-                value={form.sub_judul}
-                onChange={handleField}
-                className="w-full border rounded-xl px-4 py-3"
-              />
-            </div>
-          </div>
+          </fieldset>
 
           <div>
             <label className="font-semibold block mb-3">Topik</label>
@@ -156,24 +172,30 @@ export default function LaporanRingkas() {
             </div>
           </div>
 
-          {/* EDITOR */}
+          <fieldset
+            disabled={!isAdmin}
+            className="border-0 m-0 p-0 min-w-0 space-y-6"
+          >
+            {/* EDITOR */}
 
-          <div>
-            <label className="font-semibold block mb-3">Narasi</label>
+            <div>
+              <label className="font-semibold block mb-3">Narasi</label>
 
-            <TinyEditor
-              value={form.narasi?.[selectedBab] ?? ""}
-              onChange={(html) =>
-                setForm((prev) => ({
-                  ...prev,
-                  narasi: {
-                    ...prev.narasi,
-                    [selectedBab]: html,
-                  },
-                }))
-              }
-            />
-          </div>
+              <TinyEditor
+                readOnly={!isAdmin}
+                value={form.narasi?.[selectedBab] ?? ""}
+                onChange={(html) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    narasi: {
+                      ...prev.narasi,
+                      [selectedBab]: html,
+                    },
+                  }))
+                }
+              />
+            </div>
+          </fieldset>
 
           {/* STATUS + BUTTON */}
 
@@ -185,7 +207,8 @@ export default function LaporanRingkas() {
                 name="status"
                 value={form.status}
                 onChange={handleField}
-                className="border rounded-lg px-4 py-2"
+                disabled={!isAdmin}
+                className="border rounded-lg px-4 py-2 disabled:opacity-60"
               >
                 <option value="Aktif">Aktif</option>
 
@@ -194,13 +217,15 @@ export default function LaporanRingkas() {
             </div>
 
             <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
-              <button
-                onClick={simpanPengaturan}
-                className="w-full md:w-auto bg-purple-600 hover:bg-purple-700 text-white px-4 py-2.5 rounded-xl flex items-center justify-center gap-2"
-              >
-                <Save size={18} />
-                Simpan
-              </button>
+              {isAdmin && (
+                <button
+                  onClick={simpanPengaturan}
+                  className="w-full md:w-auto bg-purple-600 hover:bg-purple-700 text-white px-4 py-2.5 rounded-xl flex items-center justify-center gap-2"
+                >
+                  <Save size={18} />
+                  Simpan
+                </button>
+              )}
 
               <button
                 onClick={previewPdf}

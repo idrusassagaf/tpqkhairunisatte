@@ -17,6 +17,8 @@ import {
   Heart,
   Award,
   ClipboardList,
+  Clock,
+  Wallet,
 } from "lucide-react";
 import { api } from "../api";
 
@@ -33,6 +35,11 @@ export default function PengaturanSistem() {
   const [logoPreview, setLogoPreview] = useState(null);
 
   const [form, setForm] = useState({
+    // ABSENSI & GAJI
+    absensi_mulai: "17:30",
+    absensi_selesai: "20:00",
+    gaji_per_hari: "50000",
+
     // IDENTITAS
     nama_tpq: "",
     alamat: "",
@@ -93,6 +100,11 @@ export default function PengaturanSistem() {
       }
 
       setForm({
+        // ABSENSI & GAJI
+        absensi_mulai: data.absensi_mulai || "17:30",
+        absensi_selesai: data.absensi_selesai || "20:00",
+        gaji_per_hari: String(data.gaji_per_hari ?? 50000),
+
         // IDENTITAS
         nama_tpq: data.nama_tpq || "",
         alamat: data.alamat || "",
@@ -238,6 +250,10 @@ export default function PengaturanSistem() {
       // ========================================================
       // IDENTITAS
       // ========================================================
+
+      formData.append("absensi_mulai", form.absensi_mulai);
+      formData.append("absensi_selesai", form.absensi_selesai);
+      formData.append("gaji_per_hari", form.gaji_per_hari);
 
       formData.append("nama_tpq", form.nama_tpq);
       formData.append("alamat", form.alamat);
@@ -465,6 +481,94 @@ export default function PengaturanSistem() {
                 placeholder="Masukkan nama TPQ"
                 required
               />
+            </div>
+          </div>
+
+          {/* ====================================================
+              ABSENSI & GAJI
+          ==================================================== */}
+
+          <div className="mb-5 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm md:p-6">
+            <div className="mb-5 flex items-center gap-3 border-b border-gray-100 pb-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50">
+                <Clock size={20} className="text-green-600" />
+              </div>
+
+              <div>
+                <h2 className="text-base font-semibold text-gray-800">
+                  Absensi &amp; Gaji
+                </h2>
+
+                <p className="text-xs text-gray-500">
+                  Jam absen (WIT) dan gaji per hari hadir guru.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div>
+                <label htmlFor="absensi_mulai" className={labelClass}>
+                  Jam Mulai Absen
+                </label>
+
+                <input
+                  id="absensi_mulai"
+                  name="absensi_mulai"
+                  type="time"
+                  value={form.absensi_mulai}
+                  onChange={handleChange}
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="absensi_selesai" className={labelClass}>
+                  Jam Selesai Absen
+                </label>
+
+                <input
+                  id="absensi_selesai"
+                  name="absensi_selesai"
+                  type="time"
+                  value={form.absensi_selesai}
+                  onChange={handleChange}
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="gaji_per_hari" className={labelClass}>
+                  <span className="inline-flex items-center gap-1">
+                    <Wallet size={14} /> Gaji per Hari
+                  </span>
+                </label>
+
+                <div className="relative">
+                  <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-sm text-gray-500">
+                    Rp
+                  </span>
+
+                  <input
+                    id="gaji_per_hari"
+                    name="gaji_per_hari"
+                    type="text"
+                    inputMode="numeric"
+                    value={
+                      form.gaji_per_hari === ""
+                        ? ""
+                        : Number(form.gaji_per_hari).toLocaleString("id-ID")
+                    }
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        gaji_per_hari: e.target.value.replace(/\D/g, ""),
+                      }))
+                    }
+                    className={`${inputClass} pl-10`}
+                    placeholder="50.000"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 

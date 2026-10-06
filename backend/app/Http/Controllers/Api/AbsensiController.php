@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Absensi;
 use App\Models\JadwalPengajian;
+use App\Models\PengaturanSistem;
 use App\Models\Santri;
 use App\Models\Guru;
 use Illuminate\Http\Request;
@@ -147,16 +148,19 @@ class AbsensiController extends Controller
             ],
         ]);
 
-        // Absen hanya dibuka pukul 17.30 - 20.00 WIT
+        // Jam absen diambil dari pengaturan sistem (WIT)
         $waktuWit = now('Asia/Jayapura');
+        $pengaturan = PengaturanSistem::first();
+        $jamMulai = ($pengaturan?->absensi_mulai ?? '17:30') . ':00';
+        $jamSelesai = ($pengaturan?->absensi_selesai ?? '20:00') . ':59';
 
         if (
-            $waktuWit->format('H:i:s') < '17:30:00'
-            || $waktuWit->format('H:i:s') > '20:00:00'
+            $waktuWit->format('H:i:s') < $jamMulai
+            || $waktuWit->format('H:i:s') > $jamSelesai
         ) {
             return response()->json([
                 'success' => false,
-                'message' => 'Absensi hanya dibuka pukul 17.30 - 20.00 WIT.',
+                'message' => "Absensi hanya dibuka pukul {$pengaturan?->absensi_mulai} - {$pengaturan?->absensi_selesai} WIT.",
             ], 422);
         }
 

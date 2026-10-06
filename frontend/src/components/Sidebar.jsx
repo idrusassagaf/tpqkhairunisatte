@@ -546,7 +546,6 @@ export default function Sidebar({ open, setOpen }) {
                 </NavLink>
               );
             })}
-
           {/* =================================================
               ABSENSI
               HANYA UNTUK ADMIN
@@ -642,85 +641,89 @@ export default function Sidebar({ open, setOpen }) {
             </>
           )}
 
-          {/* =================================================
-              INFORMASI
-          ================================================== */}
+          {isAdmin && (
+            <>
+              {/* =================================================
+                INFORMASI
+            ================================================== */}
 
-          <button
-            type="button"
-            onClick={() => setOpenInformasi(!openInformasi)}
-            className={sectionBtnClass(open)}
-          >
-            {open ? (
-              <>
-                <span>INFORMASI</span>
+              <button
+                type="button"
+                onClick={() => setOpenInformasi(!openInformasi)}
+                className={sectionBtnClass(open)}
+              >
+                {open ? (
+                  <>
+                    <span>INFORMASI</span>
 
-                {openInformasi ? (
-                  <ChevronDown size={16} />
+                    {openInformasi ? (
+                      <ChevronDown size={16} />
+                    ) : (
+                      <ChevronRight size={16} />
+                    )}
+                  </>
                 ) : (
                   <ChevronRight size={16} />
                 )}
-              </>
-            ) : (
-              <ChevronRight size={16} />
-            )}
 
-            {!open && <span className={tooltipClass}>INFORMASI</span>}
-          </button>
+                {!open && <span className={tooltipClass}>INFORMASI</span>}
+              </button>
 
-          {openInformasi && (
-            <>
-              <NavLink
-                to="/dashboard/berita"
-                className={(props) => navItemClass(props, open)}
-              >
-                <Newspaper size={16} />
+              {openInformasi && (
+                <>
+                  <NavLink
+                    to="/dashboard/berita"
+                    className={(props) => navItemClass(props, open)}
+                  >
+                    <Newspaper size={16} />
 
-                {open ? (
-                  <span>Berita</span>
-                ) : (
-                  <span className={tooltipClass}>Berita</span>
-                )}
-              </NavLink>
+                    {open ? (
+                      <span>Berita</span>
+                    ) : (
+                      <span className={tooltipClass}>Berita</span>
+                    )}
+                  </NavLink>
 
-              <NavLink
-                to="/dashboard/pengumuman"
-                className={(props) => navItemClass(props, open)}
-              >
-                <Bell size={16} />
+                  <NavLink
+                    to="/dashboard/pengumuman"
+                    className={(props) => navItemClass(props, open)}
+                  >
+                    <Bell size={16} />
 
-                {open ? (
-                  <span>Pengumuman</span>
-                ) : (
-                  <span className={tooltipClass}>Pengumuman</span>
-                )}
-              </NavLink>
+                    {open ? (
+                      <span>Pengumuman</span>
+                    ) : (
+                      <span className={tooltipClass}>Pengumuman</span>
+                    )}
+                  </NavLink>
 
-              <NavLink
-                to="/dashboard/kalender-pengajian"
-                className={(props) => navItemClass(props, open)}
-              >
-                <CalendarDays size={16} />
+                  <NavLink
+                    to="/dashboard/kalender-pengajian"
+                    className={(props) => navItemClass(props, open)}
+                  >
+                    <CalendarDays size={16} />
 
-                {open ? (
-                  <span>Kalender Pengajian</span>
-                ) : (
-                  <span className={tooltipClass}>Kalender Pengajian</span>
-                )}
-              </NavLink>
+                    {open ? (
+                      <span>Kalender Pengajian</span>
+                    ) : (
+                      <span className={tooltipClass}>Kalender Pengajian</span>
+                    )}
+                  </NavLink>
 
-              <NavLink
-                to="/dashboard/galeri"
-                className={(props) => navItemClass(props, open)}
-              >
-                <Images size={16} />
+                  <NavLink
+                    to="/dashboard/galeri"
+                    className={(props) => navItemClass(props, open)}
+                  >
+                    <Images size={16} />
 
-                {open ? (
-                  <span>Galeri</span>
-                ) : (
-                  <span className={tooltipClass}>Galeri</span>
-                )}
-              </NavLink>
+                    {open ? (
+                      <span>Galeri</span>
+                    ) : (
+                      <span className={tooltipClass}>Galeri</span>
+                    )}
+                  </NavLink>
+                </>
+              )}
             </>
           )}
 
@@ -761,6 +764,26 @@ export default function Sidebar({ open, setOpen }) {
                 <span>Laporan Ringkas</span>
               ) : (
                 <span className={tooltipClass}>Laporan Ringkas</span>
+              )}
+            </NavLink>
+          )}
+
+          {/* =================================================
+              MANAGEMENT PASSWORD
+              HANYA UNTUK ADMIN
+          ================================================== */}
+
+          {isAdmin && (
+            <NavLink
+              to="/dashboard/management-password"
+              className={(props) => navItemClass(props, open)}
+            >
+              <KeyRound size={16} />
+
+              {open ? (
+                <span>Management Password</span>
+              ) : (
+                <span className={tooltipClass}>Management Password</span>
               )}
             </NavLink>
           )}
@@ -808,21 +831,6 @@ export default function Sidebar({ open, setOpen }) {
                       <span>Management User</span>
                     ) : (
                       <span className={tooltipClass}>Management User</span>
-                    )}
-                  </NavLink>
-
-                  {/* MANAGEMENT PASSWORD */}
-
-                  <NavLink
-                    to="/dashboard/management-password"
-                    className={(props) => navItemClass(props, open)}
-                  >
-                    <KeyRound size={16} />
-
-                    {open ? (
-                      <span>Management Password</span>
-                    ) : (
-                      <span className={tooltipClass}>Management Password</span>
                     )}
                   </NavLink>
 

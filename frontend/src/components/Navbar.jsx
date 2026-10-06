@@ -154,18 +154,20 @@ export default function Navbar({ setOpen }) {
               Profil
             </button>
 
-            <button
-              type="button"
-              role="menuitem"
-              onClick={() => {
-                setMenuOpen(false);
-                navigate("/dashboard/management-password");
-              }}
-              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-800 hover:bg-gray-100"
-            >
-              <KeyRound size={16} className="text-gray-500" />
-              Manajemen Password
-            </button>
+            {user?.role === "Admin" && (
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => {
+                  setMenuOpen(false);
+                  navigate("/dashboard/management-password");
+                }}
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-800 hover:bg-gray-100"
+              >
+                <KeyRound size={16} className="text-gray-500" />
+                Manajemen Password
+              </button>
+            )}
 
             <div className="my-2 border-t border-gray-200" />
 

@@ -5,6 +5,7 @@ import TopLoadingBar from "./components/TopLoadingBar";
 import { useEffect } from "react";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
+import RoleRoute from "./components/RoleRoute";
 import Dashboard from "./pages/Dashboard";
 import MasterData from "./pages/MasterData";
 import DataSantri from "./pages/datasantri";
@@ -277,10 +278,38 @@ export default function App() {
           {/* ===================================================
               INFORMASI
           ==================================================== */}
-          <Route path="berita" element={<Berita />} />
-          <Route path="pengumuman" element={<Pengumuman />} />
-          <Route path="kalender-pengajian" element={<KalenderPengajian />} />
-          <Route path="galeri" element={<Galeri />} />
+          <Route
+            path="berita"
+            element={
+              <RoleRoute allowedRoles={["Admin"]}>
+                <Berita />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="pengumuman"
+            element={
+              <RoleRoute allowedRoles={["Admin"]}>
+                <Pengumuman />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="kalender-pengajian"
+            element={
+              <RoleRoute allowedRoles={["Admin"]}>
+                <KalenderPengajian />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="galeri"
+            element={
+              <RoleRoute allowedRoles={["Admin"]}>
+                <Galeri />
+              </RoleRoute>
+            }
+          />
 
           {/* ===================================================
               LAPORAN

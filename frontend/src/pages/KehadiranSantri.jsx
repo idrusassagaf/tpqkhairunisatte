@@ -413,7 +413,7 @@ export default function KehadiranSantri() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <div>
             <h1 className="text-sms md:text-2xl font-extralight text-gray-800">
-              DAFTAR HADIR SANTRI TPQ KHAIRUNNISSA
+              DAFTAR HADIR SANTRI
             </h1>
 
             <p className="text-sm text-gray-500 mt-1">

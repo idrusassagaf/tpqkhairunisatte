@@ -21,6 +21,7 @@ export default function StatusGuru() {
 
   const [guru, setGuru] = useState([]);
   const [absensi, setAbsensi] = useState([]);
+  const [gajiPerHari, setGajiPerHari] = useState(GAJI_PER_HARI);
   const [search, setSearch] = useState("");
   const [filterPeriode, setFilterPeriode] = useState("");
   const [statusData, setStatusData] = useState({});
@@ -74,6 +75,24 @@ export default function StatusGuru() {
       console.error("Gagal ambil data:", err);
     }
   };
+
+  // ================= GAJI PER HARI DARI PENGATURAN =================
+  useEffect(() => {
+    const fetchGaji = async () => {
+      try {
+        const res = await api.get("/pengaturan-sistem");
+        const nilai = Number(res?.data?.data?.gaji_per_hari);
+
+        if (!Number.isNaN(nilai)) {
+          setGajiPerHari(nilai);
+        }
+      } catch (err) {
+        console.error("Gagal ambil pengaturan gaji:", err);
+      }
+    };
+
+    fetchGaji();
+  }, []);
 
   // ================= FETCH ABSENSI GURU PER BULAN =================
   useEffect(() => {
@@ -135,7 +154,7 @@ export default function StatusGuru() {
     ).length;
   };
 
-  const getGajiGuru = (guruId) => getHariHadir(guruId) * GAJI_PER_HARI;
+  const getGajiGuru = (guruId) => getHariHadir(guruId) * gajiPerHari;
 
   // ================= FORMAT RUPIAH =================
   const formatRupiah = (angka) => {

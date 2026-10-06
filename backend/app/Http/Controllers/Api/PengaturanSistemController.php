@@ -211,6 +211,9 @@ class PengaturanSistemController extends Controller
             // =================================================
 
             'id',
+            'absensi_mulai',
+            'absensi_selesai',
+            'gaji_per_hari',
             'nama_tpq',
             'alamat',
             'kelurahan',
@@ -372,6 +375,15 @@ class PengaturanSistemController extends Controller
             // IDENTITAS TPQ
             // =================================================
 
+            'absensi_mulai' =>
+            'nullable|date_format:H:i',
+
+            'absensi_selesai' =>
+            'nullable|date_format:H:i|after:absensi_mulai',
+
+            'gaji_per_hari' =>
+            'nullable|integer|min:0',
+
             'nama_tpq' =>
             'required|string|max:255',
 
@@ -494,6 +506,15 @@ class PengaturanSistemController extends Controller
         // =====================================================
         // IDENTITAS TPQ
         // =====================================================
+
+        $setting->absensi_mulai =
+            $request->absensi_mulai ?? $setting->absensi_mulai ?? '17:30';
+
+        $setting->absensi_selesai =
+            $request->absensi_selesai ?? $setting->absensi_selesai ?? '20:00';
+
+        $setting->gaji_per_hari =
+            $request->gaji_per_hari ?? $setting->gaji_per_hari ?? 50000;
 
         $setting->nama_tpq =
             $request->nama_tpq;

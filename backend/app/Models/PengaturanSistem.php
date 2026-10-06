@@ -65,6 +65,16 @@ class PengaturanSistem extends Model
         'syarat_form',
         'syarat_kk',
         'syarat_ktp',
+
+
+        // =====================================================
+        // ABSENSI & GAJI
+        // =====================================================
+
+        'absensi_mulai',
+        'absensi_selesai',
+        'gaji_per_hari',
+
         'translations',
     ];
 
