@@ -1,5 +1,5 @@
 # =========================================================
-# ROOT DOMAIN: melayani frontend (hasil build di frontend/dist)
+# ROOT DOMAIN: melayani frontend (hasil build di dist/)
 # =========================================================
 # Auto deploy dari GitHub langsung menampilkan build terbaru.
 # API tetap di subdomain api-backend.
@@ -9,14 +9,13 @@
     RewriteEngine On
 
     # Folder aset hasil build
-    RewriteRule ^(assets|tinymce|images)/(.*)$ frontend/dist/$1/$2 [L]
+    RewriteRule ^(assets|tinymce|images)/(.*)$ dist/$1/$2 [L]
 
     # File statis di root dist (logo, favicon, mp4, dll.)
-    RewriteRule ^([^/]+\.(png|jpg|jpeg|gif|svg|ico|webp|mp3|mp4|ttf|woff|woff2|json|txt|xml|webmanifest|css|js))$ frontend/dist/$1 [L]
+    RewriteRule ^([^/]+\.(png|jpg|jpeg|gif|svg|ico|webp|mp3|mp4|ttf|woff|woff2|json|txt|xml|webmanifest|css|js))$ dist/$1 [L]
 
-    # Selain itu (termasuk route React seperti /dashboard): index.html
-    # Hanya jika file/folder yang diminta memang tidak ada
+    # Selain itu (termasuk route React seperti /dashboard dan root /): index.html
+    # Hanya jika file yang diminta memang tidak ada
     RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^ frontend/dist/index.html [L]
+    RewriteRule ^ dist/index.html [L]
 </IfModule>
