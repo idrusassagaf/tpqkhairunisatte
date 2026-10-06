@@ -22,6 +22,124 @@ import {
 } from "lucide-react";
 import { api } from "../api";
 
+// ============================================================
+// TIME FIELD — pilih jam & menit dengan panel, bukan input native
+// Nilai tetap "HH:MM" dan dikirim lewat onChange seperti input biasa
+// ============================================================
+
+const JAM_OPTIONS = Array.from({ length: 24 }, (_, i) =>
+  String(i).padStart(2, "0"),
+);
+
+const MENIT_OPTIONS = Array.from({ length: 12 }, (_, i) =>
+  String(i * 5).padStart(2, "0"),
+);
+
+function TimeField({ name, value, onChange }) {
+  const [open, setOpen] = useState(false);
+  const wrapperRef = useRef(null);
+
+  const [jam, menit] = (value || "00:00").split(":");
+
+  useEffect(() => {
+    if (!open) return;
+
+    const handleClickOutside = (e) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  const pilih = (newJam, newMenit) => {
+    onChange({ target: { name, value: `${newJam}:${newMenit}` } });
+  };
+
+  const optionClass = (active) =>
+    `rounded-lg py-2 text-sm font-medium transition ${
+      active
+        ? "bg-emerald-600 text-white shadow-sm"
+        : "text-gray-600 hover:bg-emerald-50 hover:text-emerald-700"
+    }`;
+
+  return (
+    <div ref={wrapperRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        className={`flex w-full items-center justify-between rounded-xl border bg-gray-50 px-4 py-3 text-left transition focus:outline-none focus:ring-2 focus:ring-emerald-100 ${
+          open
+            ? "border-emerald-400 bg-white ring-2 ring-emerald-100"
+            : "border-gray-200"
+        }`}
+      >
+        <span className="flex items-center gap-2 font-mono text-lg font-semibold tracking-wider text-gray-800">
+          {jam}
+          <span className="text-emerald-500">:</span>
+          {menit}
+        </span>
+
+        <Clock size={18} className="text-emerald-600" />
+      </button>
+
+      {open && (
+        <div className="absolute left-0 right-0 z-20 mt-2 overflow-hidden rounded-2xl border border-gray-100 bg-white p-3 shadow-xl">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <p className="mb-2 text-center text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                Jam
+              </p>
+
+              <div className="grid max-h-56 grid-cols-4 gap-1 overflow-y-auto pr-1">
+                {JAM_OPTIONS.map((j) => (
+                  <button
+                    key={j}
+                    type="button"
+                    onClick={() => pilih(j, menit)}
+                    className={optionClass(j === jam)}
+                  >
+                    {j}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="mb-2 text-center text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+                Menit
+              </p>
+
+              <div className="grid max-h-56 grid-cols-3 gap-1 overflow-y-auto pr-1">
+                {MENIT_OPTIONS.map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => pilih(jam, m)}
+                    className={optionClass(m === menit)}
+                  >
+                    {m}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            className="mt-3 w-full rounded-xl bg-emerald-600 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700"
+          >
+            Selesai
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function PengaturanSistem() {
   const fileInputRef = useRef(null);
 
@@ -507,32 +625,22 @@ export default function PengaturanSistem() {
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <div>
-                <label htmlFor="absensi_mulai" className={labelClass}>
-                  Jam Mulai Absen
-                </label>
+                <span className={labelClass}>Jam Mulai Absen</span>
 
-                <input
-                  id="absensi_mulai"
+                <TimeField
                   name="absensi_mulai"
-                  type="time"
                   value={form.absensi_mulai}
                   onChange={handleChange}
-                  className={inputClass}
                 />
               </div>
 
               <div>
-                <label htmlFor="absensi_selesai" className={labelClass}>
-                  Jam Selesai Absen
-                </label>
+                <span className={labelClass}>Jam Selesai Absen</span>
 
-                <input
-                  id="absensi_selesai"
+                <TimeField
                   name="absensi_selesai"
-                  type="time"
                   value={form.absensi_selesai}
                   onChange={handleChange}
-                  className={inputClass}
                 />
               </div>
 

@@ -769,26 +769,6 @@ export default function Sidebar({ open, setOpen }) {
           )}
 
           {/* =================================================
-              MANAGEMENT PASSWORD
-              HANYA UNTUK ADMIN
-          ================================================== */}
-
-          {isAdmin && (
-            <NavLink
-              to="/dashboard/management-password"
-              className={(props) => navItemClass(props, open)}
-            >
-              <KeyRound size={16} />
-
-              {open ? (
-                <span>Management Password</span>
-              ) : (
-                <span className={tooltipClass}>Management Password</span>
-              )}
-            </NavLink>
-          )}
-
-          {/* =================================================
               MANAGEMENT DATA
               HANYA UNTUK ADMIN
           ================================================== */}
@@ -831,6 +811,21 @@ export default function Sidebar({ open, setOpen }) {
                       <span>Management User</span>
                     ) : (
                       <span className={tooltipClass}>Management User</span>
+                    )}
+                  </NavLink>
+
+                  {/* MANAGEMENT PASSWORD */}
+
+                  <NavLink
+                    to="/dashboard/management-password"
+                    className={(props) => navItemClass(props, open)}
+                  >
+                    <KeyRound size={16} />
+
+                    {open ? (
+                      <span>Management Password</span>
+                    ) : (
+                      <span className={tooltipClass}>Management Password</span>
                     )}
                   </NavLink>
 
