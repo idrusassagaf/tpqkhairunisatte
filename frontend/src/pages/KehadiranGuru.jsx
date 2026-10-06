@@ -1,3 +1,4 @@
+import { tanggalHariIni, periodeSekarang, tahunSekarang } from "../utils/waktu";
 import TableLoadingRow from "../components/TableLoadingRow";
 import useSedangMemuat from "../hooks/useSedangMemuat";
 import { useEffect, useMemo, useState } from "react";
@@ -21,12 +22,7 @@ export default function KehadiranGuru() {
   const sedangMemuat = useSedangMemuat();
 
   const [bulan, setBulan] = useState(() => {
-    const now = new Date();
-
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
-      2,
-      "0",
-    )}`;
+    return periodeSekarang();
   });
 
   const [guru, setGuru] = useState([]);
@@ -86,12 +82,7 @@ export default function KehadiranGuru() {
 
   // Tanggal hari ini (zona lokal) dalam format YYYY-MM-DD
   const todayStr = useMemo(() => {
-    const now = new Date();
-
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
-      2,
-      "0",
-    )}-${String(now.getDate()).padStart(2, "0")}`;
+    return tanggalHariIni();
   }, []);
 
   // Hari yang sudah lewat tanpa absensi otomatis dihitung Alpa

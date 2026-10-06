@@ -395,6 +395,9 @@ export default function Pengumuman() {
                   type="submit"
                   disabled={saving}
                   className="
+                    inline-flex
+                    items-center
+                    gap-2
                     bg-blue-500
                     hover:bg-blue-600
                     text-white
@@ -402,9 +405,13 @@ export default function Pengumuman() {
                     py-2
                     rounded
                     transition
-                    disabled:opacity-50
+                    disabled:opacity-60
+                    disabled:cursor-not-allowed
                   "
                 >
+                  {saving && (
+                    <span className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin" />
+                  )}
                   {saving ? "Menyimpan..." : isEdit ? "Update" : "Simpan"}
                 </button>
               </div>

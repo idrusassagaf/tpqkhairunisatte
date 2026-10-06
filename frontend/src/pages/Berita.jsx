@@ -63,6 +63,7 @@ export default function Berita() {
   );
 
   const [editId, setEditId] = useState(null);
+  const [saving, setSaving] = useState(false);
 
   const loadBerita = useCallback(async () => {
     try {
@@ -102,7 +103,11 @@ export default function Berita() {
   }, []);
 
   const handleSimpan = async () => {
+    if (saving) return;
+
     try {
+      setSaving(true);
+
       const formData = new FormData();
 
       formData.append("judul", form.judul);
@@ -123,21 +128,11 @@ export default function Berita() {
           },
         });
       } else {
-        if (editId) {
-          formData.append("_method", "PUT");
-
-          await api.post(`/berita/${editId}`, formData, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          });
-        } else {
-          await api.post("/berita", formData, {
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          });
-        }
+        await api.post("/berita", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
       }
 
       notifySuccess("Berita berhasil disimpan");
@@ -160,6 +155,8 @@ export default function Berita() {
       console.log(err.response?.data);
 
       alert(JSON.stringify(err.response?.data));
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -613,9 +610,13 @@ export default function Berita() {
 
                   <button
                     onClick={handleSimpan}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+                    disabled={saving}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    {editId ? "Update" : "Simpan"}
+                    {saving && (
+                      <span className="h-4 w-4 rounded-full border-2 border-white/40 border-t-white animate-spin" />
+                    )}
+                    {saving ? "Menyimpan..." : editId ? "Update" : "Simpan"}
                   </button>
                 </div>
               </div>

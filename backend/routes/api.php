@@ -99,7 +99,7 @@ Route::middleware(['auth:sanctum', 'admin'])->post(
     [AbsensiController::class, 'store']
 );
 
-Route::post(
+Route::middleware('auth:sanctum')->post(
     '/absensi/scan',
     [AbsensiController::class, 'scan']
 );

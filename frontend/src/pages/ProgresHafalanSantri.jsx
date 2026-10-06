@@ -21,8 +21,8 @@ export default function ProgresHafalanSantri() {
   const location = useLocation();
 
   const backLink = location.pathname.includes("master-hafalan")
-    ? "/master-hafalan"
-    : "/progres-hafalan";
+    ? "/dashboard/master-hafalan"
+    : "/dashboard/progres-hafalan";
 
   const isReadonly = location.pathname.includes("/progres-hafalan/");
 

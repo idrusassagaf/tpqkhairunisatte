@@ -145,10 +145,6 @@ class AbsensiController extends Controller
                 'string',
                 'max:100',
             ],
-            'tanggal' => [
-                'nullable',
-                'date',
-            ],
         ]);
 
         // Absen hanya dibuka pukul 17.30 - 20.00 WIT
@@ -164,8 +160,8 @@ class AbsensiController extends Controller
             ], 422);
         }
 
-        $tanggal = $validated['tanggal']
-            ?? $waktuWit->toDateString();
+        // Tanggal selalu hari ini (WIT), tidak diambil dari klien
+        $tanggal = $waktuWit->toDateString();
 
         // Absen hanya dibuka pada hari yang ditandai "mengaji" di kalender
         $statusJadwal = JadwalPengajian::where('tanggal', $tanggal)

@@ -4,6 +4,17 @@ import { notifySuccess } from "../toastStore";
 import { useState, useEffect } from "react";
 import { api } from "../api";
 
+// URL foto dari data server (untuk preview saat edit)
+const urlFoto = (item) => {
+  if (item?.foto_url) return item.foto_url;
+
+  if (!item?.foto) return null;
+
+  const base = api.defaults.baseURL.replace(/\/api\/?$/, "");
+
+  return `${base}/storage/${item.foto}`;
+};
+
 export default function MasterData() {
   const sedangMemuat = useSedangMemuat();
 
@@ -53,6 +64,10 @@ export default function MasterData() {
 
   const [editSantriId, setEditSantriId] = useState(null);
   const [editGuruId, setEditGuruId] = useState(null);
+
+  // Foto yang sudah tersimpan, ditampilkan saat edit
+  const [fotoLamaSantri, setFotoLamaSantri] = useState(null);
+  const [fotoLamaGuru, setFotoLamaGuru] = useState(null);
 
   // =========================================================
   // PAGINATION
@@ -167,6 +182,7 @@ export default function MasterData() {
         notifySuccess("Data santri berhasil disimpan");
 
         setEditSantriId(null);
+        setFotoLamaSantri(null);
 
         setForm({
           nama: "",
@@ -284,6 +300,7 @@ export default function MasterData() {
         notifySuccess("Data guru berhasil disimpan");
 
         setEditGuruId(null);
+        setFotoLamaGuru(null);
 
         setFormGuru({
           nama_guru: "",
@@ -660,9 +677,11 @@ export default function MasterData() {
                 className="border p-2 rounded sm:col-span-2"
               />
 
-              {form.foto && (
+              {(form.foto || fotoLamaSantri) && (
                 <img
-                  src={URL.createObjectURL(form.foto)}
+                  src={
+                    form.foto ? URL.createObjectURL(form.foto) : fotoLamaSantri
+                  }
                   alt="preview"
                   className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded border sm:col-span-2"
                 />
@@ -813,9 +832,13 @@ export default function MasterData() {
                 className="border p-2 rounded"
               />
 
-              {formGuru.foto && (
+              {(formGuru.foto || fotoLamaGuru) && (
                 <img
-                  src={URL.createObjectURL(formGuru.foto)}
+                  src={
+                    formGuru.foto
+                      ? URL.createObjectURL(formGuru.foto)
+                      : fotoLamaGuru
+                  }
                   alt="preview"
                   className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded border"
                 />
@@ -930,6 +953,7 @@ export default function MasterData() {
                           pekerjaan_ibu: d.orang_tua?.pekerjaan_ibu || "",
                         });
 
+                        setFotoLamaSantri(urlFoto(d));
                         setEditSantriId(d.id);
                         setTab("santri");
                       }}
@@ -1082,6 +1106,7 @@ export default function MasterData() {
                                       d.orang_tua?.pekerjaan_ibu || "",
                                   });
 
+                                  setFotoLamaSantri(urlFoto(d));
                                   setEditSantriId(d.id);
                                   setTab("santri");
                                 }}
@@ -1248,6 +1273,7 @@ export default function MasterData() {
                           foto: null,
                         });
 
+                        setFotoLamaGuru(urlFoto(g));
                         setEditGuruId(g.id);
                         setTab("guru");
                       }}
@@ -1364,6 +1390,7 @@ export default function MasterData() {
                                     foto: null,
                                   });
 
+                                  setFotoLamaGuru(urlFoto(g));
                                   setEditGuruId(g.id);
                                   setTab("guru");
                                 }}

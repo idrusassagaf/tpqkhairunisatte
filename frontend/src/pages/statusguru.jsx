@@ -1,3 +1,4 @@
+import { tanggalHariIni, periodeSekarang, tahunSekarang } from "../utils/waktu";
 import TableLoadingRow from "../components/TableLoadingRow";
 import useSedangMemuat from "../hooks/useSedangMemuat";
 import { notifySuccess } from "../toastStore";
@@ -31,13 +32,7 @@ export default function StatusGuru() {
 
   // ================= FORMAT PERIODE =================
   const getCurrentPeriode = () => {
-    const now = new Date();
-
-    const bulan = String(now.getMonth() + 1).padStart(2, "0");
-
-    const tahun = now.getFullYear();
-
-    return tahun + "-" + bulan;
+    return periodeSekarang();
   };
 
   // ================= NAMA BULAN =================
@@ -553,7 +548,7 @@ export default function StatusGuru() {
             {bulanList.map((bulan, index) => {
               const nomor = String(index + 1).padStart(2, "0");
 
-              const tahun = new Date().getFullYear();
+              const tahun = tahunSekarang();
 
               return (
                 <option key={nomor} value={tahun + "-" + nomor}>
