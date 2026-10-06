@@ -1,0 +1,18 @@
+# =========================================================
+# ROOT DOMAIN: melayani frontend (hasil build di frontend/dist)
+# =========================================================
+# Dengan ini, auto deploy dari GitHub langsung menampilkan build
+# terbaru tanpa perlu menyalin isi dist secara manual.
+# API tetap di subdomain api-backend.
+# =========================================================
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # File yang ada di frontend/dist: langsung dilayani
+    RewriteCond %{DOCUMENT_ROOT}/frontend/dist%{REQUEST_URI} -f
+    RewriteRule ^(.*)$ frontend/dist/$1 [L]
+
+    # Selain itu (termasuk route React seperti /dashboard): index.html
+    RewriteRule ^ frontend/dist/index.html [L]
+</IfModule>
