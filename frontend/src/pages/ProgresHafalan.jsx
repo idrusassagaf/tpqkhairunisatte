@@ -1,3 +1,5 @@
+import TableLoadingRow from "../components/TableLoadingRow";
+import useSedangMemuat from "../hooks/useSedangMemuat";
 import { useEffect, useState } from "react";
 import { api } from "../api";
 import { Eye, Download, FileSpreadsheet, FileText } from "lucide-react";
@@ -7,6 +9,8 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 export default function ProgresHafalan() {
+  const sedangMemuat = useSedangMemuat();
+
   const [santri, setSantri] = useState([]);
   const [hafalanByNis, setHafalanByNis] = useState({});
   const [search, setSearch] = useState("");
@@ -525,51 +529,57 @@ export default function ProgresHafalan() {
           </thead>
 
           <tbody>
-            {santri.length === 0 ? (
-              <tr>
-                <td colSpan="7" className="text-center p-6 text-gray-500">
-                  Data santri belum tersedia
-                </td>
-              </tr>
+            {sedangMemuat ? (
+              <TableLoadingRow colSpan={8} />
             ) : (
-              paginatedSantri.map((s, i) => (
-                <tr key={i} className="border-t hover:bg-gray-50">
-                  {/* NO */}
+              <>
+                {santri.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="text-center p-6 text-gray-500">
+                      Data santri belum tersedia
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedSantri.map((s, i) => (
+                    <tr key={i} className="border-t hover:bg-gray-50">
+                      {/* NO */}
 
-                  <td className="p-1 border text-center">{i + 1}</td>
+                      <td className="p-1 border text-center">{i + 1}</td>
 
-                  {/* NAMA */}
+                      {/* NAMA */}
 
-                  <td className="p-1 border font-medium">{s.nama}</td>
+                      <td className="p-1 border font-medium">{s.nama}</td>
 
-                  {/* NIS */}
+                      {/* NIS */}
 
-                  <td className="p-1 border">{s.nis}</td>
+                      <td className="p-1 border">{s.nis}</td>
 
-                  {/* KELAS */}
+                      {/* KELAS */}
 
-                  <td className="p-1 border">{s.kelas}</td>
+                      <td className="p-1 border">{s.kelas}</td>
 
-                  {/* LANCAR */}
+                      {/* LANCAR */}
 
-                  <td className="p-1 border text-center font-medium text-green-700">
-                    {getJumlahHafalan(s.nis, "Lancar")}
-                    -Hafalan
-                  </td>
+                      <td className="p-1 border text-center font-medium text-green-700">
+                        {getJumlahHafalan(s.nis, "Lancar")}
+                        -Hafalan
+                      </td>
 
-                  {/* BELUM */}
+                      {/* BELUM */}
 
-                  <td className="p-1 border text-center font-medium text-red-700">
-                    {getJumlahHafalan(s.nis, "Belum")}
-                    -Hafalan
-                  </td>
+                      <td className="p-1 border text-center font-medium text-red-700">
+                        {getJumlahHafalan(s.nis, "Belum")}
+                        -Hafalan
+                      </td>
 
-                  {/* LIHAT PROGRES */}
+                      {/* LIHAT PROGRES */}
 
-                  <td className="p-1 border text-center">
-                    <button
-                      onClick={() => navigate(`/dashboard/progres-hafalan/${s.nis}`)}
-                      className="
+                      <td className="p-1 border text-center">
+                        <button
+                          onClick={() =>
+                            navigate(`/dashboard/progres-hafalan/${s.nis}`)
+                          }
+                          className="
                         inline-flex
                         items-center
                         justify-center
@@ -580,12 +590,14 @@ export default function ProgresHafalan() {
                         text-purple-700
                         transition
                       "
-                    >
-                      <Eye size={18} />
-                    </button>
-                  </td>
-                </tr>
-              ))
+                        >
+                          <Eye size={18} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </>
             )}
           </tbody>
         </table>
@@ -661,7 +673,9 @@ export default function ProgresHafalan() {
                   {/* KANAN */}
 
                   <button
-                    onClick={() => navigate(`/dashboard/progres-hafalan/${s.nis}`)}
+                    onClick={() =>
+                      navigate(`/dashboard/progres-hafalan/${s.nis}`)
+                    }
                     className="
                       w-9 h-9
                       rounded-full

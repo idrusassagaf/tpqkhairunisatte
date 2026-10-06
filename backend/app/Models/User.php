@@ -14,10 +14,15 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name',
+        'foto',
         'email',
         'password',
         'is_active',
         'role',
+    ];
+
+    protected $appends = [
+        'foto_url',
     ];
 
     protected $hidden = [
@@ -32,5 +37,11 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_active' => 'boolean',
         ];
+    }
+
+    // URL foto profil (null jika belum ada)
+    public function getFotoUrlAttribute(): ?string
+    {
+        return $this->foto ? asset('storage/' . $this->foto) : null;
     }
 }

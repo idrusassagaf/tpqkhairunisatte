@@ -1,3 +1,5 @@
+import TableLoadingRow from "../components/TableLoadingRow";
+import useSedangMemuat from "../hooks/useSedangMemuat";
 import { useEffect, useState } from "react";
 
 import { Download, FileSpreadsheet, FileText } from "lucide-react";
@@ -11,6 +13,8 @@ import autoTable from "jspdf-autotable";
 import { api } from "../api";
 
 export default function ProgresIqra() {
+  const sedangMemuat = useSedangMemuat();
+
   const [santri, setSantri] = useState([]);
   const [guru, setGuru] = useState([]);
   const [progresData, setProgresData] = useState({});
@@ -632,61 +636,69 @@ export default function ProgresIqra() {
             </thead>
 
             <tbody>
-              {currentSantri.length === 0 ? (
-                <tr>
-                  <td colSpan="10" className="text-center p-4">
-                    Tidak ada data progres iqra
-                  </td>
-                </tr>
+              {sedangMemuat ? (
+                <TableLoadingRow colSpan={11} />
               ) : (
-                currentSantri.map((s, i) => {
-                  const namaGuru = progresData[`guru_${s.nis}`] || "-";
-
-                  const dataGuru = guru.find((g) => g.nama_guru === namaGuru);
-
-                  const progres = progresData[s.nis] || "-";
-
-                  const prestasi =
-                    progres === "Lancar"
-                      ? "Di-Lanjut"
-                      : progres === "Belum"
-                        ? "Di-Ulang"
-                        : "-";
-
-                  return (
-                    <tr key={i} className="border-t">
-                      <td className="p-2 font-semibold">{s.nama}</td>
-
-                      <td className="p-2">{s.nis}</td>
-
-                      <td className="p-2">{namaGuru}</td>
-
-                      <td className="p-2">{dataGuru?.nig || "-"}</td>
-
-                      <td className="p-2">{s.kelas || "-"}</td>
-
-                      <td className="p-2">
-                        {progresData[`jilid_${s.nis}`] || "-"}
-                      </td>
-
-                      <td className="p-2">
-                        {progresData[`hal_${s.nis}`] || "-"}
-                      </td>
-
-                      <td className="p-2">{progres}</td>
-
-                      <td className="p-2">{prestasi}</td>
-
-                      <td className="p-2 text-xs text-gray-500">
-                        {new Date().toLocaleDateString("id-ID", {
-                          day: "2-digit",
-                          month: "long",
-                          year: "numeric",
-                        })}
+                <>
+                  {currentSantri.length === 0 ? (
+                    <tr>
+                      <td colSpan="10" className="text-center p-4">
+                        Tidak ada data progres iqra
                       </td>
                     </tr>
-                  );
-                })
+                  ) : (
+                    currentSantri.map((s, i) => {
+                      const namaGuru = progresData[`guru_${s.nis}`] || "-";
+
+                      const dataGuru = guru.find(
+                        (g) => g.nama_guru === namaGuru,
+                      );
+
+                      const progres = progresData[s.nis] || "-";
+
+                      const prestasi =
+                        progres === "Lancar"
+                          ? "Di-Lanjut"
+                          : progres === "Belum"
+                            ? "Di-Ulang"
+                            : "-";
+
+                      return (
+                        <tr key={i} className="border-t">
+                          <td className="p-2 font-semibold">{s.nama}</td>
+
+                          <td className="p-2">{s.nis}</td>
+
+                          <td className="p-2">{namaGuru}</td>
+
+                          <td className="p-2">{dataGuru?.nig || "-"}</td>
+
+                          <td className="p-2">{s.kelas || "-"}</td>
+
+                          <td className="p-2">
+                            {progresData[`jilid_${s.nis}`] || "-"}
+                          </td>
+
+                          <td className="p-2">
+                            {progresData[`hal_${s.nis}`] || "-"}
+                          </td>
+
+                          <td className="p-2">{progres}</td>
+
+                          <td className="p-2">{prestasi}</td>
+
+                          <td className="p-2 text-xs text-gray-500">
+                            {new Date().toLocaleDateString("id-ID", {
+                              day: "2-digit",
+                              month: "long",
+                              year: "numeric",
+                            })}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </>
               )}
             </tbody>
           </table>

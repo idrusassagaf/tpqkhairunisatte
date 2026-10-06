@@ -1,3 +1,4 @@
+import { notifySuccess } from "../toastStore";
 import { useEffect, useState } from "react";
 import { api } from "../api";
 
@@ -5,6 +6,7 @@ export default function Galeri() {
   const [judul, setJudul] = useState("");
   const [foto, setFoto] = useState(null);
   const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadGaleri();
@@ -12,10 +14,14 @@ export default function Galeri() {
 
   const loadGaleri = async () => {
     try {
+      setLoading(true);
+
       const res = await api.get("/galeri");
       setData(res.data.data || []);
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -39,7 +45,7 @@ export default function Galeri() {
 
       loadGaleri();
 
-      alert("Foto berhasil ditambahkan");
+      notifySuccess("Foto berhasil ditambahkan");
     } catch (err) {
       console.error(err);
       alert("Gagal upload foto");
@@ -91,31 +97,39 @@ export default function Galeri() {
       </div>
 
       {/* DATA */}
-      <div className="grid md:grid-cols-3 gap-6">
-        {data.map((item) => (
-          <div
-            key={item.id}
-            className="bg-white rounded-2xl shadow overflow-hidden"
-          >
-            <img
-              src={`${api.defaults.baseURL.replace(/\/api\/?$/, "")}/storage/${item.foto}`}
-              alt={item.judul}
-              className="w-full h-56 object-cover"
-            />
+      {loading ? (
+        <div className="bg-white rounded-xl shadow p-8 flex flex-col items-center justify-center gap-3 text-gray-500">
+          <span className="h-8 w-8 rounded-full border-4 border-gray-200 border-t-purple-600 animate-spin" />
 
-            <div className="p-4">
-              <h3 className="font-semibold mb-3">{item.judul}</h3>
+          <span className="text-sm">Memuat galeri...</span>
+        </div>
+      ) : (
+        <div className="grid md:grid-cols-3 gap-6">
+          {data.map((item) => (
+            <div
+              key={item.id}
+              className="bg-white rounded-2xl shadow overflow-hidden"
+            >
+              <img
+                src={`${api.defaults.baseURL.replace(/\/api\/?$/, "")}/storage/${item.foto}`}
+                alt={item.judul}
+                className="w-full h-56 object-cover"
+              />
 
-              <button
-                onClick={() => hapusGaleri(item.id)}
-                className="bg-red-500 text-white px-4 py-2 rounded-lg"
-              >
-                Hapus
-              </button>
+              <div className="p-4">
+                <h3 className="font-semibold mb-3">{item.judul}</h3>
+
+                <button
+                  onClick={() => hapusGaleri(item.id)}
+                  className="bg-red-500 text-white px-4 py-2 rounded-lg"
+                >
+                  Hapus
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

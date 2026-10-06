@@ -172,8 +172,10 @@ export default function Sidebar({ open, setOpen }) {
     };
 
     window.addEventListener("storage", refreshUser);
+    window.addEventListener("user-updated", refreshUser);
 
     return () => {
+      window.removeEventListener("user-updated", refreshUser);
       window.removeEventListener("storage", refreshUser);
     };
   }, []);
@@ -201,6 +203,11 @@ export default function Sidebar({ open, setOpen }) {
   // =========================================================
 
   const getUserPhoto = () => {
+    // Backend sudah mengirim URL lengkap di foto_url
+    if (user?.foto_url) {
+      return user.foto_url;
+    }
+
     if (!user?.foto) {
       return null;
     }

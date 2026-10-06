@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Absensi;
+use App\Models\JadwalPengajian;
 use App\Models\Santri;
 use App\Models\Guru;
 use Illuminate\Http\Request;
@@ -150,8 +151,32 @@ class AbsensiController extends Controller
             ],
         ]);
 
+        // Absen hanya dibuka pukul 17.30 - 20.00 WIT
+        $waktuWit = now('Asia/Jayapura');
+
+        if (
+            $waktuWit->format('H:i:s') < '17:30:00'
+            || $waktuWit->format('H:i:s') > '20:00:00'
+        ) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Absensi hanya dibuka pukul 17.30 - 20.00 WIT.',
+            ], 422);
+        }
+
         $tanggal = $validated['tanggal']
-            ?? now()->toDateString();
+            ?? $waktuWit->toDateString();
+
+        // Absen hanya dibuka pada hari yang ditandai "mengaji" di kalender
+        $statusJadwal = JadwalPengajian::where('tanggal', $tanggal)
+            ->value('status');
+
+        if ($statusJadwal !== 'mengaji') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Hari ini bukan jadwal mengaji di kalender.',
+            ], 422);
+        }
 
         if ($validated['tipe'] === 'santri') {
             $orang = Santri::where(
@@ -187,17 +212,26 @@ class AbsensiController extends Controller
             $nomor = $orang->nig;
         }
 
-        $absensi = Absensi::updateOrCreate(
-            [
-                'tipe' => $validated['tipe'],
-                'person_id' => $personId,
-                'tanggal' => $tanggal,
-            ],
-            [
-                'status' => 'H',
-                'jam' => now()->format('H:i:s'),
-            ]
-        );
+        // Satu orang hanya bisa absen satu kali per hari
+        $sudahAbsen = Absensi::where('tipe', $validated['tipe'])
+            ->where('person_id', $personId)
+            ->whereDate('tanggal', $tanggal)
+            ->first();
+
+        if ($sudahAbsen) {
+            return response()->json([
+                'success' => false,
+                'message' => "{$nama} sudah absen hari ini pukul {$sudahAbsen->jam}.",
+            ], 409);
+        }
+
+        $absensi = Absensi::create([
+            'tipe' => $validated['tipe'],
+            'person_id' => $personId,
+            'tanggal' => $tanggal,
+            'status' => 'H',
+            'jam' => $waktuWit->format('H:i:s'),
+        ]);
 
         return response()->json([
             'success' => true,

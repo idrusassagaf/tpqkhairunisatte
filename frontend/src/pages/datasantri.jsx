@@ -1,3 +1,5 @@
+import TableLoadingRow from "../components/TableLoadingRow";
+import useSedangMemuat from "../hooks/useSedangMemuat";
 import { useEffect, useState } from "react";
 
 import { Download, FileSpreadsheet, FileText } from "lucide-react";
@@ -11,6 +13,8 @@ import autoTable from "jspdf-autotable";
 import { api } from "../api";
 
 export default function DataSantri() {
+  const sedangMemuat = useSedangMemuat();
+
   const [data, setData] = useState([]);
 
   const [search, setSearch] = useState("");
@@ -546,96 +550,102 @@ export default function DataSantri() {
           </thead>
 
           <tbody>
-            {filteredData.length === 0 ? (
-              <tr>
-                <td colSpan="7" className="text-center p-6 text-gray-500">
-                  Data tidak ditemukan
-                </td>
-              </tr>
+            {sedangMemuat ? (
+              <TableLoadingRow colSpan={8} />
             ) : (
-              paginatedData.map((d, i) => (
-                <tr
-                  key={d.id || i}
-                  className="border-t hover:bg-gray-50 transition"
-                >
-                  {/* FOTO */}
+              <>
+                {filteredData.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="text-center p-6 text-gray-500">
+                      Data tidak ditemukan
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedData.map((d, i) => (
+                    <tr
+                      key={d.id || i}
+                      className="border-t hover:bg-gray-50 transition"
+                    >
+                      {/* FOTO */}
 
-                  <td className="p-3">
-                    {d.foto ? (
-                      <img
-                        src={`${api.defaults.baseURL.replace(/\/api\/?$/, "")}/storage/${d.foto}`}
-                        alt="foto"
-                        className="w-12 h-12 object-cover rounded"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-xs">
-                        No Img
-                      </div>
-                    )}
-                  </td>
+                      <td className="p-3">
+                        {d.foto ? (
+                          <img
+                            src={`${api.defaults.baseURL.replace(/\/api\/?$/, "")}/storage/${d.foto}`}
+                            alt="foto"
+                            className="w-12 h-12 object-cover rounded"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-xs">
+                            No Img
+                          </div>
+                        )}
+                      </td>
 
-                  {/* NAMA */}
+                      {/* NAMA */}
 
-                  <td className="p-3">
-                    <div className="font-medium">{d.nama}</div>
+                      <td className="p-3">
+                        <div className="font-medium">{d.nama}</div>
 
-                    <div className="text-xs text-gray-500">{d.nis}</div>
-                  </td>
+                        <div className="text-xs text-gray-500">{d.nis}</div>
+                      </td>
 
-                  {/* JK + USIA */}
+                      {/* JK + USIA */}
 
-                  <td className="p-3">
-                    <div>
-                      {d.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"},{" "}
-                      {d.usia} Th
-                    </div>
+                      <td className="p-3">
+                        <div>
+                          {d.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"},{" "}
+                          {d.usia} Th
+                        </div>
 
-                    <div className="text-xs text-gray-500">
-                      {d.tanggal_lahir}
-                    </div>
-                  </td>
+                        <div className="text-xs text-gray-500">
+                          {d.tanggal_lahir}
+                        </div>
+                      </td>
 
-                  {/* ALAMAT */}
+                      {/* ALAMAT */}
 
-                  <td className="p-3">
-                    <div>{d.alamat}</div>
+                      <td className="p-3">
+                        <div>{d.alamat}</div>
 
-                    <div className="text-xs text-gray-500">
-                      {d.kontak || "-"}
-                    </div>
-                  </td>
+                        <div className="text-xs text-gray-500">
+                          {d.kontak || "-"}
+                        </div>
+                      </td>
 
-                  {/* AYAH */}
+                      {/* AYAH */}
 
-                  <td className="p-3">
-                    <div>{d.orang_tua?.nama_ayah || "-"}</div>
+                      <td className="p-3">
+                        <div>{d.orang_tua?.nama_ayah || "-"}</div>
 
-                    <div className="text-xs text-gray-500">
-                      {d.orang_tua?.pekerjaan_ayah || "-"}
-                    </div>
-                  </td>
+                        <div className="text-xs text-gray-500">
+                          {d.orang_tua?.pekerjaan_ayah || "-"}
+                        </div>
+                      </td>
 
-                  {/* IBU */}
+                      {/* IBU */}
 
-                  <td className="p-3">
-                    <div>{d.orang_tua?.nama_ibu || "-"}</div>
+                      <td className="p-3">
+                        <div>{d.orang_tua?.nama_ibu || "-"}</div>
 
-                    <div className="text-xs text-gray-500">
-                      {d.orang_tua?.pekerjaan_ibu || "-"}
-                    </div>
-                  </td>
+                        <div className="text-xs text-gray-500">
+                          {d.orang_tua?.pekerjaan_ibu || "-"}
+                        </div>
+                      </td>
 
-                  {/* STATUS */}
+                      {/* STATUS */}
 
-                  <td className="p-3">
-                    <div>{d.status_orangtua || "-"}</div>
+                      <td className="p-3">
+                        <div>{d.status_orangtua || "-"}</div>
 
-                    <div className="text-xs text-gray-500">
-                      {d.status_anak || "-"}
-                    </div>
-                  </td>
-                </tr>
-              ))
+                        <div className="text-xs text-gray-500">
+                          {d.status_anak || "-"}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </>
             )}
           </tbody>
         </table>

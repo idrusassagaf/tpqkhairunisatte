@@ -1,10 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginAdmin() {
   const navigate = useNavigate();
+
+  // Sudah login: langsung ke dashboard, tidak perlu login lagi
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [navigate]);
 
   const [form, setForm] = useState({
     email: "",
@@ -29,7 +36,7 @@ export default function LoginAdmin() {
     setError("");
 
     try {
-      const res = await api.post("/login", form);
+      const res = await api.post("/login", form, { skipLoading: true });
 
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));

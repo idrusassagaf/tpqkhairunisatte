@@ -19,6 +19,14 @@ import ChatAI from "./ChatAI";
 
 export default function PublicLayout() {
   const [mobileMenu, setMobileMenu] = useState(false);
+  // Sudah login jika token tersimpan
+  const sudahLogin = (() => {
+    try {
+      return !!localStorage.getItem("token");
+    } catch {
+      return false;
+    }
+  })();
   const [language, setLanguage] = useState("id");
   const location = useLocation();
 
@@ -33,6 +41,7 @@ export default function PublicLayout() {
       reports: "Laporan",
       contact: "Kontak",
       login: "Login Admin",
+      dashboard: "Dashboard",
 
       footerTitle: "TPQ HAIRUNNISA",
       footerDescription:
@@ -57,6 +66,7 @@ export default function PublicLayout() {
       reports: "Reports",
       contact: "Contact",
       login: "Admin Login",
+      dashboard: "Dashboard",
 
       footerTitle: "TPQ HAIRUNNISA",
       footerDescription:
@@ -81,6 +91,7 @@ export default function PublicLayout() {
       reports: "التقارير",
       contact: "اتصل بنا",
       login: "دخول المسؤول",
+      dashboard: "لوحة التحكم",
 
       footerTitle: "TPQ HAIRUNNISA",
       footerDescription:
@@ -552,8 +563,8 @@ export default function PublicLayout() {
 
             {/* LOGIN ADMIN */}
             <Link
-              to="/login"
-              title="Login Admin"
+              to={sudahLogin ? "/dashboard" : "/login"}
+              title={sudahLogin ? "Dashboard" : "Login Admin"}
               className="
                 ml-1
                 flex
@@ -590,7 +601,9 @@ export default function PublicLayout() {
               </div>
 
               <span className="mt-1 text-[10px] text-green-700 font-semibold">
-                {translations[language].login}
+                {sudahLogin
+                  ? translations[language].dashboard
+                  : translations[language].login}
               </span>
             </Link>
           </nav>
@@ -945,7 +958,7 @@ export default function PublicLayout() {
                   LOGIN ADMIN MOBILE
               ================================================== */}
               <Link
-                to="/login"
+                to={sudahLogin ? "/dashboard" : "/login"}
                 onClick={() => setMobileMenu(false)}
                 className="
                   mt-7
@@ -965,7 +978,9 @@ export default function PublicLayout() {
                 "
               >
                 <LogIn size={21} />
-                {translations[language].login}
+                {sudahLogin
+                  ? translations[language].dashboard
+                  : translations[language].login}
               </Link>
             </div>
           </div>

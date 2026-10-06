@@ -26,3 +26,4 @@ Thumbs.db
 
 # Backup files
 backend/app/Http/Controllers/Api/AiController_backup.php
+catatan.txt

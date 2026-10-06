@@ -41,9 +41,13 @@ export default function ChatAI() {
     setLoading(true);
 
     try {
-      const response = await api.post("/ai/chat", {
-        message: text,
-      });
+      const response = await api.post(
+        "/ai/chat",
+        {
+          message: text,
+        },
+        { skipLoading: true },
+      );
 
       if (response.data?.success) {
         setMessages((prev) => [

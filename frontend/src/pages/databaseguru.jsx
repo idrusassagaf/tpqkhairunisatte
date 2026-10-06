@@ -1,3 +1,5 @@
+import TableLoadingRow from "../components/TableLoadingRow";
+import useSedangMemuat from "../hooks/useSedangMemuat";
 import { useEffect, useState } from "react";
 
 import { Download, FileSpreadsheet, FileText } from "lucide-react";
@@ -11,6 +13,8 @@ import autoTable from "jspdf-autotable";
 import { api } from "../api";
 
 export default function DatabaseGuru() {
+  const sedangMemuat = useSedangMemuat();
+
   const [data, setData] = useState([]);
 
   const [search, setSearch] = useState("");
@@ -584,72 +588,78 @@ export default function DatabaseGuru() {
           </thead>
 
           <tbody>
-            {filteredData.length === 0 ? (
-              <tr>
-                <td colSpan="5" className="text-center p-6 text-gray-500">
-                  Data tidak ditemukan
-                </td>
-              </tr>
+            {sedangMemuat ? (
+              <TableLoadingRow colSpan={6} />
             ) : (
-              paginatedData.map((d, i) => (
-                <tr
-                  key={d.id || i}
-                  className="border-t hover:bg-gray-50 align-top"
-                >
-                  {/* FOTO */}
+              <>
+                {filteredData.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="text-center p-6 text-gray-500">
+                      Data tidak ditemukan
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedData.map((d, i) => (
+                    <tr
+                      key={d.id || i}
+                      className="border-t hover:bg-gray-50 align-top"
+                    >
+                      {/* FOTO */}
 
-                  <td className="p-2">
-                    {d.foto_url ? (
-                      <img
-                        src={d.foto_url}
-                        alt="foto"
-                        className="w-12 h-12 object-cover rounded"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-xs">
-                        No Img
-                      </div>
-                    )}
-                  </td>
+                      <td className="p-2">
+                        {d.foto_url ? (
+                          <img
+                            src={d.foto_url}
+                            alt="foto"
+                            className="w-12 h-12 object-cover rounded"
+                          />
+                        ) : (
+                          <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-xs">
+                            No Img
+                          </div>
+                        )}
+                      </td>
 
-                  {/* NAMA / NIG */}
+                      {/* NAMA / NIG */}
 
-                  <td className="p-2">
-                    <div className="font-medium">{d.nama_guru}</div>
+                      <td className="p-2">
+                        <div className="font-medium">{d.nama_guru}</div>
 
-                    <div className="text-gray-500 text-xs">{d.nig}</div>
-                  </td>
+                        <div className="text-gray-500 text-xs">{d.nig}</div>
+                      </td>
 
-                  {/* JK + USIA */}
+                      {/* JK + USIA */}
 
-                  <td className="p-2">
-                    <div>
-                      {d.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"},{" "}
-                      {d.usia} Th
-                    </div>
+                      <td className="p-2">
+                        <div>
+                          {d.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"},{" "}
+                          {d.usia} Th
+                        </div>
 
-                    <div className="text-gray-500 text-xs">
-                      {d.tanggal_lahir}
-                    </div>
-                  </td>
+                        <div className="text-gray-500 text-xs">
+                          {d.tanggal_lahir}
+                        </div>
+                      </td>
 
-                  {/* PENDIDIKAN / PEKERJAAN */}
+                      {/* PENDIDIKAN / PEKERJAAN */}
 
-                  <td className="p-2">
-                    <div>{d.pendidikan || "-"}</div>
+                      <td className="p-2">
+                        <div>{d.pendidikan || "-"}</div>
 
-                    <div className="text-gray-500 text-xs">
-                      {d.pekerjaan || "-"}
-                    </div>
-                  </td>
+                        <div className="text-gray-500 text-xs">
+                          {d.pekerjaan || "-"}
+                        </div>
+                      </td>
 
-                  {/* KONTAK */}
+                      {/* KONTAK */}
 
-                  <td className="p-2">
-                    <div>{d.kontak || "-"}</div>
-                  </td>
-                </tr>
-              ))
+                      <td className="p-2">
+                        <div>{d.kontak || "-"}</div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </>
             )}
           </tbody>
         </table>

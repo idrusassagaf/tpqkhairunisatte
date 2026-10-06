@@ -1,9 +1,14 @@
+import TableLoadingRow from "../components/TableLoadingRow";
+import useSedangMemuat from "../hooks/useSedangMemuat";
+import { notifySuccess } from "../toastStore";
 import { useEffect, useState } from "react";
 import { api } from "../api";
 import { Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export default function MasterProgres() {
+  const sedangMemuat = useSedangMemuat();
+
   const navigate = useNavigate();
 
   const [tab, setTab] = useState("iqra");
@@ -421,13 +426,12 @@ export default function MasterProgres() {
       }
 
       if (dilewati > 0) {
-        alert(
-          `Data berhasil disimpan ke database.\n\n` +
-            `Berhasil: ${berhasil} data\n` +
-            `Dilewati: ${dilewati} data karena Guru belum dipilih atau NIG tidak ditemukan.`,
+        notifySuccess(
+          `Data berhasil disimpan: ${berhasil} data. ` +
+            `${dilewati} data dilewati karena Guru belum dipilih atau NIG tidak ditemukan.`,
         );
       } else {
-        alert(`Data berhasil disimpan ke database (${berhasil} data).`);
+        notifySuccess(`Data berhasil disimpan ke database (${berhasil} data).`);
       }
     } catch (err) {
       console.error("Gagal menyimpan Master Progres:", err);
@@ -591,151 +595,157 @@ export default function MasterProgres() {
                 </thead>
 
                 <tbody>
-                  {santriIqra.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan="10"
-                        className="text-center p-4 text-gray-500"
-                      >
-                        Tidak ada data santri Iqra
-                      </td>
-                    </tr>
+                  {sedangMemuat ? (
+                    <TableLoadingRow colSpan={11} />
                   ) : (
-                    paginatedSantriIqra.map((s, i) => {
-                      const namaGuru = progresData[`guru_${s.nis}`] || "";
-
-                      const dataGuru = guru.find(
-                        (g) => g.nama_guru === namaGuru,
-                      );
-
-                      const progres = progresData[s.nis] || "";
-
-                      const prestasi =
-                        progres === "Lancar"
-                          ? "Di-Lanjut"
-                          : progres === "Belum"
-                            ? "Di-Ulang"
-                            : "-";
-
-                      return (
-                        <tr
-                          key={s.nis || i}
-                          className="border-t hover:bg-gray-50"
-                        >
-                          {/* NAMA */}
-                          <td className="p-2 border align-middle font-semibold text-gray-800 truncate">
-                            {s.nama}
-                          </td>
-
-                          {/* NIS */}
-                          <td className="p-2 border align-middle whitespace-nowrap">
-                            {s.nis}
-                          </td>
-
-                          {/* GURU */}
-                          <td className="p-2 border align-middle">
-                            <select
-                              className="border p-1.5 rounded text-xs w-full min-w-0"
-                              value={progresData[`guru_${s.nis}`] || ""}
-                              onChange={(e) =>
-                                handleProgresChange(
-                                  `guru_${s.nis}`,
-                                  e.target.value,
-                                )
-                              }
-                            >
-                              <option value="">Pilih Guru</option>
-
-                              {guru.map((g, index) => (
-                                <option
-                                  key={g.nig || index}
-                                  value={g.nama_guru}
-                                >
-                                  {g.nama_guru}
-                                </option>
-                              ))}
-                            </select>
-                          </td>
-
-                          {/* NIG */}
-                          <td className="p-2 border align-middle whitespace-nowrap">
-                            {dataGuru?.nig || "-"}
-                          </td>
-
-                          {/* KELAS */}
-                          <td className="p-2 border align-middle whitespace-nowrap">
-                            {s.kelas || "-"}
-                          </td>
-
-                          {/* JILID */}
-                          <td className="p-2 border align-middle">
-                            <select
-                              className="border p-1.5 rounded text-xs w-full min-w-0"
-                              value={progresData[`jilid_${s.nis}`] || ""}
-                              onChange={(e) =>
-                                handleProgresChange(
-                                  `jilid_${s.nis}`,
-                                  e.target.value,
-                                )
-                              }
-                            >
-                              <option value="">Pilih</option>
-                              <option value="Iqra 1">Iqra 1</option>
-                              <option value="Iqra 2">Iqra 2</option>
-                              <option value="Iqra 3">Iqra 3</option>
-                              <option value="Iqra 4">Iqra 4</option>
-                              <option value="Iqra 5">Iqra 5</option>
-                              <option value="Iqra 6">Iqra 6</option>
-                            </select>
-                          </td>
-
-                          {/* HALAMAN */}
-                          <td className="p-2 border align-middle">
-                            <input
-                              type="number"
-                              className="border p-1.5 rounded text-xs w-full min-w-0"
-                              placeholder="0"
-                              value={progresData[`hal_${s.nis}`] || ""}
-                              onChange={(e) =>
-                                handleProgresChange(
-                                  `hal_${s.nis}`,
-                                  e.target.value,
-                                )
-                              }
-                            />
-                          </td>
-
-                          {/* PROGRES */}
-                          <td className="p-2 border align-middle">
-                            <select
-                              className="border p-1.5 rounded text-xs w-full min-w-0"
-                              value={progres}
-                              onChange={(e) =>
-                                handleProgresChange(s.nis, e.target.value)
-                              }
-                            >
-                              <option value="">Pilih</option>
-                              <option value="Belum">Belum</option>
-                              <option value="Lancar">Lancar</option>
-                            </select>
-                          </td>
-
-                          {/* PRESTASI */}
-                          <td className="p-2 border align-middle font-medium whitespace-nowrap">
-                            {prestasi}
-                          </td>
-
-                          {/* UPDATE */}
-                          <td className="p-2 border align-middle text-gray-500 whitespace-nowrap">
-                            {new Date().toLocaleDateString("id-ID", {
-                              day: "2-digit",
-                              month: "2-digit",
-                              year: "numeric",
-                            })}
+                    <>
+                      {santriIqra.length === 0 ? (
+                        <tr>
+                          <td
+                            colSpan="11"
+                            className="text-center p-4 text-gray-500"
+                          >
+                            Tidak ada data santri Iqra
                           </td>
                         </tr>
-                      );
-                    })
+                      ) : (
+                        paginatedSantriIqra.map((s, i) => {
+                          const namaGuru = progresData[`guru_${s.nis}`] || "";
+
+                          const dataGuru = guru.find(
+                            (g) => g.nama_guru === namaGuru,
+                          );
+
+                          const progres = progresData[s.nis] || "";
+
+                          const prestasi =
+                            progres === "Lancar"
+                              ? "Di-Lanjut"
+                              : progres === "Belum"
+                                ? "Di-Ulang"
+                                : "-";
+
+                          return (
+                            <tr
+                              key={s.nis || i}
+                              className="border-t hover:bg-gray-50"
+                            >
+                              {/* NAMA */}
+                              <td className="p-2 border align-middle font-semibold text-gray-800 truncate">
+                                {s.nama}
+                              </td>
+
+                              {/* NIS */}
+                              <td className="p-2 border align-middle whitespace-nowrap">
+                                {s.nis}
+                              </td>
+
+                              {/* GURU */}
+                              <td className="p-2 border align-middle">
+                                <select
+                                  className="border p-1.5 rounded text-xs w-full min-w-0"
+                                  value={progresData[`guru_${s.nis}`] || ""}
+                                  onChange={(e) =>
+                                    handleProgresChange(
+                                      `guru_${s.nis}`,
+                                      e.target.value,
+                                    )
+                                  }
+                                >
+                                  <option value="">Pilih Guru</option>
+
+                                  {guru.map((g, index) => (
+                                    <option
+                                      key={g.nig || index}
+                                      value={g.nama_guru}
+                                    >
+                                      {g.nama_guru}
+                                    </option>
+                                  ))}
+                                </select>
+                              </td>
+
+                              {/* NIG */}
+                              <td className="p-2 border align-middle whitespace-nowrap">
+                                {dataGuru?.nig || "-"}
+                              </td>
+
+                              {/* KELAS */}
+                              <td className="p-2 border align-middle whitespace-nowrap">
+                                {s.kelas || "-"}
+                              </td>
+
+                              {/* JILID */}
+                              <td className="p-2 border align-middle">
+                                <select
+                                  className="border p-1.5 rounded text-xs w-full min-w-0"
+                                  value={progresData[`jilid_${s.nis}`] || ""}
+                                  onChange={(e) =>
+                                    handleProgresChange(
+                                      `jilid_${s.nis}`,
+                                      e.target.value,
+                                    )
+                                  }
+                                >
+                                  <option value="">Pilih</option>
+                                  <option value="Iqra 1">Iqra 1</option>
+                                  <option value="Iqra 2">Iqra 2</option>
+                                  <option value="Iqra 3">Iqra 3</option>
+                                  <option value="Iqra 4">Iqra 4</option>
+                                  <option value="Iqra 5">Iqra 5</option>
+                                  <option value="Iqra 6">Iqra 6</option>
+                                </select>
+                              </td>
+
+                              {/* HALAMAN */}
+                              <td className="p-2 border align-middle">
+                                <input
+                                  type="number"
+                                  className="border p-1.5 rounded text-xs w-full min-w-0"
+                                  placeholder="0"
+                                  value={progresData[`hal_${s.nis}`] || ""}
+                                  onChange={(e) =>
+                                    handleProgresChange(
+                                      `hal_${s.nis}`,
+                                      e.target.value,
+                                    )
+                                  }
+                                />
+                              </td>
+
+                              {/* PROGRES */}
+                              <td className="p-2 border align-middle">
+                                <select
+                                  className="border p-1.5 rounded text-xs w-full min-w-0"
+                                  value={progres}
+                                  onChange={(e) =>
+                                    handleProgresChange(s.nis, e.target.value)
+                                  }
+                                >
+                                  <option value="">Pilih</option>
+                                  <option value="Belum">Belum</option>
+                                  <option value="Lancar">Lancar</option>
+                                </select>
+                              </td>
+
+                              {/* PRESTASI */}
+                              <td className="p-2 border align-middle font-medium whitespace-nowrap">
+                                {prestasi}
+                              </td>
+
+                              {/* UPDATE */}
+                              <td className="p-2 border align-middle text-gray-500 whitespace-nowrap">
+                                {new Date().toLocaleDateString("id-ID", {
+                                  day: "2-digit",
+                                  month: "2-digit",
+                                  year: "numeric",
+                                })}
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </>
                   )}
                 </tbody>
               </table>
@@ -1074,179 +1084,196 @@ export default function MasterProgres() {
                 </thead>
 
                 <tbody>
-                  {santriQuran.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan="12"
-                        className="text-center p-4 text-gray-500"
-                      >
-                        Tidak ada data santri Al-Qur’an
-                      </td>
-                    </tr>
+                  {sedangMemuat ? (
+                    <TableLoadingRow colSpan={13} />
                   ) : (
-                    paginatedSantriQuran.map((s, i) => {
-                      const namaGuru = progresData[`quran_guru_${s.nis}`] || "";
-
-                      const dataGuru = guru.find(
-                        (g) => g.nama_guru === namaGuru,
-                      );
-
-                      const progres =
-                        progresData[`quran_progres_${s.nis}`] || "";
-
-                      const prestasi =
-                        progres === "Lancar"
-                          ? "Di-Lanjut"
-                          : progres === "Belum"
-                            ? "Di-Ulang"
-                            : "-";
-
-                      return (
-                        <tr
-                          key={s.nis || i}
-                          className="border-t hover:bg-gray-50"
-                        >
-                          {/* NAMA */}
-                          <td className="p-2 border align-middle font-semibold truncate">
-                            {s.nama}
-                          </td>
-
-                          {/* NIS */}
-                          <td className="p-2 border align-middle whitespace-nowrap">
-                            {s.nis}
-                          </td>
-
-                          {/* GURU */}
-                          <td className="p-2 border align-middle">
-                            <select
-                              className="border p-1.5 rounded text-xs w-full min-w-0"
-                              value={progresData[`quran_guru_${s.nis}`] || ""}
-                              onChange={(e) =>
-                                handleProgresChange(
-                                  `quran_guru_${s.nis}`,
-                                  e.target.value,
-                                )
-                              }
-                            >
-                              <option value="">Pilih Guru</option>
-
-                              {guru.map((g, index) => (
-                                <option
-                                  key={g.nig || index}
-                                  value={g.nama_guru}
-                                >
-                                  {g.nama_guru}
-                                </option>
-                              ))}
-                            </select>
-                          </td>
-
-                          {/* NIG */}
-                          <td className="p-2 border align-middle whitespace-nowrap">
-                            {dataGuru?.nig || "-"}
-                          </td>
-
-                          {/* KELAS */}
-                          <td className="p-2 border align-middle whitespace-nowrap">
-                            {s.kelas || "-"}
-                          </td>
-
-                          {/* JUZ */}
-                          <td className="p-2 border align-middle">
-                            <input
-                              type="number"
-                              min="1"
-                              max="30"
-                              className="border p-1.5 rounded text-xs w-full min-w-0"
-                              value={progresData[`quran_juz_${s.nis}`] || ""}
-                              onChange={(e) =>
-                                handleProgresChange(
-                                  `quran_juz_${s.nis}`,
-                                  e.target.value,
-                                )
-                              }
-                            />
-                          </td>
-
-                          {/* SURAH */}
-                          <td className="p-2 border align-middle">
-                            <input
-                              type="text"
-                              className="border p-1.5 rounded text-xs w-full min-w-0"
-                              value={progresData[`quran_surah_${s.nis}`] || ""}
-                              onChange={(e) =>
-                                handleProgresChange(
-                                  `quran_surah_${s.nis}`,
-                                  e.target.value,
-                                )
-                              }
-                            />
-                          </td>
-
-                          {/* AYAT */}
-                          <td className="p-2 border align-middle">
-                            <input
-                              type="number"
-                              className="border p-1.5 rounded text-xs w-full min-w-0"
-                              value={progresData[`quran_ayat_${s.nis}`] || ""}
-                              onChange={(e) =>
-                                handleProgresChange(
-                                  `quran_ayat_${s.nis}`,
-                                  e.target.value,
-                                )
-                              }
-                            />
-                          </td>
-
-                          {/* HALAMAN */}
-                          <td className="p-2 border align-middle">
-                            <input
-                              type="number"
-                              className="border p-1.5 rounded text-xs w-full min-w-0"
-                              value={progresData[`quran_hal_${s.nis}`] || ""}
-                              onChange={(e) =>
-                                handleProgresChange(
-                                  `quran_hal_${s.nis}`,
-                                  e.target.value,
-                                )
-                              }
-                            />
-                          </td>
-
-                          {/* PROGRES */}
-                          <td className="p-2 border align-middle">
-                            <select
-                              className="border p-1.5 rounded text-xs w-full min-w-0"
-                              value={progres}
-                              onChange={(e) =>
-                                handleProgresChange(
-                                  `quran_progres_${s.nis}`,
-                                  e.target.value,
-                                )
-                              }
-                            >
-                              <option value="">Pilih</option>
-                              <option value="Belum">Belum</option>
-                              <option value="Lancar">Lancar</option>
-                            </select>
-                          </td>
-
-                          {/* PRESTASI */}
-                          <td className="p-2 border align-middle font-medium whitespace-nowrap">
-                            {prestasi}
-                          </td>
-
-                          {/* UPDATE */}
-                          <td className="p-2 border align-middle text-gray-500 whitespace-nowrap">
-                            {new Date().toLocaleDateString("id-ID", {
-                              day: "2-digit",
-                              month: "2-digit",
-                              year: "numeric",
-                            })}
+                    <>
+                      {santriQuran.length === 0 ? (
+                        <tr>
+                          <td
+                            colSpan="13"
+                            className="text-center p-4 text-gray-500"
+                          >
+                            Tidak ada data santri Al-Qur’an
                           </td>
                         </tr>
-                      );
-                    })
+                      ) : (
+                        paginatedSantriQuran.map((s, i) => {
+                          const namaGuru =
+                            progresData[`quran_guru_${s.nis}`] || "";
+
+                          const dataGuru = guru.find(
+                            (g) => g.nama_guru === namaGuru,
+                          );
+
+                          const progres =
+                            progresData[`quran_progres_${s.nis}`] || "";
+
+                          const prestasi =
+                            progres === "Lancar"
+                              ? "Di-Lanjut"
+                              : progres === "Belum"
+                                ? "Di-Ulang"
+                                : "-";
+
+                          return (
+                            <tr
+                              key={s.nis || i}
+                              className="border-t hover:bg-gray-50"
+                            >
+                              {/* NAMA */}
+                              <td className="p-2 border align-middle font-semibold truncate">
+                                {s.nama}
+                              </td>
+
+                              {/* NIS */}
+                              <td className="p-2 border align-middle whitespace-nowrap">
+                                {s.nis}
+                              </td>
+
+                              {/* GURU */}
+                              <td className="p-2 border align-middle">
+                                <select
+                                  className="border p-1.5 rounded text-xs w-full min-w-0"
+                                  value={
+                                    progresData[`quran_guru_${s.nis}`] || ""
+                                  }
+                                  onChange={(e) =>
+                                    handleProgresChange(
+                                      `quran_guru_${s.nis}`,
+                                      e.target.value,
+                                    )
+                                  }
+                                >
+                                  <option value="">Pilih Guru</option>
+
+                                  {guru.map((g, index) => (
+                                    <option
+                                      key={g.nig || index}
+                                      value={g.nama_guru}
+                                    >
+                                      {g.nama_guru}
+                                    </option>
+                                  ))}
+                                </select>
+                              </td>
+
+                              {/* NIG */}
+                              <td className="p-2 border align-middle whitespace-nowrap">
+                                {dataGuru?.nig || "-"}
+                              </td>
+
+                              {/* KELAS */}
+                              <td className="p-2 border align-middle whitespace-nowrap">
+                                {s.kelas || "-"}
+                              </td>
+
+                              {/* JUZ */}
+                              <td className="p-2 border align-middle">
+                                <input
+                                  type="number"
+                                  min="1"
+                                  max="30"
+                                  className="border p-1.5 rounded text-xs w-full min-w-0"
+                                  value={
+                                    progresData[`quran_juz_${s.nis}`] || ""
+                                  }
+                                  onChange={(e) =>
+                                    handleProgresChange(
+                                      `quran_juz_${s.nis}`,
+                                      e.target.value,
+                                    )
+                                  }
+                                />
+                              </td>
+
+                              {/* SURAH */}
+                              <td className="p-2 border align-middle">
+                                <input
+                                  type="text"
+                                  className="border p-1.5 rounded text-xs w-full min-w-0"
+                                  value={
+                                    progresData[`quran_surah_${s.nis}`] || ""
+                                  }
+                                  onChange={(e) =>
+                                    handleProgresChange(
+                                      `quran_surah_${s.nis}`,
+                                      e.target.value,
+                                    )
+                                  }
+                                />
+                              </td>
+
+                              {/* AYAT */}
+                              <td className="p-2 border align-middle">
+                                <input
+                                  type="number"
+                                  className="border p-1.5 rounded text-xs w-full min-w-0"
+                                  value={
+                                    progresData[`quran_ayat_${s.nis}`] || ""
+                                  }
+                                  onChange={(e) =>
+                                    handleProgresChange(
+                                      `quran_ayat_${s.nis}`,
+                                      e.target.value,
+                                    )
+                                  }
+                                />
+                              </td>
+
+                              {/* HALAMAN */}
+                              <td className="p-2 border align-middle">
+                                <input
+                                  type="number"
+                                  className="border p-1.5 rounded text-xs w-full min-w-0"
+                                  value={
+                                    progresData[`quran_hal_${s.nis}`] || ""
+                                  }
+                                  onChange={(e) =>
+                                    handleProgresChange(
+                                      `quran_hal_${s.nis}`,
+                                      e.target.value,
+                                    )
+                                  }
+                                />
+                              </td>
+
+                              {/* PROGRES */}
+                              <td className="p-2 border align-middle">
+                                <select
+                                  className="border p-1.5 rounded text-xs w-full min-w-0"
+                                  value={progres}
+                                  onChange={(e) =>
+                                    handleProgresChange(
+                                      `quran_progres_${s.nis}`,
+                                      e.target.value,
+                                    )
+                                  }
+                                >
+                                  <option value="">Pilih</option>
+                                  <option value="Belum">Belum</option>
+                                  <option value="Lancar">Lancar</option>
+                                </select>
+                              </td>
+
+                              {/* PRESTASI */}
+                              <td className="p-2 border align-middle font-medium whitespace-nowrap">
+                                {prestasi}
+                              </td>
+
+                              {/* UPDATE */}
+                              <td className="p-2 border align-middle text-gray-500 whitespace-nowrap">
+                                {new Date().toLocaleDateString("id-ID", {
+                                  day: "2-digit",
+                                  month: "2-digit",
+                                  year: "numeric",
+                                })}
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </>
                   )}
                 </tbody>
               </table>

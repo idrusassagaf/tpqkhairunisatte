@@ -1,9 +1,13 @@
+import TableLoadingRow from "../components/TableLoadingRow";
+import useSedangMemuat from "../hooks/useSedangMemuat";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "../api";
 import { Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export default function MasterHafalan() {
+  const sedangMemuat = useSedangMemuat();
+
   const [santri, setSantri] = useState([]);
   const [progresHafalan, setProgresHafalan] = useState([]);
   const [search, setSearch] = useState("");
@@ -259,55 +263,63 @@ export default function MasterHafalan() {
           </thead>
 
           <tbody>
-            {santri.length === 0 ? (
-              <tr>
-                <td colSpan="7" className="text-center p-6 text-gray-500">
-                  Data santri belum tersedia
-                </td>
-              </tr>
-            ) : currentSantri.length === 0 ? (
-              <tr>
-                <td colSpan="7" className="text-center p-6 text-gray-500">
-                  Data santri tidak ditemukan
-                </td>
-              </tr>
+            {sedangMemuat ? (
+              <TableLoadingRow colSpan={8} />
             ) : (
-              currentSantri.map((s, i) => (
-                <tr key={s.nis || i} className="border-t hover:bg-gray-50">
-                  <td className="p-1 border text-center">
-                    {startIndex + i + 1}
-                  </td>
+              <>
+                {santri.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="text-center p-6 text-gray-500">
+                      Data santri belum tersedia
+                    </td>
+                  </tr>
+                ) : currentSantri.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="text-center p-6 text-gray-500">
+                      Data santri tidak ditemukan
+                    </td>
+                  </tr>
+                ) : (
+                  currentSantri.map((s, i) => (
+                    <tr key={s.nis || i} className="border-t hover:bg-gray-50">
+                      <td className="p-1 border text-center">
+                        {startIndex + i + 1}
+                      </td>
 
-                  <td className="p-1 border font-medium">{s.nama}</td>
+                      <td className="p-1 border font-medium">{s.nama}</td>
 
-                  <td className="p-1 border">{s.nis}</td>
+                      <td className="p-1 border">{s.nis}</td>
 
-                  <td className="p-1 border">{s.kelas}</td>
+                      <td className="p-1 border">{s.kelas}</td>
 
-                  <td className="p-1 border text-center font-medium text-green-700">
-                    {getJumlahHafalan(s.nis, "Lancar")}-Hafalan
-                  </td>
+                      <td className="p-1 border text-center font-medium text-green-700">
+                        {getJumlahHafalan(s.nis, "Lancar")}-Hafalan
+                      </td>
 
-                  <td className="p-1 border text-center font-medium text-red-700">
-                    {getJumlahHafalan(s.nis, "Belum")}-Hafalan
-                  </td>
+                      <td className="p-1 border text-center font-medium text-red-700">
+                        {getJumlahHafalan(s.nis, "Belum")}-Hafalan
+                      </td>
 
-                  <td className="p-1 border text-center">
-                    <button
-                      type="button"
-                      onClick={() => navigate(`/dashboard/master-hafalan/${s.nis}`)}
-                      className="
+                      <td className="p-1 border text-center">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            navigate(`/dashboard/master-hafalan/${s.nis}`)
+                          }
+                          className="
                         inline-flex items-center justify-center
                         w-7 h-7 rounded-full
                         bg-purple-100 hover:bg-purple-200
                         text-purple-700 transition
                       "
-                    >
-                      <Eye size={18} />
-                    </button>
-                  </td>
-                </tr>
-              ))
+                        >
+                          <Eye size={18} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </>
             )}
           </tbody>
         </table>
@@ -382,7 +394,9 @@ export default function MasterHafalan() {
 
                     <button
                       type="button"
-                      onClick={() => navigate(`/dashboard/master-hafalan/${s.nis}`)}
+                      onClick={() =>
+                        navigate(`/dashboard/master-hafalan/${s.nis}`)
+                      }
                       className="
                         w-9 h-9
                         rounded-full

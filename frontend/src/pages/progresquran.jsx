@@ -1,3 +1,5 @@
+import TableLoadingRow from "../components/TableLoadingRow";
+import useSedangMemuat from "../hooks/useSedangMemuat";
 import { useEffect, useState } from "react";
 import { Download, FileSpreadsheet, FileText } from "lucide-react";
 import * as XLSX from "xlsx";
@@ -7,6 +9,8 @@ import autoTable from "jspdf-autotable";
 import { api } from "../api";
 
 export default function ProgresQuran() {
+  const sedangMemuat = useSedangMemuat();
+
   const [dataQuran, setDataQuran] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [search, setSearch] = useState("");
@@ -678,40 +682,49 @@ export default function ProgresQuran() {
             </thead>
 
             <tbody>
-              {currentData.length === 0 ? (
-                <tr>
-                  <td colSpan="11" className="text-center p-4 text-gray-500">
-                    Belum ada data progres Qur'an
-                  </td>
-                </tr>
+              {sedangMemuat ? (
+                <TableLoadingRow colSpan={12} />
               ) : (
-                currentData.map((d, i) => (
-                  <tr key={i} className="border-t">
-                    <td className="p-2 border font-semibold">{d.nama}</td>
+                <>
+                  {currentData.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan="11"
+                        className="text-center p-4 text-gray-500"
+                      >
+                        Belum ada data progres Qur'an
+                      </td>
+                    </tr>
+                  ) : (
+                    currentData.map((d, i) => (
+                      <tr key={i} className="border-t">
+                        <td className="p-2 border font-semibold">{d.nama}</td>
 
-                    <td className="p-2 border">{d.nis}</td>
+                        <td className="p-2 border">{d.nis}</td>
 
-                    <td className="p-2 border">{d.guru}</td>
+                        <td className="p-2 border">{d.guru}</td>
 
-                    <td className="p-2 border">{d.kelas}</td>
+                        <td className="p-2 border">{d.kelas}</td>
 
-                    <td className="p-2 border">{d.juz}</td>
+                        <td className="p-2 border">{d.juz}</td>
 
-                    <td className="p-2 border">{d.surah}</td>
+                        <td className="p-2 border">{d.surah}</td>
 
-                    <td className="p-2 border">{d.ayat}</td>
+                        <td className="p-2 border">{d.ayat}</td>
 
-                    <td className="p-2 border">{d.halaman}</td>
+                        <td className="p-2 border">{d.halaman}</td>
 
-                    <td className="p-2 border">{d.progres}</td>
+                        <td className="p-2 border">{d.progres}</td>
 
-                    <td className="p-2 border">{d.prestasi}</td>
+                        <td className="p-2 border">{d.prestasi}</td>
 
-                    <td className="p-2 border text-xs text-gray-500">
-                      {d.update}
-                    </td>
-                  </tr>
-                ))
+                        <td className="p-2 border text-xs text-gray-500">
+                          {d.update}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </>
               )}
             </tbody>
           </table>

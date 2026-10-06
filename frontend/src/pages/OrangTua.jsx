@@ -1,3 +1,4 @@
+import { notifySuccess } from "../toastStore";
 import { useEffect, useState } from "react";
 import { api } from "../api";
 
@@ -52,7 +53,7 @@ export default function OrangTua() {
     api
       .post("/orangtua", payload)
       .then(() => {
-        alert("Berhasil tambah orang tua");
+        notifySuccess("Orang tua berhasil ditambahkan");
         setForm({
           nama_ayah: "",
           nama_ibu: "",

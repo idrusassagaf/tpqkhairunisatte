@@ -1,7 +1,12 @@
+import TableLoadingRow from "../components/TableLoadingRow";
+import useSedangMemuat from "../hooks/useSedangMemuat";
+import { notifySuccess } from "../toastStore";
 import { useState, useEffect } from "react";
 import { api } from "../api";
 
 export default function MasterData() {
+  const sedangMemuat = useSedangMemuat();
+
   // ================= SANTRI =================
   const [form, setForm] = useState({
     nama: "",
@@ -159,7 +164,7 @@ export default function MasterData() {
       .then((res) => {
         console.log("HASIL SIMPAN:", res.data);
 
-        alert("Alhamdulillah... Data santri berhasil");
+        notifySuccess("Data santri berhasil disimpan");
 
         setEditSantriId(null);
 
@@ -276,7 +281,7 @@ export default function MasterData() {
 
     request
       .then(() => {
-        alert("Alhamdulillah... Data guru berhasil");
+        notifySuccess("Data guru berhasil disimpan");
 
         setEditGuruId(null);
 
@@ -364,7 +369,7 @@ export default function MasterData() {
     try {
       await api.delete(`/master-data/${id}`);
 
-      alert("Berhasil dihapus");
+      notifySuccess("Data berhasil dihapus");
 
       fetchSantri();
 
@@ -390,7 +395,7 @@ export default function MasterData() {
     try {
       await api.delete(`/guru/${id}`);
 
-      alert("Guru berhasil dihapus");
+      notifySuccess("Guru berhasil dihapus");
 
       fetchGuru();
 
@@ -535,10 +540,10 @@ export default function MasterData() {
       </h1>
 
       {/* TAB */}
-      <div className="grid grid-cols-2 md:flex gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 md:flex gap-2 md:gap-4">
         <button
           onClick={() => setTab("santri")}
-          className={`px-4 py-2 font-light rounded ${
+          className={`px-3 py-2 sm:px-4 text-sm font-light rounded text-center ${
             tab === "santri" ? "bg-purple-600 text-white" : "bg-gray-200"
           }`}
         >
@@ -547,7 +552,7 @@ export default function MasterData() {
 
         <button
           onClick={() => setTab("guru")}
-          className={`px-4 py-2 font-light rounded ${
+          className={`px-3 py-2 sm:px-4 text-sm font-light rounded text-center ${
             tab === "guru" ? "bg-purple-600 text-white" : "bg-gray-200"
           }`}
         >
@@ -556,7 +561,7 @@ export default function MasterData() {
 
         <button
           onClick={() => setTab("viewSantri")}
-          className={`px-4 py-2 font-light rounded ${
+          className={`px-3 py-2 sm:px-4 text-sm font-light rounded text-center ${
             tab === "viewSantri" ? "bg-green-600 text-white" : "bg-gray-200"
           }`}
         >
@@ -565,7 +570,7 @@ export default function MasterData() {
 
         <button
           onClick={() => setTab("viewGuru")}
-          className={`px-4 py-2 font-light rounded ${
+          className={`px-3 py-2 sm:px-4 text-sm font-light rounded text-center ${
             tab === "viewGuru" ? "bg-blue-600 text-white" : "bg-gray-200"
           }`}
         >
@@ -578,13 +583,13 @@ export default function MasterData() {
       {/* ===================================================== */}
 
       {tab === "santri" && (
-        <div className="w-[calc(100%-8px)] mx-auto md:w-auto md:mx-0 bg-white p-3 md:p-4 rounded-xl shadow-sm md:border">
+        <div className="w-full md:w-auto md:mx-0 bg-white p-3 md:p-4 rounded-xl shadow-sm md:border">
           <div className="md:max-w-4xl md:mx-auto">
             <form
               onSubmit={handleSubmit}
-              className="w-full max-w-full min-w-0 grid md:grid-cols-2 gap-3 md:gap-4 text-xs"
+              className="w-full max-w-full min-w-0 grid sm:grid-cols-2 gap-3 md:gap-4 text-sm md:text-xs"
             >
-              <div className="hidden md:block md:col-span-2 font-extralight text-black border-b pb-1">
+              <div className="hidden md:block sm:col-span-2 font-extralight text-black border-b pb-1">
                 Isi Data Santri dan Orangtua berdasarkan dokumen resmi KTP/Kartu
                 Keluarga dan keterangan orangtua
               </div>
@@ -646,20 +651,20 @@ export default function MasterData() {
                 placeholder="Alamat"
                 value={form.alamat}
                 onChange={handleChange}
-                className="border p-2 rounded md:col-span-2"
+                className="border p-2 rounded sm:col-span-2"
               />
 
               <input
                 type="file"
                 onChange={handleFotoSantri}
-                className="border p-2 rounded md:col-span-2"
+                className="border p-2 rounded sm:col-span-2"
               />
 
               {form.foto && (
                 <img
                   src={URL.createObjectURL(form.foto)}
                   alt="preview"
-                  className="w-24 h-24 object-cover rounded border md:col-span-2"
+                  className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded border sm:col-span-2"
                 />
               )}
 
@@ -700,7 +705,7 @@ export default function MasterData() {
                 placeholder="Nomor Kontak"
                 value={form.kontak}
                 onChange={handleChange}
-                className="border p-2 rounded md:col-span-2"
+                className="border p-2 rounded sm:col-span-2"
               />
 
               <select
@@ -721,7 +726,7 @@ export default function MasterData() {
                 className="border p-2 rounded bg-gray-100"
               />
 
-              <button className="md:col-span-2 bg-purple-600 text-white py-2 rounded">
+              <button className="sm:col-span-2 bg-purple-600 text-white py-2.5 text-sm rounded">
                 {editSantriId ? "Update Data Santri" : "Simpan Data Santri"}
               </button>
             </form>
@@ -734,11 +739,11 @@ export default function MasterData() {
       {/* ===================================================== */}
 
       {tab === "guru" && (
-        <div className="w-[calc(100%-8px)] mx-auto md:w-auto md:mx-0 bg-white p-3 md:p-4 rounded-xl shadow-sm md:border">
+        <div className="w-full md:w-auto md:mx-0 bg-white p-3 md:p-4 rounded-xl shadow-sm md:border">
           <div className="md:max-w-4xl md:mx-auto">
             <form
               onSubmit={handleSubmitGuru}
-              className="w-full max-w-full min-w-0 grid md:grid-cols-2 gap-3 md:gap-4 text-sm"
+              className="w-full max-w-full min-w-0 grid sm:grid-cols-2 gap-3 md:gap-4 text-sm"
             >
               <input
                 name="nama_guru"
@@ -812,13 +817,13 @@ export default function MasterData() {
                 <img
                   src={URL.createObjectURL(formGuru.foto)}
                   alt="preview"
-                  className="w-24 h-24 object-cover rounded border"
+                  className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded border"
                 />
               )}
 
               <button
                 type="submit"
-                className="md:col-span-2 bg-blue-600 text-white py-2 rounded"
+                className="sm:col-span-2 bg-blue-600 text-white py-2 rounded"
               >
                 {editGuruId ? "Update Data Guru" : "Simpan Data Guru"}
               </button>
@@ -832,7 +837,7 @@ export default function MasterData() {
       {/* ===================================================== */}
 
       {tab === "viewSantri" && (
-        <div className="w-[calc(100%+8px)] -ml-1 md:w-auto md:ml-0 bg-transparent md:bg-white p-0 md:p-5 md:rounded-xl md:shadow">
+        <div className="w-full md:w-auto bg-transparent md:bg-white p-0 md:p-5 md:rounded-xl md:shadow">
           {/* SEARCH */}
           <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <input
@@ -843,7 +848,7 @@ export default function MasterData() {
                 setSearchSantri(e.target.value);
                 setSantriPage(1);
               }}
-              className="border p-2 rounded w-full md:w-64"
+              className="border p-2 rounded w-full md:w-64 text-sm"
             />
 
             <div className="text-xs text-gray-500">
@@ -871,22 +876,22 @@ export default function MasterData() {
                         <img
                           src={`${api.defaults.baseURL.replace(/\/api\/?$/, "")}/storage/${d.foto}`}
                           alt="foto"
-                          className="w-24 h-24 object-cover rounded-full border-4 border-white shadow"
+                          className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-full border-4 border-white shadow"
                         />
                       ) : (
-                        <div className="w-24 h-24 bg-white text-gray-800 rounded-full flex items-center justify-center text-xs border-4 border-white">
+                        <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white text-gray-800 rounded-full flex items-center justify-center text-xs border-4 border-white">
                           No Foto
                         </div>
                       )}
                     </div>
 
-                    <div className="text-black font-bold text-lg uppercase">
+                    <div className="text-black font-bold text-base sm:text-lg uppercase break-words">
                       {d.nama}
                     </div>
                   </div>
 
                   {/* NARASI */}
-                  <div className="text-base p-4 space-y-3 bg-blue-100 text-gray-700 text-justify">
+                  <div className="text-sm sm:text-base p-4 space-y-3 bg-blue-100 text-gray-700 text-justify">
                     Adalah santri TPQ Khairunisa Ternate - nomor ID {d.nis}{" "}
                     Kelas pada {d.kelas || "-"} dengan jenis kelamin{" "}
                     {d.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"}{" "}
@@ -961,129 +966,141 @@ export default function MasterData() {
               </thead>
 
               <tbody>
-                {paginatedSantri.length === 0 ? (
-                  <tr>
-                    <td colSpan="8" className="text-center p-4">
-                      Data tidak ditemukan
-                    </td>
-                  </tr>
+                {sedangMemuat ? (
+                  <TableLoadingRow colSpan={9} />
                 ) : (
-                  paginatedSantri.map((d, i) => (
-                    <tr key={d.id || i} className="border-t hover:bg-gray-50">
-                      {/* FOTO */}
-                      <td className="p-2">
-                        {d.foto ? (
-                          <img
-                            src={`${api.defaults.baseURL.replace(/\/api\/?$/, "")}/storage/${d.foto}`}
-                            alt="foto"
-                            className="w-12 h-12 object-cover rounded"
-                          />
-                        ) : (
-                          <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-xs">
-                            No Img
-                          </div>
-                        )}
-                      </td>
+                  <>
+                    {paginatedSantri.length === 0 ? (
+                      <tr>
+                        <td colSpan="8" className="text-center p-4">
+                          Data tidak ditemukan
+                        </td>
+                      </tr>
+                    ) : (
+                      paginatedSantri.map((d, i) => (
+                        <tr
+                          key={d.id || i}
+                          className="border-t hover:bg-gray-50"
+                        >
+                          {/* FOTO */}
+                          <td className="p-2">
+                            {d.foto ? (
+                              <img
+                                src={`${api.defaults.baseURL.replace(/\/api\/?$/, "")}/storage/${d.foto}`}
+                                alt="foto"
+                                className="w-12 h-12 object-cover rounded"
+                              />
+                            ) : (
+                              <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-xs">
+                                No Img
+                              </div>
+                            )}
+                          </td>
 
-                      {/* NAMA */}
-                      <td className="p-2">
-                        <div className="font-semibold">{d.nama}</div>
+                          {/* NAMA */}
+                          <td className="p-2">
+                            <div className="font-semibold">{d.nama}</div>
 
-                        <div className="text-xs text-gray-500">
-                          {d.nis} | Kelas {d.kelas || "-"}
-                        </div>
-                      </td>
+                            <div className="text-xs text-gray-500">
+                              {d.nis} | Kelas {d.kelas || "-"}
+                            </div>
+                          </td>
 
-                      {/* JK */}
-                      <td className="p-2">
-                        <div>
-                          {d.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"},{" "}
-                          {d.usia} Th
-                        </div>
+                          {/* JK */}
+                          <td className="p-2">
+                            <div>
+                              {d.jenis_kelamin === "L"
+                                ? "Laki-laki"
+                                : "Perempuan"}
+                              , {d.usia} Th
+                            </div>
 
-                        <div className="text-xs text-gray-500">
-                          {d.tanggal_lahir}
-                        </div>
-                      </td>
+                            <div className="text-xs text-gray-500">
+                              {d.tanggal_lahir}
+                            </div>
+                          </td>
 
-                      {/* ALAMAT */}
-                      <td className="p-2">
-                        <div>{d.alamat || "-"}</div>
+                          {/* ALAMAT */}
+                          <td className="p-2">
+                            <div>{d.alamat || "-"}</div>
 
-                        <div className="text-xs text-gray-500">
-                          {d.kontak || "-"}
-                        </div>
-                      </td>
+                            <div className="text-xs text-gray-500">
+                              {d.kontak || "-"}
+                            </div>
+                          </td>
 
-                      {/* AYAH */}
-                      <td className="p-2">
-                        <div>{d.orang_tua?.nama_ayah || "-"}</div>
+                          {/* AYAH */}
+                          <td className="p-2">
+                            <div>{d.orang_tua?.nama_ayah || "-"}</div>
 
-                        <div className="text-xs text-gray-500">
-                          {d.orang_tua?.pekerjaan_ayah || "-"}
-                        </div>
-                      </td>
+                            <div className="text-xs text-gray-500">
+                              {d.orang_tua?.pekerjaan_ayah || "-"}
+                            </div>
+                          </td>
 
-                      {/* IBU */}
-                      <td className="p-2">
-                        <div>{d.orang_tua?.nama_ibu || "-"}</div>
+                          {/* IBU */}
+                          <td className="p-2">
+                            <div>{d.orang_tua?.nama_ibu || "-"}</div>
 
-                        <div className="text-xs text-gray-500">
-                          {d.orang_tua?.pekerjaan_ibu || "-"}
-                        </div>
-                      </td>
+                            <div className="text-xs text-gray-500">
+                              {d.orang_tua?.pekerjaan_ibu || "-"}
+                            </div>
+                          </td>
 
-                      {/* STATUS */}
-                      <td className="p-2">
-                        <div>{d.status_orangtua || "-"}</div>
+                          {/* STATUS */}
+                          <td className="p-2">
+                            <div>{d.status_orangtua || "-"}</div>
 
-                        <div className="text-xs text-gray-500">
-                          {d.status_anak || "-"}
-                        </div>
-                      </td>
+                            <div className="text-xs text-gray-500">
+                              {d.status_anak || "-"}
+                            </div>
+                          </td>
 
-                      {/* AKSI */}
-                      <td className="p-2 text-center">
-                        <div className="flex justify-center gap-2">
-                          <button
-                            className="text-blue-600"
-                            onClick={() => {
-                              setForm({
-                                nama: d.nama,
-                                nis: d.nis,
-                                kelas: d.kelas || "",
-                                jenis_kelamin: d.jenis_kelamin,
-                                tanggal_lahir: d.tanggal_lahir,
-                                usia: d.usia,
-                                alamat: d.alamat,
-                                kontak: d.kontak,
-                                status_orangtua: d.status_orangtua,
-                                status_anak: d.status_anak,
-                                foto: null,
-                                nama_ayah: d.orang_tua?.nama_ayah || "",
-                                pekerjaan_ayah:
-                                  d.orang_tua?.pekerjaan_ayah || "",
-                                nama_ibu: d.orang_tua?.nama_ibu || "",
-                                pekerjaan_ibu: d.orang_tua?.pekerjaan_ibu || "",
-                              });
+                          {/* AKSI */}
+                          <td className="p-2 text-center">
+                            <div className="flex justify-center gap-2">
+                              <button
+                                className="text-blue-600"
+                                onClick={() => {
+                                  setForm({
+                                    nama: d.nama,
+                                    nis: d.nis,
+                                    kelas: d.kelas || "",
+                                    jenis_kelamin: d.jenis_kelamin,
+                                    tanggal_lahir: d.tanggal_lahir,
+                                    usia: d.usia,
+                                    alamat: d.alamat,
+                                    kontak: d.kontak,
+                                    status_orangtua: d.status_orangtua,
+                                    status_anak: d.status_anak,
+                                    foto: null,
+                                    nama_ayah: d.orang_tua?.nama_ayah || "",
+                                    pekerjaan_ayah:
+                                      d.orang_tua?.pekerjaan_ayah || "",
+                                    nama_ibu: d.orang_tua?.nama_ibu || "",
+                                    pekerjaan_ibu:
+                                      d.orang_tua?.pekerjaan_ibu || "",
+                                  });
 
-                              setEditSantriId(d.id);
-                              setTab("santri");
-                            }}
-                          >
-                            ✏️
-                          </button>
+                                  setEditSantriId(d.id);
+                                  setTab("santri");
+                                }}
+                              >
+                                ✏️
+                              </button>
 
-                          <button
-                            className="text-red-600"
-                            onClick={() => handleDeleteSantri(d.id)}
-                          >
-                            🗑️
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                              <button
+                                className="text-red-600"
+                                onClick={() => handleDeleteSantri(d.id)}
+                              >
+                                🗑️
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </>
                 )}
               </tbody>
             </table>
@@ -1151,7 +1168,7 @@ export default function MasterData() {
       {/* ===================================================== */}
 
       {tab === "viewGuru" && (
-        <div className="w-[calc(100%+8px)] -ml-1 md:w-auto md:ml-0 bg-transparent md:bg-white p-0 md:p-5 md:rounded-xl md:shadow">
+        <div className="w-full md:w-auto bg-transparent md:bg-white p-0 md:p-5 md:rounded-xl md:shadow">
           {/* SEARCH */}
           <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <input
@@ -1162,7 +1179,7 @@ export default function MasterData() {
                 setSearchGuru(e.target.value);
                 setGuruPage(1);
               }}
-              className="border p-2 rounded w-full md:w-64"
+              className="border p-2 rounded w-full md:w-64 text-sm"
             />
 
             <div className="text-xs text-gray-500">
@@ -1189,22 +1206,22 @@ export default function MasterData() {
                         <img
                           src={g.foto_url}
                           alt="foto"
-                          className="w-24 h-24 object-cover rounded-full border-4 border-white shadow"
+                          className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-full border-4 border-white shadow"
                         />
                       ) : (
-                        <div className="w-24 h-24 bg-white text-gray-500 rounded-full flex items-center justify-center text-xs border-4 border-white">
+                        <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white text-gray-500 rounded-full flex items-center justify-center text-xs border-4 border-white">
                           No Foto
                         </div>
                       )}
                     </div>
 
-                    <div className="text-black font-bold text-lg uppercase">
+                    <div className="text-black font-bold text-base sm:text-lg uppercase break-words">
                       {g.nama_guru}
                     </div>
                   </div>
 
                   {/* NARASI */}
-                  <div className="text-base p-4 space-y-3 bg-blue-100 text-gray-700 text-justify">
+                  <div className="text-sm sm:text-base p-4 space-y-3 bg-blue-100 text-gray-700 text-justify">
                     Adalah guru TPQ Hairunnisa Ternate dengan nomor ID {g.nig}.
                     Berjenis kelamin{" "}
                     {g.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"}{" "}
@@ -1265,96 +1282,107 @@ export default function MasterData() {
               </thead>
 
               <tbody>
-                {paginatedGuru.length === 0 ? (
-                  <tr>
-                    <td colSpan="6" className="text-center p-3">
-                      Data guru kosong
-                    </td>
-                  </tr>
+                {sedangMemuat ? (
+                  <TableLoadingRow colSpan={7} />
                 ) : (
-                  paginatedGuru.map((g, i) => (
-                    <tr key={g.id || i} className="border-t hover:bg-gray-50">
-                      {/* FOTO */}
-                      <td className="p-2">
-                        {g.foto ? (
-                          <img
-                            src={g.foto_url}
-                            alt="foto"
-                            className="w-12 h-12 object-cover rounded"
-                          />
-                        ) : (
-                          <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-xs">
-                            No Img
-                          </div>
-                        )}
-                      </td>
+                  <>
+                    {paginatedGuru.length === 0 ? (
+                      <tr>
+                        <td colSpan="6" className="text-center p-3">
+                          Data guru kosong
+                        </td>
+                      </tr>
+                    ) : (
+                      paginatedGuru.map((g, i) => (
+                        <tr
+                          key={g.id || i}
+                          className="border-t hover:bg-gray-50"
+                        >
+                          {/* FOTO */}
+                          <td className="p-2">
+                            {g.foto ? (
+                              <img
+                                src={g.foto_url}
+                                alt="foto"
+                                className="w-12 h-12 object-cover rounded"
+                              />
+                            ) : (
+                              <div className="w-12 h-12 bg-gray-200 rounded flex items-center justify-center text-xs">
+                                No Img
+                              </div>
+                            )}
+                          </td>
 
-                      {/* NAMA */}
-                      <td className="p-2">
-                        <div className="font-semibold">{g.nama_guru}</div>
+                          {/* NAMA */}
+                          <td className="p-2">
+                            <div className="font-semibold">{g.nama_guru}</div>
 
-                        <div className="text-xs text-gray-500">{g.nig}</div>
-                      </td>
+                            <div className="text-xs text-gray-500">{g.nig}</div>
+                          </td>
 
-                      {/* JK */}
-                      <td className="p-2">
-                        <div>
-                          {g.jenis_kelamin === "L" ? "Laki-laki" : "Perempuan"}{" "}
-                          {g.usia} Th
-                        </div>
+                          {/* JK */}
+                          <td className="p-2">
+                            <div>
+                              {g.jenis_kelamin === "L"
+                                ? "Laki-laki"
+                                : "Perempuan"}{" "}
+                              {g.usia} Th
+                            </div>
 
-                        <div className="text-xs text-gray-500">
-                          {g.tanggal_lahir}
-                        </div>
-                      </td>
+                            <div className="text-xs text-gray-500">
+                              {g.tanggal_lahir}
+                            </div>
+                          </td>
 
-                      {/* PENDIDIKAN */}
-                      <td className="p-2">
-                        <div>{g.pendidikan || "-"}</div>
+                          {/* PENDIDIKAN */}
+                          <td className="p-2">
+                            <div>{g.pendidikan || "-"}</div>
 
-                        <div className="text-xs text-gray-500">
-                          {g.pekerjaan || "-"}
-                        </div>
-                      </td>
+                            <div className="text-xs text-gray-500">
+                              {g.pekerjaan || "-"}
+                            </div>
+                          </td>
 
-                      {/* KONTAK */}
-                      <td className="p-2">{g.kontak || "-"}</td>
+                          {/* KONTAK */}
+                          <td className="p-2">{g.kontak || "-"}</td>
 
-                      {/* AKSI */}
-                      <td className="p-2 text-center">
-                        <div className="flex justify-center gap-2">
-                          <button
-                            className="text-blue-600"
-                            onClick={() => {
-                              setFormGuru({
-                                nama_guru: g.nama_guru,
-                                nig: g.nig,
-                                jenis_kelamin: g.jenis_kelamin,
-                                tanggal_lahir: g.tanggal_lahir,
-                                usia: g.usia,
-                                pendidikan: g.pendidikan,
-                                pekerjaan: g.pekerjaan,
-                                kontak: g.kontak,
-                                foto: null,
-                              });
+                          {/* AKSI */}
+                          <td className="p-2 text-center">
+                            <div className="flex justify-center gap-2">
+                              <button
+                                className="text-blue-600"
+                                onClick={() => {
+                                  setFormGuru({
+                                    nama_guru: g.nama_guru,
+                                    nig: g.nig,
+                                    jenis_kelamin: g.jenis_kelamin,
+                                    tanggal_lahir: g.tanggal_lahir,
+                                    usia: g.usia,
+                                    pendidikan: g.pendidikan,
+                                    pekerjaan: g.pekerjaan,
+                                    kontak: g.kontak,
+                                    foto: null,
+                                  });
 
-                              setEditGuruId(g.id);
-                              setTab("guru");
-                            }}
-                          >
-                            ✏️
-                          </button>
+                                  setEditGuruId(g.id);
+                                  setTab("guru");
+                                }}
+                              >
+                                ✏️
+                              </button>
 
-                          <button
-                            className="text-red-600"
-                            onClick={() => handleDeleteGuru(g.id)}
-                          >
-                            🗑️
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                              <button
+                                className="text-red-600"
+                                onClick={() => handleDeleteGuru(g.id)}
+                              >
+                                🗑️
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </>
                 )}
               </tbody>
             </table>

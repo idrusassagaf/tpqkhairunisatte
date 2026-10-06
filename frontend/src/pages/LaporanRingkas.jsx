@@ -1,10 +1,26 @@
+import { notifySuccess } from "../toastStore";
 import { useEffect, useState } from "react";
 import { api } from "../api";
 import { Eye, Download, Save } from "lucide-react";
-import RichTextEditor from "../components/laporan/RichTextEditor";
+import TinyEditor from "../components/TinyEditor";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
+
+const DAFTAR_TOPIK = [
+  { value: "cover", label: "Cover" },
+  { value: "pendahuluan", label: "Pendahuluan" },
+  { value: "ringkasan", label: "Ringkasan Eksekutif" },
+  { value: "bab1", label: "BAB I - Data Santri" },
+  { value: "bab2", label: "BAB II - Status Santri" },
+  { value: "bab3", label: "BAB III - Data Guru" },
+  { value: "bab4", label: "BAB IV - Status Guru" },
+  { value: "bab5", label: "BAB V - Progres Iqra" },
+  { value: "bab6", label: "BAB VI - Progres Al-Qur'an" },
+  { value: "bab7", label: "BAB VII - Hafalan" },
+  { value: "bab8", label: "BAB VIII - Kesimpulan" },
+  { value: "penutup", label: "Penutup" },
+];
 
 export default function LaporanRingkas() {
   const [loading, setLoading] = useState(true);
@@ -52,7 +68,7 @@ export default function LaporanRingkas() {
     try {
       await api.put("/laporan-setting", form);
 
-      alert("Pengaturan berhasil disimpan.");
+      notifySuccess("Pengaturan berhasil disimpan.");
 
       loadSetting();
     } catch (err) {
@@ -62,10 +78,7 @@ export default function LaporanRingkas() {
   };
 
   const previewPdf = () => {
-    window.open(
-      `${API_BASE_URL}/laporan-ringkas/view?language=id`,
-      "_blank",
-    );
+    window.open(`${API_BASE_URL}/laporan-ringkas/view?language=id`, "_blank");
   };
 
   const downloadPdf = () => {
@@ -73,7 +86,13 @@ export default function LaporanRingkas() {
   };
 
   if (loading) {
-    return <div className="p-10 text-center">Memuat Pengaturan...</div>;
+    return (
+      <div className="p-10 flex flex-col items-center justify-center gap-3 text-gray-500">
+        <span className="h-8 w-8 rounded-full border-4 border-gray-200 border-t-green-600 animate-spin" />
+
+        <span className="text-sm">Memuat Pengaturan...</span>
+      </div>
+    );
   }
 
   return (
@@ -93,41 +112,7 @@ export default function LaporanRingkas() {
           {/* BARIS ATAS */}
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
-            <div className="col-span-1 md:col-span-3">
-              <label className="font-semibold block mb-2">Topik</label>
-
-              <select
-                value={selectedBab}
-                onChange={(e) => setSelectedBab(e.target.value)}
-                className="w-full border rounded-xl px-4 py-3"
-              >
-                <option value="cover">Cover</option>
-
-                <option value="pendahuluan">Pendahuluan</option>
-
-                <option value="ringkasan">Ringkasan Eksekutif</option>
-
-                <option value="bab1">BAB I - Data Santri</option>
-
-                <option value="bab2">BAB II - Status Santri</option>
-
-                <option value="bab3">BAB III - Data Guru</option>
-
-                <option value="bab4">BAB IV - Status Guru</option>
-
-                <option value="bab5">BAB V - Progres Iqra</option>
-
-                <option value="bab6">BAB VI - Progres Al-Qur'an</option>
-
-                <option value="bab7">BAB VII - Hafalan</option>
-
-                <option value="bab8">BAB VIII - Kesimpulan</option>
-
-                <option value="penutup">Penutup</option>
-              </select>
-            </div>
-
-            <div className="col-span-1 md:col-span-4">
+            <div className="col-span-1 md:col-span-6">
               <label className="font-semibold block mb-2">Judul</label>
 
               <input
@@ -138,7 +123,7 @@ export default function LaporanRingkas() {
               />
             </div>
 
-            <div className="col-span-1 md:col-span-5">
+            <div className="col-span-1 md:col-span-6">
               <label className="font-semibold block mb-2">Sub Judul</label>
 
               <input
@@ -150,12 +135,33 @@ export default function LaporanRingkas() {
             </div>
           </div>
 
+          <div>
+            <label className="font-semibold block mb-3">Topik</label>
+
+            <div className="flex flex-wrap gap-2">
+              {DAFTAR_TOPIK.map((topik) => (
+                <button
+                  key={topik.value}
+                  type="button"
+                  onClick={() => setSelectedBab(topik.value)}
+                  className={`px-3 py-2 rounded-xl border text-sm transition ${
+                    selectedBab === topik.value
+                      ? "bg-green-600 text-white border-green-600"
+                      : "bg-white text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  {topik.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* EDITOR */}
 
           <div>
             <label className="font-semibold block mb-3">Narasi</label>
 
-            <RichTextEditor
+            <TinyEditor
               value={form.narasi?.[selectedBab] ?? ""}
               onChange={(html) =>
                 setForm((prev) => ({

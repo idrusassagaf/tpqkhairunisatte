@@ -1,4 +1,7 @@
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import ToastHost from "./components/ToastHost";
+import MutationLoader from "./components/MutationLoader";
+import TopLoadingBar from "./components/TopLoadingBar";
 import { useEffect } from "react";
 import Layout from "./components/Layout";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -28,6 +31,7 @@ import LaporanRingkas from "./pages/LaporanRingkas";
 
 import ManagementUser from "./pages/ManagementUser";
 import ManagementPassword from "./pages/ManagementPassword";
+import Profil from "./pages/Profil";
 import PengaturanSistem from "./pages/PengaturanSistem";
 
 import PublicLayout from "./public/PublicLayout";
@@ -197,6 +201,9 @@ export default function App() {
   return (
     <>
       <SeoUpdater />
+      {location.pathname === "/dashboard" && <TopLoadingBar />}
+      <MutationLoader />
+      <ToastHost />
       <Routes>
         {/* =====================================================
             WEBSITE PUBLIC
@@ -293,6 +300,7 @@ export default function App() {
           <Route path="management-user" element={<ManagementUser />} />
 
           <Route path="management-password" element={<ManagementPassword />} />
+          <Route path="profil" element={<Profil />} />
 
           <Route path="pengaturan-sistem" element={<PengaturanSistem />} />
         </Route>

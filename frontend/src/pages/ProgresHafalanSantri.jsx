@@ -1,3 +1,5 @@
+import TableLoadingRow from "../components/TableLoadingRow";
+import useSedangMemuat from "../hooks/useSedangMemuat";
 import { useEffect, useState } from "react";
 import { Link, useParams, useLocation } from "react-router-dom";
 import { Download, FileSpreadsheet, FileText } from "lucide-react";
@@ -7,6 +9,8 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 export default function ProgresHafalanSantri() {
+  const sedangMemuat = useSedangMemuat();
+
   const { nis } = useParams();
 
   const [guru, setGuru] = useState([]);
@@ -1089,81 +1093,89 @@ export default function ProgresHafalanSantri() {
           </thead>
 
           <tbody>
-            {jenisHafalan.map((item, i) => {
-              const progres = dataHafalan[i]?.progres || "";
+            {sedangMemuat ? (
+              <TableLoadingRow colSpan={7} />
+            ) : (
+              <>
+                {jenisHafalan.map((item, i) => {
+                  const progres = dataHafalan[i]?.progres || "";
 
-              const prestasi =
-                progres === "Belum"
-                  ? "Di Ulang"
-                  : progres === "Lancar"
-                    ? "Di Lanjut"
-                    : "-";
+                  const prestasi =
+                    progres === "Belum"
+                      ? "Di Ulang"
+                      : progres === "Lancar"
+                        ? "Di Lanjut"
+                        : "-";
 
-              return (
-                <tr key={i} className="hover:bg-gray-50">
-                  <td className="p-2 border text-center">{i + 1}</td>
+                  return (
+                    <tr key={i} className="hover:bg-gray-50">
+                      <td className="p-2 border text-center">{i + 1}</td>
 
-                  <td className="p-2 border">{item}</td>
+                      <td className="p-2 border">{item}</td>
 
-                  <td className="p-2 border">
-                    <select
-                      disabled={isReadonly}
-                      value={dataHafalan[i]?.guru || ""}
-                      onChange={(e) => handleChange(i, "guru", e.target.value)}
-                      className="
+                      <td className="p-2 border">
+                        <select
+                          disabled={isReadonly}
+                          value={dataHafalan[i]?.guru || ""}
+                          onChange={(e) =>
+                            handleChange(i, "guru", e.target.value)
+                          }
+                          className="
                         border rounded
                         px-2 py-1
                         w-full
                         text-xs
                       "
-                    >
-                      <option value="">Pilih Guru</option>
+                        >
+                          <option value="">Pilih Guru</option>
 
-                      {guru.map((g, idx) => {
-                        const namaGuru =
-                          g.nama || g.nama_guru || g.name || "Tanpa Nama";
+                          {guru.map((g, idx) => {
+                            const namaGuru =
+                              g.nama || g.nama_guru || g.name || "Tanpa Nama";
 
-                        return (
-                          <option key={idx} value={namaGuru}>
-                            {namaGuru}
-                          </option>
-                        );
-                      })}
-                    </select>
-                  </td>
+                            return (
+                              <option key={idx} value={namaGuru}>
+                                {namaGuru}
+                              </option>
+                            );
+                          })}
+                        </select>
+                      </td>
 
-                  <td className="p-2 border">
-                    <select
-                      disabled={isReadonly}
-                      value={progres}
-                      onChange={(e) =>
-                        handleChange(i, "progres", e.target.value)
-                      }
-                      className="
+                      <td className="p-2 border">
+                        <select
+                          disabled={isReadonly}
+                          value={progres}
+                          onChange={(e) =>
+                            handleChange(i, "progres", e.target.value)
+                          }
+                          className="
                         border rounded
                         px-2 py-1
                         w-full
                         text-xs
                       "
-                    >
-                      <option value="">Pilih</option>
+                        >
+                          <option value="">Pilih</option>
 
-                      <option value="Belum">Belum</option>
+                          <option value="Belum">Belum</option>
 
-                      <option value="Lancar">Lancar</option>
-                    </select>
-                  </td>
+                          <option value="Lancar">Lancar</option>
+                        </select>
+                      </td>
 
-                  <td className="p-2 border text-center font-medium">
-                    {prestasi}
-                  </td>
+                      <td className="p-2 border text-center font-medium">
+                        {prestasi}
+                      </td>
 
-                  <td className="p-2 border text-center text-xs">
-                    {dataHafalan[i]?.update || "-"}
-                  </td>
-                </tr>
-              );
-            })}
+                      <td className="p-2 border text-center text-xs">
+                        {dataHafalan[i]?.update || "-"}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </>
+            )}
           </tbody>
         </table>
       </div>

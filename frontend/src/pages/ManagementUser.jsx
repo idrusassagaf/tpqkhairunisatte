@@ -1,3 +1,5 @@
+import TableLoadingRow from "../components/TableLoadingRow";
+import useSedangMemuat from "../hooks/useSedangMemuat";
 import { useEffect, useState } from "react";
 import {
   UserCog,
@@ -16,6 +18,7 @@ import {
 import { api } from "../api";
 
 export default function ManagementUser() {
+  const sedangMemuat = useSedangMemuat();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -710,72 +713,84 @@ export default function ManagementUser() {
                   </thead>
 
                   <tbody className="divide-y divide-gray-100">
-                    {users.map((user, index) => (
-                      <tr key={user.id} className="hover:bg-gray-50 transition">
-                        <td className="px-5 py-4 text-gray-500">{index + 1}</td>
+                    {sedangMemuat ? (
+                      <TableLoadingRow colSpan={8} />
+                    ) : (
+                      <>
+                        {users.map((user, index) => (
+                          <tr
+                            key={user.id}
+                            className="hover:bg-gray-50 transition"
+                          >
+                            <td className="px-5 py-4 text-gray-500">
+                              {index + 1}
+                            </td>
 
-                        <td className="px-5 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-xl bg-purple-100 flex items-center justify-center">
-                              <UserCog size={17} className="text-purple-700" />
-                            </div>
+                            <td className="px-5 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 rounded-xl bg-purple-100 flex items-center justify-center">
+                                  <UserCog
+                                    size={17}
+                                    className="text-purple-700"
+                                  />
+                                </div>
 
-                            <div>
-                              <div className="font-semibold text-gray-800">
-                                {user.name}
+                                <div>
+                                  <div className="font-semibold text-gray-800">
+                                    {user.name}
+                                  </div>
+
+                                  <div className="text-xs text-gray-400">
+                                    ID: {user.id}
+                                  </div>
+                                </div>
                               </div>
+                            </td>
 
-                              <div className="text-xs text-gray-400">
-                                ID: {user.id}
+                            <td className="px-5 py-4">
+                              <div className="flex items-center gap-2 text-gray-600">
+                                <Mail size={15} />
+                                {user.email}
                               </div>
-                            </div>
-                          </div>
-                        </td>
+                            </td>
 
-                        <td className="px-5 py-4">
-                          <div className="flex items-center gap-2 text-gray-600">
-                            <Mail size={15} />
-                            {user.email}
-                          </div>
-                        </td>
+                            <td className="px-5 py-4">
+                              <div className="flex items-center gap-2 text-gray-500">
+                                <CalendarDays size={15} />
+                                {formatTanggal(user.created_at)}
+                              </div>
+                            </td>
 
-                        <td className="px-5 py-4">
-                          <div className="flex items-center gap-2 text-gray-500">
-                            <CalendarDays size={15} />
-                            {formatTanggal(user.created_at)}
-                          </div>
-                        </td>
+                            {/* ROLE */}
+                            <td className="px-5 py-4">
+                              <div className="flex justify-center">
+                                {user.role === "Admin" ? (
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-50 border border-purple-200 text-purple-700 text-xs font-semibold">
+                                    <ShieldCheck size={14} />
+                                    Admin
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold">
+                                    <Shield size={14} />
+                                    Viewer
+                                  </span>
+                                )}
+                              </div>
+                            </td>
 
-                        {/* ROLE */}
-                        <td className="px-5 py-4">
-                          <div className="flex justify-center">
-                            {user.role === "Admin" ? (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-purple-50 border border-purple-200 text-purple-700 text-xs font-semibold">
-                                <ShieldCheck size={14} />
-                                Admin
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold">
-                                <Shield size={14} />
-                                Viewer
-                              </span>
-                            )}
-                          </div>
-                        </td>
-
-                        {/* STATUS */}
-                        <td className="px-5 py-4">
-                          <div className="flex justify-center">
-                            <button
-                              type="button"
-                              onClick={() => handleToggleActive(user)}
-                              disabled={togglingId === user.id}
-                              title={
-                                user.is_active
-                                  ? "Klik untuk menonaktifkan user"
-                                  : "Klik untuk mengaktifkan user"
-                              }
-                              className={`
+                            {/* STATUS */}
+                            <td className="px-5 py-4">
+                              <div className="flex justify-center">
+                                <button
+                                  type="button"
+                                  onClick={() => handleToggleActive(user)}
+                                  disabled={togglingId === user.id}
+                                  title={
+                                    user.is_active
+                                      ? "Klik untuk menonaktifkan user"
+                                      : "Klik untuk mengaktifkan user"
+                                  }
+                                  className={`
                                 relative w-9 h-9 rounded-lg
                                 flex items-center justify-center
                                 border transition
@@ -790,38 +805,40 @@ export default function ManagementUser() {
                                     : ""
                                 }
                               `}
-                            >
-                              {user.is_active && (
-                                <Check size={20} strokeWidth={3} />
-                              )}
-                            </button>
-                          </div>
-                        </td>
+                                >
+                                  {user.is_active && (
+                                    <Check size={20} strokeWidth={3} />
+                                  )}
+                                </button>
+                              </div>
+                            </td>
 
-                        {/* AKSI */}
-                        <td className="px-5 py-4">
-                          <div className="flex justify-end gap-2">
-                            <button
-                              type="button"
-                              onClick={() => openEditForm(user)}
-                              className="w-9 h-9 rounded-lg flex items-center justify-center text-blue-600 hover:bg-blue-50 transition"
-                              title="Edit user"
-                            >
-                              <Pencil size={16} />
-                            </button>
+                            {/* AKSI */}
+                            <td className="px-5 py-4">
+                              <div className="flex justify-end gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => openEditForm(user)}
+                                  className="w-9 h-9 rounded-lg flex items-center justify-center text-blue-600 hover:bg-blue-50 transition"
+                                  title="Edit user"
+                                >
+                                  <Pencil size={16} />
+                                </button>
 
-                            <button
-                              type="button"
-                              onClick={() => handleDelete(user)}
-                              className="w-9 h-9 rounded-lg flex items-center justify-center text-red-600 hover:bg-red-50 transition"
-                              title="Hapus user"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                                <button
+                                  type="button"
+                                  onClick={() => handleDelete(user)}
+                                  className="w-9 h-9 rounded-lg flex items-center justify-center text-red-600 hover:bg-red-50 transition"
+                                  title="Hapus user"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </>
+                    )}
                   </tbody>
                 </table>
               </div>

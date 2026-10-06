@@ -1,3 +1,6 @@
+import TableLoadingRow from "../components/TableLoadingRow";
+import useSedangMemuat from "../hooks/useSedangMemuat";
+import { notifySuccess } from "../toastStore";
 import { useEffect, useState } from "react";
 
 import { Download, FileSpreadsheet, FileText } from "lucide-react";
@@ -10,8 +13,13 @@ import autoTable from "jspdf-autotable";
 
 import { api } from "../api";
 
+const GAJI_PER_HARI = 50000;
+
 export default function StatusGuru() {
+  const sedangMemuat = useSedangMemuat();
+
   const [guru, setGuru] = useState([]);
+  const [absensi, setAbsensi] = useState([]);
   const [search, setSearch] = useState("");
   const [filterPeriode, setFilterPeriode] = useState("");
   const [statusData, setStatusData] = useState({});
@@ -72,6 +80,26 @@ export default function StatusGuru() {
     }
   };
 
+  // ================= FETCH ABSENSI GURU PER BULAN =================
+  useEffect(() => {
+    if (!filterPeriode) return;
+
+    const fetchAbsensi = async () => {
+      try {
+        const res = await api.get("/absensi", {
+          params: { tipe: "guru", bulan: filterPeriode },
+        });
+
+        setAbsensi(res?.data?.absensi || []);
+      } catch (err) {
+        console.error("Gagal ambil absensi guru:", err);
+        setAbsensi([]);
+      }
+    };
+
+    fetchAbsensi();
+  }, [filterPeriode]);
+
   // ================= HANDLE INPUT =================
   const handleChange = (nig, field, value) => {
     const periodeAktif = filterPeriode || getCurrentPeriode();
@@ -99,31 +127,20 @@ export default function StatusGuru() {
   const handleSave = () => {
     localStorage.setItem("status_guru", JSON.stringify(statusData));
 
-    alert("Data berhasil disimpan");
+    notifySuccess("Data berhasil disimpan");
   };
 
-  // ================= HITUNG GAJI =================
-  const getGajiGuru = (status) => {
-    const gajiPokok = 1000000;
-
-    if (status === "Sangat Aktif") {
-      return gajiPokok + gajiPokok * 0.1;
-    }
-
-    if (status === "Aktif") {
-      return gajiPokok;
-    }
-
-    if (status === "Kurang Aktif") {
-      return gajiPokok - gajiPokok * 0.2;
-    }
-
-    if (status === "Tidak Aktif") {
-      return 0;
-    }
-
-    return 0;
+  // ================= HITUNG HARI HADIR & GAJI =================
+  const getHariHadir = (guruId) => {
+    return absensi.filter(
+      (a) =>
+        a.tipe === "guru" &&
+        Number(a.person_id) === Number(guruId) &&
+        a.status === "H",
+    ).length;
   };
+
+  const getGajiGuru = (guruId) => getHariHadir(guruId) * GAJI_PER_HARI;
 
   // ================= FORMAT RUPIAH =================
   const formatRupiah = (angka) => {
@@ -132,27 +149,6 @@ export default function StatusGuru() {
       currency: "IDR",
       minimumFractionDigits: 0,
     }).format(angka);
-  };
-
-  // ================= STATUS OTOMATIS =================
-  const getStatusGuru = (kehadiran) => {
-    if (kehadiran === "Hadir Penuh") {
-      return "Sangat Aktif";
-    }
-
-    if (kehadiran === "Kurang 5 Hr") {
-      return "Aktif";
-    }
-
-    if (kehadiran === "Kurang 10 Hr") {
-      return "Kurang Aktif";
-    }
-
-    if (kehadiran === "Diatas 10 Hr") {
-      return "Tidak Aktif";
-    }
-
-    return "-";
   };
 
   // ================= FILTER SEARCH =================
@@ -183,15 +179,10 @@ export default function StatusGuru() {
   }, [search, itemsPerPage, filterPeriode]);
 
   // ================= TOTAL GAJI =================
-  const totalGaji = filteredGuru.reduce((total, g) => {
-    const dataPeriode = statusData[g.nig]?.[filterPeriode] || {};
-
-    const kehadiran = dataPeriode.kehadiran || "";
-
-    const status = getStatusGuru(kehadiran);
-
-    return total + getGajiGuru(status);
-  }, 0);
+  const totalGaji = filteredGuru.reduce(
+    (total, g) => total + getGajiGuru(g.id),
+    0,
+  );
 
   // =========================================================
   // DOWNLOAD EXCEL STATUS GURU
@@ -209,12 +200,6 @@ export default function StatusGuru() {
     const excelData = filteredGuru.map((g, index) => {
       const dataPeriode = statusData[g.nig]?.[periodeAktif] || {};
 
-      const kehadiran = dataPeriode.kehadiran || "";
-
-      const status = getStatusGuru(kehadiran);
-
-      const gaji = getGajiGuru(status);
-
       return {
         No: index + 1,
 
@@ -224,11 +209,9 @@ export default function StatusGuru() {
 
         "Total Santri": dataPeriode.totalSantri || "-",
 
-        "Kehadiran & Absensi": kehadiran || "-",
+        "Hari Hadir": getHariHadir(g.id),
 
-        Status: status,
-
-        "Gaji Per-Guru": gaji,
+        "Gaji Per-Guru": getGajiGuru(g.id),
 
         Update: dataPeriode.update || "-",
       };
@@ -246,8 +229,7 @@ export default function StatusGuru() {
       { wch: 28 },
       { wch: 15 },
       { wch: 16 },
-      { wch: 24 },
-      { wch: 18 },
+      { wch: 14 },
       { wch: 20 },
       { wch: 18 },
     ];
@@ -367,12 +349,6 @@ export default function StatusGuru() {
     const rows = filteredGuru.map((g, index) => {
       const dataPeriode = statusData[g.nig]?.[periodeAktif] || {};
 
-      const kehadiran = dataPeriode.kehadiran || "";
-
-      const status = getStatusGuru(kehadiran);
-
-      const gaji = getGajiGuru(status);
-
       return [
         index + 1,
 
@@ -382,11 +358,9 @@ export default function StatusGuru() {
 
         dataPeriode.totalSantri || "-",
 
-        kehadiran || "-",
+        getHariHadir(g.id),
 
-        status,
-
-        formatRupiah(gaji),
+        formatRupiah(getGajiGuru(g.id)),
 
         dataPeriode.update || "-",
       ];
@@ -408,8 +382,7 @@ export default function StatusGuru() {
           "Nama Guru",
           "NIG",
           "Total Santri",
-          "Kehadiran",
-          "Status",
+          "Hari Hadir",
           "Gaji Per-Guru",
           "Update",
         ],
@@ -462,19 +435,15 @@ export default function StatusGuru() {
         },
 
         4: {
-          cellWidth: 35,
-        },
-
-        5: {
           cellWidth: 30,
         },
 
-        6: {
-          cellWidth: 35,
+        5: {
+          cellWidth: 45,
         },
 
-        7: {
-          cellWidth: 25,
+        6: {
+          cellWidth: 50,
         },
       },
 
@@ -594,6 +563,27 @@ export default function StatusGuru() {
             })}
           </select>
 
+          {/* ================= SIMPAN ================= */}
+          <button
+            type="button"
+            onClick={handleSave}
+            className="
+              inline-flex
+              items-center
+              justify-center
+              px-4 py-2
+              rounded-xl
+              bg-purple-600
+              text-white
+              text-sm
+              font-medium
+              hover:bg-purple-700
+              transition
+            "
+          >
+            Simpan
+          </button>
+
           {/* ================= DOWNLOAD ================= */}
           <div className="relative">
             <button
@@ -704,148 +694,101 @@ export default function StatusGuru() {
 
               <th className="px-2 py-2 border">Total Santri</th>
 
-              <th className="px-2 py-2 border">Kehadiran & Absensi</th>
-
-              <th className="px-2 py-2 border">Status</th>
+              <th className="px-2 py-2 border">Hari Hadir</th>
 
               <th className="px-2 py-2 border">Gaji Per-Guru</th>
-
-              <th className="px-2 py-2 border">Aksi</th>
 
               <th className="px-2 py-2 border">Update</th>
             </tr>
           </thead>
 
           <tbody>
-            {filteredGuru.length === 0 ? (
-              <tr>
-                <td colSpan="9" className="text-center p-6 text-gray-500">
-                  Data guru belum tersedia
-                </td>
-              </tr>
+            {sedangMemuat ? (
+              <TableLoadingRow colSpan={8} />
             ) : (
-              paginatedGuru.map((g, i) => {
-                const dataPeriode = statusData[g.nig]?.[filterPeriode] || {};
-
-                const kehadiran = dataPeriode.kehadiran || "";
-
-                const status = getStatusGuru(kehadiran);
-
-                const gaji = getGajiGuru(status);
-
-                return (
-                  <tr key={i} className="border-t hover:bg-gray-50">
-                    {/* NO */}
-                    <td className="px-2 py-1 border text-center">
-                      {startIndex + i + 1}
+              <>
+                {filteredGuru.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="text-center p-6 text-gray-500">
+                      Data guru belum tersedia
                     </td>
+                  </tr>
+                ) : (
+                  paginatedGuru.map((g, i) => {
+                    const dataPeriode =
+                      statusData[g.nig]?.[filterPeriode] || {};
 
-                    {/* NAMA */}
-                    <td className="px-2 py-1 border font-medium">
-                      {g.nama_guru}
-                    </td>
+                    const hariHadir = getHariHadir(g.id);
 
-                    {/* NIG */}
-                    <td className="px-2 py-1 border text-center">
-                      {g.nig || "-"}
-                    </td>
+                    const gaji = getGajiGuru(g.id);
 
-                    {/* TOTAL SANTRI */}
-                    <td className="px-2 py-1 border text-center">
-                      <input
-                        type="number"
-                        value={dataPeriode.totalSantri || ""}
-                        onChange={(e) =>
-                          handleChange(g.nig, "totalSantri", e.target.value)
-                        }
-                        className="
+                    return (
+                      <tr key={i} className="border-t hover:bg-gray-50">
+                        {/* NO */}
+                        <td className="px-2 py-1 border text-center">
+                          {startIndex + i + 1}
+                        </td>
+
+                        {/* NAMA */}
+                        <td className="px-2 py-1 border font-medium">
+                          {g.nama_guru}
+                        </td>
+
+                        {/* NIG */}
+                        <td className="px-2 py-1 border text-center">
+                          {g.nig || "-"}
+                        </td>
+
+                        {/* TOTAL SANTRI */}
+                        <td className="px-2 py-1 border text-center">
+                          <input
+                            type="number"
+                            value={dataPeriode.totalSantri || ""}
+                            onChange={(e) =>
+                              handleChange(g.nig, "totalSantri", e.target.value)
+                            }
+                            className="
                           border rounded
                           px-2 py-1
                           w-20 text-xs
                           text-center
                         "
-                      />
-                    </td>
+                          />
+                        </td>
 
-                    {/* KEHADIRAN */}
-                    <td className="px-2 py-1 border text-center">
-                      <select
-                        value={kehadiran}
-                        onChange={(e) =>
-                          handleChange(g.nig, "kehadiran", e.target.value)
-                        }
-                        className="
-                          border rounded
-                          px-2 py-1
-                          text-xs
-                        "
-                      >
-                        <option value="">Pilih</option>
-
-                        <option value="Hadir Penuh">Hadir Penuh</option>
-
-                        <option value="Kurang 5 Hr">Kurang 5 Hr</option>
-
-                        <option value="Kurang 10 Hr">Kurang 10 Hr</option>
-
-                        <option value="Diatas 10 Hr">Diatas 10 Hr</option>
-                      </select>
-                    </td>
-
-                    {/* STATUS */}
-                    <td className="px-2 py-1 border text-center">
-                      <span
-                        className={`
+                        {/* HARI HADIR (dari absensi) */}
+                        <td className="px-2 py-1 border text-center">
+                          <span
+                            className={`
                           px-3 py-1 rounded-full
                           text-xs font-medium
                           ${
-                            status === "Sangat Aktif"
+                            hariHadir > 0
                               ? "bg-green-100 text-green-700"
-                              : status === "Aktif"
-                                ? "bg-blue-100 text-blue-700"
-                                : status === "Kurang Aktif"
-                                  ? "bg-yellow-100 text-yellow-700"
-                                  : status === "Tidak Aktif"
-                                    ? "bg-red-100 text-red-700"
-                                    : "bg-gray-100 text-gray-600"
+                              : "bg-gray-100 text-gray-600"
                           }
                         `}
-                      >
-                        {status}
-                      </span>
-                    </td>
+                          >
+                            {hariHadir} hari
+                          </span>
+                        </td>
 
-                    {/* GAJI */}
-                    <td className="px-2 py-1 border text-center">
-                      <span className="font-semibold text-green-700">
-                        {formatRupiah(gaji)}
-                      </span>
-                    </td>
+                        {/* GAJI */}
+                        <td className="px-2 py-1 border text-center">
+                          <span className="font-semibold text-green-700">
+                            {formatRupiah(gaji)}
+                          </span>
+                        </td>
 
-                    {/* AKSI */}
-                    <td className="px-2 py-1 border text-center">
-                      <button
-                        onClick={handleSave}
-                        className="
-                          bg-purple-600
-                          hover:bg-purple-700
-                          text-white
-                          px-3 py-1
-                          rounded
-                          text-xs
-                        "
-                      >
-                        Simpan
-                      </button>
-                    </td>
-
-                    {/* UPDATE */}
-                    <td className="px-2 py-1 border text-center text-xs text-gray-500">
-                      {dataPeriode.update || "-"}
-                    </td>
-                  </tr>
-                );
-              })
+                        {/* UPDATE */}
+                        <td className="px-2 py-1 border text-center text-xs text-gray-500">
+                          {dataPeriode.update || "-"}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </>
             )}
           </tbody>
         </table>
@@ -856,9 +799,7 @@ export default function StatusGuru() {
         {paginatedGuru.map((g, i) => {
           const dataPeriode = statusData[g.nig]?.[filterPeriode] || {};
 
-          const kehadiran = dataPeriode.kehadiran || "";
-
-          const status = getStatusGuru(kehadiran);
+          const hariHadir = getHariHadir(g.id);
 
           return (
             <div
@@ -917,65 +858,17 @@ export default function StatusGuru() {
                   />
                 </div>
 
-                {/* KEHADIRAN */}
-                <div className="flex items-center gap-1 text-xs min-w-0">
-                  <span className="font-medium shrink-0">Kehadiran :</span>
-
-                  <select
-                    value={kehadiran}
-                    onChange={(e) =>
-                      handleChange(g.nig, "kehadiran", e.target.value)
-                    }
-                    className="
-                flex-1
-                min-w-0
-                border-0
-                bg-transparent
-                px-1
-                py-0
-                text-xs
-                font-medium
-                text-black
-                focus:outline-none
-                focus:ring-0
-              "
-                  >
-                    <option value="">Pilih</option>
-                    <option value="Hadir Penuh">Hadir Penuh</option>
-                    <option value="Kurang 5 Hr">Kurang 5 Hr</option>
-                    <option value="Kurang 10 Hr">Kurang 10 Hr</option>
-                    <option value="Diatas 10 Hr">Diatas 10 Hr</option>
-                  </select>
-                </div>
-
-                {/* STATUS */}
+                {/* HARI HADIR (dari absensi) */}
                 <div className="text-xs">
-                  <span className="font-medium">Status :</span>{" "}
-                  <span
-                    className={`
-                font-medium
-                ${
-                  status === "Sangat Aktif"
-                    ? "text-green-700"
-                    : status === "Aktif"
-                      ? "text-blue-700"
-                      : status === "Kurang Aktif"
-                        ? "text-yellow-700"
-                        : status === "Tidak Aktif"
-                          ? "text-red-700"
-                          : "text-gray-600"
-                }
-              `}
-                  >
-                    {status}
-                  </span>
+                  <span className="font-medium">Hari Hadir :</span>{" "}
+                  <span className="font-medium">{hariHadir} hari</span>
                 </div>
 
                 {/* GAJI */}
                 <div className="text-xs">
                   <span className="font-medium">Gaji :</span>{" "}
                   <span className="font-bold text-green-700">
-                    {formatRupiah(getGajiGuru(status))}
+                    {formatRupiah(getGajiGuru(g.id))}
                   </span>
                 </div>
 
@@ -983,23 +876,6 @@ export default function StatusGuru() {
                 <div className="text-xs text-gray-500">
                   Update : {dataPeriode.update || "-"}
                 </div>
-              </div>
-
-              {/* SIMPAN STATUS */}
-              <div className="border-t border-b bg-gray-200 px-3 py-2">
-                <button
-                  onClick={handleSave}
-                  className="
-              w-full
-              text-center
-              text-xs
-              font-medium
-              text-purple-600
-              hover:text-purple-700
-            "
-                >
-                  Simpan Status
-                </button>
               </div>
             </div>
           );

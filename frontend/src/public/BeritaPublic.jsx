@@ -1,3 +1,4 @@
+import { stripHtml } from "../utils/htmlBerita";
 import { useEffect, useState } from "react";
 import { api } from "../api";
 import { Link, useOutletContext } from "react-router-dom";
@@ -173,7 +174,7 @@ export default function BeritaPublic() {
                     </div>
 
                     <p className="mt-4 text-gray-700 text-sm md:text-base leading-5 md:leading-6 text-justify">
-                      {displayBerita[0].isi?.substring(0, 300)}
+                      {stripHtml(displayBerita[0].isi).substring(0, 300)}
                       ...
                     </p>
 

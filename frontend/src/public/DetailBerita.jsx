@@ -1,3 +1,4 @@
+import { isiBeritaHtml, stripHtml } from "../utils/htmlBerita";
 import { useEffect, useRef, useState } from "react";
 import { useParams, Link, useOutletContext } from "react-router-dom";
 import { api } from "../api";
@@ -281,7 +282,7 @@ ${getBeritaUrl()}`;
       ? `${baseUrl}/storage/${berita.foto}`
       : `${baseUrl}/logo-tpq.png`;
     const title = displayBerita.judul || "Berita TPQ Hairunnisa";
-    const description = String(displayBerita.isi || "")
+    const description = stripHtml(displayBerita.isi)
       .replace(/\s+/g, " ")
       .trim();
 
@@ -580,13 +581,14 @@ ${getBeritaUrl()}`;
               text-justify
               leading-5
               md:leading-8
-              whitespace-pre-line
+              berita-isi
               text-sm
               md:text-base
             "
-          >
-            {displayBerita?.isi}
-          </div>
+            dangerouslySetInnerHTML={{
+              __html: isiBeritaHtml(displayBerita?.isi),
+            }}
+          ></div>
         </div>
       </section>
 

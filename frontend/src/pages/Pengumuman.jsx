@@ -1,19 +1,23 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
 
+const FORM_KOSONG = {
+  id: null,
+  judul: "",
+  isi: "",
+  status: "Aktif",
+  tanggal_berakhir: "",
+};
+
 export default function Pengumuman() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const [form, setForm] = useState({
-    id: null,
-    judul: "",
-    isi: "",
-    status: "Aktif",
-    tanggal_berakhir: "",
-  });
+  const [form, setForm] = useState(FORM_KOSONG);
 
   const [isEdit, setIsEdit] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -25,6 +29,8 @@ export default function Pengumuman() {
 
   const loadData = async () => {
     try {
+      setLoading(true);
+
       const res = await api.get("/pengumuman");
 
       // Mendukung response:
@@ -55,18 +61,32 @@ export default function Pengumuman() {
   };
 
   // =========================================================
-  // RESET FORM
+  // MODAL
   // =========================================================
 
-  const resetForm = () => {
-    setForm({
-      id: null,
-      judul: "",
-      isi: "",
-      status: "Aktif",
-      tanggal_berakhir: "",
-    });
+  const bukaTambah = () => {
+    setForm(FORM_KOSONG);
+    setIsEdit(false);
+    setShowModal(true);
+  };
 
+  const bukaEdit = (item) => {
+    setForm({
+      id: item.id ?? null,
+      judul: item.judul ?? "",
+      isi: item.isi ?? "",
+      status: item.status ?? "Aktif",
+      tanggal_berakhir: item.tanggal_berakhir ?? "",
+    });
+    setIsEdit(true);
+    setShowModal(true);
+  };
+
+  const tutupModal = () => {
+    if (saving) return;
+
+    setShowModal(false);
+    setForm(FORM_KOSONG);
     setIsEdit(false);
   };
 
@@ -76,14 +96,6 @@ export default function Pengumuman() {
   //
   // Kita hanya merapikan line ending Windows/Linux.
   // Paragraf kosong tetap dipertahankan.
-  //
-  // Contoh:
-  //
-  // Paragraf pertama.
-  //
-  // Paragraf kedua.
-  //
-  // Tetap menjadi dua paragraf.
   //
   // =========================================================
 
@@ -106,6 +118,8 @@ export default function Pengumuman() {
     e.preventDefault();
 
     try {
+      setSaving(true);
+
       const dataKirim = {
         ...form,
         isi: normalisasiIsi(form.isi),
@@ -117,32 +131,17 @@ export default function Pengumuman() {
         await api.post("/pengumuman", dataKirim);
       }
 
-      resetForm();
+      setShowModal(false);
+      setForm(FORM_KOSONG);
+      setIsEdit(false);
+
       await loadData();
     } catch (error) {
       console.error("Gagal menyimpan pengumuman:", error);
+      alert("Gagal menyimpan pengumuman. Coba lagi.");
+    } finally {
+      setSaving(false);
     }
-  };
-
-  // =========================================================
-  // EDIT
-  // =========================================================
-
-  const handleEdit = (item) => {
-    setForm({
-      id: item.id ?? null,
-      judul: item.judul ?? "",
-      isi: item.isi ?? "",
-      status: item.status ?? "Aktif",
-      tanggal_berakhir: item.tanggal_berakhir ?? "",
-    });
-
-    setIsEdit(true);
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
   };
 
   // =========================================================
@@ -211,165 +210,219 @@ export default function Pengumuman() {
   return (
     <div className="p-4 space-y-6">
       {/* =====================================================
-          JUDUL HALAMAN
+          JUDUL HALAMAN + TOMBOL TAMBAH
       ===================================================== */}
 
-      <h1 className="text-xl font-light">PENGUMUMAN</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-xl font-light">PENGUMUMAN</h1>
 
-      {/* =====================================================
-          FORM
-      ===================================================== */}
-
-      <form
-        onSubmit={handleSubmit}
-        className="
-          border
-          p-4
-          rounded
-          bg-white
-          space-y-3
-        "
-      >
-        {/* ===================================================
-            JUDUL
-        =================================================== */}
-
-        <input
-          name="judul"
-          value={form.judul}
-          onChange={handleChange}
-          placeholder="Judul"
+        <button
+          type="button"
+          onClick={bukaTambah}
           className="
-            border
-            border-gray-300
-            p-2
-            w-full
+            bg-blue-500
+            hover:bg-blue-600
+            text-white
+            px-4
+            py-2
             rounded
-            focus:outline-none
-            focus:ring-2
-            focus:ring-blue-300
-          "
-        />
-
-        {/* ===================================================
-            ISI PENGUMUMAN
-        =================================================== */}
-
-        <textarea
-          name="isi"
-          value={form.isi}
-          onChange={handleChange}
-          placeholder="Isi pengumuman"
-          rows={12}
-          className="
-            border
-            border-gray-300
-            p-3
-            w-full
-            rounded
-            resize-y
-            leading-7
-            focus:outline-none
-            focus:ring-2
-            focus:ring-blue-300
-          "
-        />
-
-        <p className="text-xs text-gray-500">
-          Tip: gunakan satu baris kosong untuk memisahkan paragraf.
-        </p>
-
-        {/* ===================================================
-            TANGGAL BERAKHIR
-        =================================================== */}
-
-        <input
-          type="date"
-          name="tanggal_berakhir"
-          value={form.tanggal_berakhir}
-          onChange={handleChange}
-          className="
-            border
-            border-gray-300
-            p-2
-            w-full
-            rounded
-            focus:outline-none
-            focus:ring-2
-            focus:ring-blue-300
-          "
-        />
-
-        {/* ===================================================
-            STATUS
-        =================================================== */}
-
-        <select
-          name="status"
-          value={form.status}
-          onChange={handleChange}
-          className="
-            border
-            border-gray-300
-            p-2
-            w-full
-            rounded
-            focus:outline-none
-            focus:ring-2
-            focus:ring-blue-300
+            transition
           "
         >
-          <option value="Aktif">Aktif</option>
+          + Tambah Pengumuman
+        </button>
+      </div>
 
-          <option value="Nonaktif">Nonaktif</option>
-        </select>
+      {/* =====================================================
+          MODAL FORM
+      ===================================================== */}
 
-        {/* ===================================================
-            BUTTON
-        =================================================== */}
-
-        <div className="flex gap-2">
-          <button
-            type="submit"
+      {showModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={tutupModal}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            onClick={(e) => e.stopPropagation()}
             className="
-              bg-blue-500
-              hover:bg-blue-600
-              text-white
-              px-4
-              py-2
-              rounded
-              transition
+              bg-white
+              rounded-xl
+              shadow-lg
+              w-full
+              max-w-2xl
+              max-h-[90vh]
+              flex
+              flex-col
             "
           >
-            {isEdit ? "Update" : "Simpan"}
-          </button>
+            {/* HEADER MODAL */}
+            <div className="flex items-center justify-between gap-3 p-4 border-b">
+              <h2 className="text-lg font-semibold text-gray-800">
+                {isEdit ? "Edit Pengumuman" : "Tambah Pengumuman"}
+              </h2>
 
-          {isEdit && (
-            <button
-              type="button"
-              onClick={resetForm}
-              className="
-                bg-gray-400
-                hover:bg-gray-500
-                text-white
-                px-4
-                py-2
-                rounded
-                transition
-              "
+              <button
+                type="button"
+                onClick={tutupModal}
+                disabled={saving}
+                className="text-gray-500 hover:text-gray-800 text-xl leading-none px-2 disabled:opacity-50"
+                aria-label="Tutup"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* FORM */}
+            <form
+              onSubmit={handleSubmit}
+              className="overflow-y-auto p-4 space-y-3"
             >
-              Batal
-            </button>
-          )}
+              <input
+                name="judul"
+                value={form.judul}
+                onChange={handleChange}
+                placeholder="Judul"
+                className="
+                  border
+                  border-gray-300
+                  p-2
+                  w-full
+                  rounded
+                  focus:outline-none
+                  focus:ring-2
+                  focus:ring-blue-300
+                "
+              />
+
+              <textarea
+                name="isi"
+                value={form.isi}
+                onChange={handleChange}
+                placeholder="Isi pengumuman"
+                rows={10}
+                className="
+                  border
+                  border-gray-300
+                  p-3
+                  w-full
+                  rounded
+                  resize-y
+                  leading-7
+                  focus:outline-none
+                  focus:ring-2
+                  focus:ring-blue-300
+                "
+              />
+
+              <p className="text-xs text-gray-500">
+                Tip: gunakan satu baris kosong untuk memisahkan paragraf.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1">
+                    Berlaku sampai
+                  </label>
+
+                  <input
+                    type="date"
+                    name="tanggal_berakhir"
+                    value={form.tanggal_berakhir}
+                    onChange={handleChange}
+                    className="
+                      border
+                      border-gray-300
+                      p-2
+                      w-full
+                      rounded
+                      focus:outline-none
+                      focus:ring-2
+                      focus:ring-blue-300
+                    "
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1">
+                    Status
+                  </label>
+
+                  <select
+                    name="status"
+                    value={form.status}
+                    onChange={handleChange}
+                    className="
+                      border
+                      border-gray-300
+                      p-2
+                      w-full
+                      rounded
+                      focus:outline-none
+                      focus:ring-2
+                      focus:ring-blue-300
+                    "
+                  >
+                    <option value="Aktif">Aktif</option>
+
+                    <option value="Nonaktif">Nonaktif</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* BUTTON */}
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={tutupModal}
+                  disabled={saving}
+                  className="
+                    bg-gray-400
+                    hover:bg-gray-500
+                    text-white
+                    px-4
+                    py-2
+                    rounded
+                    transition
+                    disabled:opacity-50
+                  "
+                >
+                  Batal
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="
+                    bg-blue-500
+                    hover:bg-blue-600
+                    text-white
+                    px-4
+                    py-2
+                    rounded
+                    transition
+                    disabled:opacity-50
+                  "
+                >
+                  {saving ? "Menyimpan..." : isEdit ? "Update" : "Simpan"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </form>
+      )}
 
       {/* =====================================================
           LIST PENGUMUMAN
       ===================================================== */}
 
       {loading ? (
-        <p>Loading...</p>
+        <div className="flex flex-col items-center justify-center gap-3 py-12 text-gray-500">
+          <span className="h-8 w-8 rounded-full border-4 border-gray-200 border-t-blue-500 animate-spin" />
+
+          <span className="text-sm">Memuat pengumuman...</span>
+        </div>
       ) : data.length === 0 ? (
         <div
           className="
@@ -433,7 +486,7 @@ export default function Pengumuman() {
               <div className="flex gap-2 mt-3">
                 <button
                   type="button"
-                  onClick={() => handleEdit(item)}
+                  onClick={() => bukaEdit(item)}
                   className="
                     bg-yellow-500
                     hover:bg-yellow-600

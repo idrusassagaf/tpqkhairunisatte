@@ -1,3 +1,5 @@
+import TableLoadingRow from "../components/TableLoadingRow";
+import useSedangMemuat from "../hooks/useSedangMemuat";
 import { useEffect, useMemo, useState } from "react";
 import {
   FileText,
@@ -5,6 +7,8 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
+  Pencil,
+  X,
 } from "lucide-react";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
@@ -14,6 +18,8 @@ import { api } from "../api";
 const DATA_PER_PAGE = 10;
 
 export default function KehadiranSantri() {
+  const sedangMemuat = useSedangMemuat();
+
   const [bulan, setBulan] = useState(() => {
     const now = new Date();
 
@@ -28,6 +34,95 @@ export default function KehadiranSantri() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
+  const [jadwal, setJadwal] = useState({});
+  const [editingSantri, setEditingSantri] = useState(null);
+  const [savingTanggal, setSavingTanggal] = useState("");
+
+  // Hanya Admin yang boleh mengedit kehadiran
+  const isAdmin = useMemo(() => {
+    try {
+      const savedUser = JSON.parse(localStorage.getItem("user") || "null");
+
+      return savedUser?.role === "Admin";
+    } catch {
+      return false;
+    }
+  }, []);
+
+  // Jadwal mengaji dari kalender: { "YYYY-MM-DD": "mengaji" | "libur" }
+  useEffect(() => {
+    const fetchJadwal = async () => {
+      try {
+        const response = await api.get("/jadwal");
+
+        setJadwal(response.data || {});
+      } catch (error) {
+        console.error("Gagal mengambil jadwal kalender:", error);
+        setJadwal({});
+      }
+    };
+
+    fetchJadwal();
+  }, []);
+
+  // Hari ini (zona lokal) dalam format YYYY-MM-DD
+  const todayStr = useMemo(() => {
+    const now = new Date();
+
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
+      2,
+      "0",
+    )}-${String(now.getDate()).padStart(2, "0")}`;
+  }, []);
+
+  // Daftar tanggal di bulan yang dipilih
+  const daftarTanggal = useMemo(() => {
+    const [tahun, bulanAngka] = bulan.split("-");
+    const jumlahHari = new Date(Number(tahun), Number(bulanAngka), 0).getDate();
+
+    return Array.from({ length: jumlahHari }, (_, i) => {
+      const hari = String(i + 1).padStart(2, "0");
+
+      return `${bulan}-${hari}`;
+    });
+  }, [bulan]);
+
+  // Status per tanggal: record jika ada, "A" jika hari mengaji sudah lewat
+  const getStatusPada = (personId, tanggal) => {
+    const record = absensi.find(
+      (absen) =>
+        String(absen.tipe) === "santri" &&
+        Number(absen.person_id) === Number(personId) &&
+        String(absen.tanggal).slice(0, 10) === tanggal,
+    );
+
+    if (record) return record.status;
+
+    return tanggal < todayStr && jadwal[tanggal] === "mengaji" ? "A" : "";
+  };
+
+  const handleUbahStatus = async (personId, tanggal, status) => {
+    if (!isAdmin || !status) return;
+
+    try {
+      setSavingTanggal(tanggal);
+
+      await api.post("/absensi", {
+        tipe: "santri",
+        person_id: personId,
+        tanggal,
+        status,
+      });
+
+      await fetchAbsensi();
+    } catch (error) {
+      console.error("Gagal menyimpan absensi santri:", error);
+
+      alert("Gagal menyimpan absensi. Coba lagi.");
+    } finally {
+      setSavingTanggal("");
+    }
+  };
 
   useEffect(() => {
     fetchAbsensi();
@@ -68,17 +163,24 @@ export default function KehadiranSantri() {
           Number(absen.person_id) === Number(item.id),
       );
 
+      // Alpa = A yang diisi manual + hari mengaji yang lewat tanpa absensi
+      const alpaOtomatis = daftarTanggal.filter(
+        (tanggal) =>
+          tanggal < todayStr &&
+          jadwal[tanggal] === "mengaji" &&
+          !data.some((x) => String(x.tanggal).slice(0, 10) === tanggal),
+      ).length;
+
       return {
         id: item.id,
         nama: item.nama,
         nis: item.nis,
         H: data.filter((x) => x.status === "H").length,
         I: data.filter((x) => x.status === "I").length,
-        S: data.filter((x) => x.status === "S").length,
-        A: data.filter((x) => x.status === "A").length,
+        A: data.filter((x) => x.status === "A").length + alpaOtomatis,
       };
     });
-  }, [santri, absensi]);
+  }, [santri, absensi, daftarTanggal, todayStr, jadwal]);
 
   const filteredSantri = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -130,7 +232,6 @@ export default function KehadiranSantri() {
       NIS: item.nis || "",
       H: item.H || 0,
       I: item.I || 0,
-      S: item.S || 0,
       A: item.A || 0,
     }));
 
@@ -189,14 +290,13 @@ export default function KehadiranSantri() {
       item.nis || "",
       item.H || 0,
       item.I || 0,
-      item.S || 0,
       item.A || 0,
     ]);
 
     autoTable(doc, {
       startY: 41,
 
-      head: [["No", "Nama Santri", "NIS", "H", "I", "S", "A"]],
+      head: [["No", "Nama Santri", "NIS", "H", "I", "A"]],
 
       body: tableData,
 
@@ -288,13 +388,11 @@ export default function KehadiranSantri() {
       (hasil, item) => ({
         H: hasil.H + Number(item.H || 0),
         I: hasil.I + Number(item.I || 0),
-        S: hasil.S + Number(item.S || 0),
         A: hasil.A + Number(item.A || 0),
       }),
       {
         H: 0,
         I: 0,
-        S: 0,
         A: 0,
       },
     );
@@ -307,7 +405,7 @@ export default function KehadiranSantri() {
     doc.setFontSize(10);
 
     doc.text(
-      `TOTAL   H: ${total.H}    I: ${total.I}    S: ${total.S}    A: ${total.A}`,
+      `TOTAL   H: ${total.H}    I: ${total.I}    A: ${total.A}`,
       pageWidth / 2,
       finalY,
       {
@@ -408,66 +506,154 @@ export default function KehadiranSantri() {
                 </th>
 
                 <th className="border px-2 py-3 text-center text-sm font-semibold w-[10%]">
-                  S
-                </th>
-
-                <th className="border px-2 py-3 text-center text-sm font-semibold w-[10%]">
                   A
                 </th>
+
+                {isAdmin && (
+                  <th className="border px-2 py-3 text-center text-sm font-semibold w-[12%]">
+                    Edit
+                  </th>
+                )}
               </tr>
             </thead>
 
             <tbody>
-              {loading ? (
-                <tr>
-                  <td
-                    colSpan="6"
-                    className="border px-4 py-8 text-center text-gray-500"
-                  >
-                    Memuat data...
-                  </td>
-                </tr>
-              ) : paginatedSantri.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan="6"
-                    className="border px-4 py-8 text-center text-gray-500"
-                  >
-                    Data kehadiran santri belum tersedia.
-                  </td>
-                </tr>
+              {sedangMemuat ? (
+                <TableLoadingRow colSpan={7} />
               ) : (
-                paginatedSantri.map((item) => (
-                  <tr key={item.id} className="hover:bg-gray-50">
-                    <td className="border px-3 py-3 text-sm break-words">
-                      {item.nama}
-                    </td>
+                <>
+                  {loading ? (
+                    <tr>
+                      <td
+                        colSpan={isAdmin ? 6 : 5}
+                        className="border px-4 py-8 text-center text-gray-500"
+                      >
+                        Memuat data...
+                      </td>
+                    </tr>
+                  ) : paginatedSantri.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={isAdmin ? 6 : 5}
+                        className="border px-4 py-8 text-center text-gray-500"
+                      >
+                        Data kehadiran santri belum tersedia.
+                      </td>
+                    </tr>
+                  ) : (
+                    paginatedSantri.map((item) => (
+                      <tr key={item.id} className="hover:bg-gray-50">
+                        <td className="border px-3 py-3 text-sm break-words">
+                          {item.nama}
+                        </td>
 
-                    <td className="border px-2 py-3 text-sm text-center break-all">
-                      {item.nis}
-                    </td>
+                        <td className="border px-2 py-3 text-sm text-center break-all">
+                          {item.nis}
+                        </td>
 
-                    <td className="border px-2 py-3 text-sm text-center">
-                      {item.H}
-                    </td>
+                        <td className="border px-2 py-3 text-sm text-center">
+                          {item.H}
+                        </td>
 
-                    <td className="border px-2 py-3 text-sm text-center">
-                      {item.I}
-                    </td>
+                        <td className="border px-2 py-3 text-sm text-center">
+                          {item.I}
+                        </td>
 
-                    <td className="border px-2 py-3 text-sm text-center">
-                      {item.S}
-                    </td>
+                        <td className="border px-2 py-3 text-sm text-center">
+                          {item.A}
+                        </td>
 
-                    <td className="border px-2 py-3 text-sm text-center">
-                      {item.A}
-                    </td>
-                  </tr>
-                ))
+                        {isAdmin && (
+                          <td className="border px-2 py-3 text-center">
+                            <button
+                              type="button"
+                              onClick={() => setEditingSantri(item)}
+                              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-green-600 text-green-700 text-xs font-medium hover:bg-green-50"
+                            >
+                              <Pencil size={13} />
+                              Edit
+                            </button>
+                          </td>
+                        )}
+                      </tr>
+                    ))
+                  )}
+                </>
               )}
             </tbody>
           </table>
         </div>
+
+        {editingSantri && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+            onClick={() => setEditingSantri(null)}
+          >
+            <div
+              className="bg-white rounded-xl shadow-lg w-full max-w-md max-h-[85vh] flex flex-col"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-start justify-between gap-3 p-4 border-b">
+                <div>
+                  <h2 className="text-base font-semibold text-gray-800">
+                    {editingSantri.nama}
+                  </h2>
+
+                  <p className="text-xs text-gray-500">
+                    NIS {editingSantri.nis || "-"} · {namaBulan}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setEditingSantri(null)}
+                  className="p-1 rounded hover:bg-gray-100"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="overflow-y-auto p-4 space-y-2">
+                {daftarTanggal.map((tanggal) => {
+                  const status = getStatusPada(editingSantri.id, tanggal);
+
+                  return (
+                    <div
+                      key={tanggal}
+                      className="flex items-center justify-between gap-3"
+                    >
+                      <span className="text-sm text-gray-700">
+                        {new Intl.DateTimeFormat("id-ID", {
+                          weekday: "short",
+                          day: "2-digit",
+                          month: "short",
+                        }).format(new Date(`${tanggal}T00:00:00`))}
+                      </span>
+
+                      <select
+                        value={status}
+                        disabled={savingTanggal === tanggal}
+                        onChange={(e) =>
+                          handleUbahStatus(
+                            editingSantri.id,
+                            tanggal,
+                            e.target.value,
+                          )
+                        }
+                        className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50"
+                      >
+                        <option value="">Belum diisi</option>
+                        <option value="H">H - Hadir</option>
+                        <option value="I">I - Izin</option>
+                        <option value="A">A - Alpa</option>
+                      </select>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
 
         {filteredSantri.length > 0 && (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-5">

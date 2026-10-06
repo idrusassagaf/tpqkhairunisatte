@@ -94,7 +94,7 @@ Route::get(
     [AbsensiController::class, 'index']
 );
 
-Route::post(
+Route::middleware(['auth:sanctum', 'admin'])->post(
     '/absensi',
     [AbsensiController::class, 'store']
 );
@@ -291,6 +291,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post(
         '/change-password',
         [AuthController::class, 'changePassword']
+    );
+
+    Route::post(
+        '/profile',
+        [AuthController::class, 'updateProfile']
     );
 
 

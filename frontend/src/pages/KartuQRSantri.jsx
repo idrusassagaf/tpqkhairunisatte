@@ -253,8 +253,10 @@ export default function KartuQRSantri() {
 
         {/* LOADING */}
         {loading && (
-          <div className="bg-white rounded-xl shadow p-8 text-center text-gray-500 no-print">
-            Memuat data dan membuat QR Code...
+          <div className="bg-white rounded-xl shadow p-8 no-print flex flex-col items-center justify-center gap-3 text-gray-500">
+            <span className="h-8 w-8 rounded-full border-4 border-gray-200 border-t-purple-600 animate-spin" />
+
+            <span className="text-sm">Memuat data dan membuat QR Code...</span>
           </div>
         )}
 

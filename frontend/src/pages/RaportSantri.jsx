@@ -1,3 +1,5 @@
+import TableLoadingRow from "../components/TableLoadingRow";
+import useSedangMemuat from "../hooks/useSedangMemuat";
 import { useEffect, useMemo, useState } from "react";
 
 import { api } from "../api";
@@ -22,6 +24,8 @@ import {
 } from "lucide-react";
 
 export default function RaportSantri() {
+  const sedangMemuat = useSedangMemuat();
+
   const [santri, setSantri] = useState([]);
   const [guru, setGuru] = useState([]);
   const [selectedNis, setSelectedNis] = useState("");
@@ -1443,11 +1447,13 @@ export default function RaportSantri() {
               onChange={(e) => setTahun(Number(e.target.value))}
               className="w-full border border-gray-300 rounded-lg px-3 py-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
             >
-              {[tahun - 1, tahun, tahun + 1].map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
+              {[new Date().getFullYear() - 1, new Date().getFullYear()].map(
+                (item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ),
+              )}
             </select>
           </div>
         </div>
@@ -1620,25 +1626,35 @@ export default function RaportSantri() {
                 </thead>
 
                 <tbody>
-                  <tr>
-                    <td className="border px-3 py-2">
-                      {value(iqraData?.jilid)}
-                    </td>
+                  {sedangMemuat ? (
+                    <TableLoadingRow colSpan={7} />
+                  ) : (
+                    <>
+                      <tr>
+                        <td className="border px-3 py-2">
+                          {value(iqraData?.jilid)}
+                        </td>
 
-                    <td className="border px-3 py-2">{value(iqraData?.hal)}</td>
+                        <td className="border px-3 py-2">
+                          {value(iqraData?.hal)}
+                        </td>
 
-                    <td className="border px-3 py-2">
-                      {value(iqraData?.guru)}
-                    </td>
+                        <td className="border px-3 py-2">
+                          {value(iqraData?.guru)}
+                        </td>
 
-                    <td className="border px-3 py-2">{value(guruIqra?.nig)}</td>
+                        <td className="border px-3 py-2">
+                          {value(guruIqra?.nig)}
+                        </td>
 
-                    <td className="border px-3 py-2">
-                      {value(iqraData?.progres)}
-                    </td>
+                        <td className="border px-3 py-2">
+                          {value(iqraData?.progres)}
+                        </td>
 
-                    <td className="border px-3 py-2">{pencapaianIqra}</td>
-                  </tr>
+                        <td className="border px-3 py-2">{pencapaianIqra}</td>
+                      </tr>
+                    </>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -1678,35 +1694,41 @@ export default function RaportSantri() {
                 </thead>
 
                 <tbody>
-                  <tr>
-                    <td className="border px-3 py-2">
-                      {value(quranData?.quran_juz)}
-                    </td>
+                  {sedangMemuat ? (
+                    <TableLoadingRow colSpan={8} />
+                  ) : (
+                    <>
+                      <tr>
+                        <td className="border px-3 py-2">
+                          {value(quranData?.quran_juz)}
+                        </td>
 
-                    <td className="border px-3 py-2">
-                      {value(quranData?.quran_surah)}
-                    </td>
+                        <td className="border px-3 py-2">
+                          {value(quranData?.quran_surah)}
+                        </td>
 
-                    <td className="border px-3 py-2">
-                      {value(quranData?.quran_ayat)}
-                    </td>
+                        <td className="border px-3 py-2">
+                          {value(quranData?.quran_ayat)}
+                        </td>
 
-                    <td className="border px-3 py-2">
-                      {value(quranData?.quran_hal)}
-                    </td>
+                        <td className="border px-3 py-2">
+                          {value(quranData?.quran_hal)}
+                        </td>
 
-                    <td className="border px-3 py-2">
-                      {value(quranData?.quran_guru)}
-                    </td>
+                        <td className="border px-3 py-2">
+                          {value(quranData?.quran_guru)}
+                        </td>
 
-                    <td className="border px-3 py-2">
-                      {value(guruQuran?.nig)}
-                    </td>
+                        <td className="border px-3 py-2">
+                          {value(guruQuran?.nig)}
+                        </td>
 
-                    <td className="border px-3 py-2">
-                      {value(quranData?.quran_progres)}
-                    </td>
-                  </tr>
+                        <td className="border px-3 py-2">
+                          {value(quranData?.quran_progres)}
+                        </td>
+                      </tr>
+                    </>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -1772,49 +1794,55 @@ export default function RaportSantri() {
                 </thead>
 
                 <tbody>
-                  {hafalanData.length > 0 ? (
-                    hafalanData.map((item, index) => (
-                      <tr key={index}>
-                        <td className="border px-3 py-2 text-center">
-                          {index + 1}
-                        </td>
-
-                        <td className="border px-3 py-2">
-                          {value(item?.jenis)}
-                        </td>
-
-                        <td className="border px-3 py-2">
-                          {value(item?.guru)}
-                        </td>
-
-                        <td className="border px-3 py-2">
-                          {value(item?.progres)}
-                        </td>
-
-                        <td className="border px-3 py-2">
-                          {String(item?.progres || "").toLowerCase() ===
-                          "lancar"
-                            ? "Di-Lanjut"
-                            : String(item?.progres || "").toLowerCase() ===
-                                "belum"
-                              ? "Di-Ulang"
-                              : "-"}
-                        </td>
-
-                        <td className="border px-3 py-2">
-                          {value(item?.update)}
-                        </td>
-                      </tr>
-                    ))
+                  {sedangMemuat ? (
+                    <TableLoadingRow colSpan={7} />
                   ) : (
-                    <tr>
-                      <td
-                        colSpan="6"
-                        className="border px-3 py-6 text-center text-gray-500"
-                      >
-                        Belum ada data hafalan.
-                      </td>
-                    </tr>
+                    <>
+                      {hafalanData.length > 0 ? (
+                        hafalanData.map((item, index) => (
+                          <tr key={index}>
+                            <td className="border px-3 py-2 text-center">
+                              {index + 1}
+                            </td>
+
+                            <td className="border px-3 py-2">
+                              {value(item?.jenis)}
+                            </td>
+
+                            <td className="border px-3 py-2">
+                              {value(item?.guru)}
+                            </td>
+
+                            <td className="border px-3 py-2">
+                              {value(item?.progres)}
+                            </td>
+
+                            <td className="border px-3 py-2">
+                              {String(item?.progres || "").toLowerCase() ===
+                              "lancar"
+                                ? "Di-Lanjut"
+                                : String(item?.progres || "").toLowerCase() ===
+                                    "belum"
+                                  ? "Di-Ulang"
+                                  : "-"}
+                            </td>
+
+                            <td className="border px-3 py-2">
+                              {value(item?.update)}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan="6"
+                            className="border px-3 py-6 text-center text-gray-500"
+                          >
+                            Belum ada data hafalan.
+                          </td>
+                        </tr>
+                      )}
+                    </>
                   )}
                 </tbody>
               </table>
