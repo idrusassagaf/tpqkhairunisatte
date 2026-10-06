@@ -15,5 +15,8 @@
     RewriteRule ^([^/]+\.(png|jpg|jpeg|gif|svg|ico|webp|mp3|mp4|ttf|woff|woff2|json|txt|xml|webmanifest|css|js))$ frontend/dist/$1 [L]
 
     # Selain itu (termasuk route React seperti /dashboard): index.html
+    # Hanya jika file/folder yang diminta memang tidak ada
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^ frontend/dist/index.html [L]
 </IfModule>
