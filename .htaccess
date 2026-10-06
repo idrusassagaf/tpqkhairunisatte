@@ -1,17 +1,18 @@
 # =========================================================
 # ROOT DOMAIN: melayani frontend (hasil build di frontend/dist)
 # =========================================================
-# Dengan ini, auto deploy dari GitHub langsung menampilkan build
-# terbaru tanpa perlu menyalin isi dist secara manual.
+# Auto deploy dari GitHub langsung menampilkan build terbaru.
 # API tetap di subdomain api-backend.
 # =========================================================
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # File yang ada di frontend/dist: langsung dilayani
-    RewriteCond %{DOCUMENT_ROOT}/frontend/dist%{REQUEST_URI} -f
-    RewriteRule ^(.*)$ frontend/dist/$1 [L]
+    # Folder aset hasil build
+    RewriteRule ^(assets|tinymce|images)/(.*)$ frontend/dist/$1/$2 [L]
+
+    # File statis di root dist (logo, favicon, mp4, dll.)
+    RewriteRule ^([^/]+\.(png|jpg|jpeg|gif|svg|ico|webp|mp3|mp4|ttf|woff|woff2|json|txt|xml|webmanifest|css|js))$ frontend/dist/$1 [L]
 
     # Selain itu (termasuk route React seperti /dashboard): index.html
     RewriteRule ^ frontend/dist/index.html [L]
