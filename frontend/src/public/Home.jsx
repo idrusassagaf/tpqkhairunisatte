@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 import jsPDF from "jspdf";
+import { logoPutihUntukPdf } from "../utils/logoPdf";
 import autoTable from "jspdf-autotable";
 import dejaVuSansRegular from "../assets/DejaVuSans.ttf";
 import dejaVuSansBold from "../assets/DejaVuSans-Bold.ttf";
@@ -359,14 +360,10 @@ export default function Home() {
         "";
 
       const visi =
-        (language !== "id" && profilTranslated?.visi) ||
-        pengaturan.visi ||
-        "";
+        (language !== "id" && profilTranslated?.visi) || pengaturan.visi || "";
 
       const misi =
-        (language !== "id" && profilTranslated?.misi) ||
-        pengaturan.misi ||
-        "";
+        (language !== "id" && profilTranslated?.misi) || pengaturan.misi || "";
 
       // =====================================================
       // PILIH TEKS SESUAI BAHASA
@@ -416,7 +413,9 @@ export default function Home() {
         const fontResponse = await fetch(url);
 
         if (!fontResponse.ok) {
-          throw new Error(`Font gagal dimuat (${style}): HTTP ${fontResponse.status}`);
+          throw new Error(
+            `Font gagal dimuat (${style}): HTTP ${fontResponse.status}`,
+          );
         }
 
         const fontArrayBuffer = await fontResponse.arrayBuffer();
@@ -447,15 +446,17 @@ export default function Home() {
           await muatFontTtf(dejaVuSansRegular, "DejaVuSans.ttf", "normal");
           await muatFontTtf(dejaVuSansBold, "DejaVuSans-Bold.ttf", "bold");
         } catch (fontError) {
-          console.error("Font Arabic gagal dimuat untuk PDF Profil:", fontError);
+          console.error(
+            "Font Arabic gagal dimuat untuk PDF Profil:",
+            fontError,
+          );
         }
       }
 
       // Dipakai di styles/headStyles autoTable supaya tabel juga
       // pakai font Arab+Latin (bukan cuma pemanggilan doc.text()
       // manual).
-      const fontStylesTabel =
-        language === "ar" ? { font: "DejaVuSans" } : {};
+      const fontStylesTabel = language === "ar" ? { font: "DejaVuSans" } : {};
 
       // Ganti "doc.setFont('helvetica', style)" dengan ini supaya
       // otomatis pakai DejaVu Sans (Arab+Latin) saat bahasa Arab.
@@ -593,7 +594,14 @@ export default function Home() {
       });
 
       try {
-        doc.addImage(logoTPQ, "PNG", centerX - 20, 59, 40, 40);
+        doc.addImage(
+          await logoPutihUntukPdf(logoTPQ),
+          "JPEG",
+          centerX - 20,
+          59,
+          40,
+          40,
+        );
       } catch (logoError) {
         console.error("Logo gagal dimasukkan ke PDF:", logoError);
       }
@@ -631,10 +639,7 @@ export default function Home() {
       if (visi) {
         const visiLinesPreview = doc.splitTextToSize(String(visi), 165);
 
-        profilY = ensureSpace(
-          profilY,
-          5 + visiLinesPreview.length * 4.5 + 6,
-        );
+        profilY = ensureSpace(profilY, 5 + visiLinesPreview.length * 4.5 + 6);
 
         aturFont("bold");
         doc.setFontSize(10);
@@ -660,10 +665,7 @@ export default function Home() {
       if (misi) {
         const misiLinesPreview = doc.splitTextToSize(String(misi), 165);
 
-        profilY = ensureSpace(
-          profilY,
-          5 + misiLinesPreview.length * 4.5 + 8,
-        );
+        profilY = ensureSpace(profilY, 5 + misiLinesPreview.length * 4.5 + 8);
 
         aturFont("bold");
         doc.setFontSize(10);

@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { api } from "../api";
 
 import logoTPQ from "../assets/logo-tpq.png";
+import { logoPutihUntukPdf } from "../utils/logoPdf";
 
 import jsPDF from "jspdf";
 
@@ -523,9 +524,9 @@ export default function RaportSantri() {
       // ========================================================
 
       try {
-        const logoData = await getLogoDataUrl();
+        const logoData = await logoPutihUntukPdf(logoTPQ);
 
-        doc.addImage(logoData, "PNG", centerX - 12, 10, 24, 24);
+        doc.addImage(logoData, "JPEG", centerX - 12, 10, 24, 24);
       } catch (logoError) {
         console.warn("Logo tidak dapat dimuat:", logoError);
       }
