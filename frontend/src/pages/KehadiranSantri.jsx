@@ -67,6 +67,7 @@ export default function KehadiranSantri() {
   }, []);
 
   // Daftar tanggal di bulan yang dipilih
+  // Hanya tanggal yang ditandai "mengaji" di Kalender Pengajian
   const daftarTanggal = useMemo(() => {
     const [tahun, bulanAngka] = bulan.split("-");
     const jumlahHari = new Date(Number(tahun), Number(bulanAngka), 0).getDate();
@@ -75,8 +76,8 @@ export default function KehadiranSantri() {
       const hari = String(i + 1).padStart(2, "0");
 
       return `${bulan}-${hari}`;
-    });
-  }, [bulan]);
+    }).filter((tanggal) => jadwal[tanggal] === "mengaji");
+  }, [bulan, jadwal]);
 
   // Status per tanggal: record jika ada, "A" jika hari mengaji sudah lewat
   const getStatusPada = (personId, tanggal) => {

@@ -72,13 +72,14 @@ export default function KehadiranGuru() {
     return new Date(Number(tahun), Number(bulanAngka), 0).getDate();
   }, [bulan]);
 
+  // Hanya tanggal yang ditandai "mengaji" di Kalender Pengajian
   const daftarTanggal = useMemo(() => {
     return Array.from({ length: jumlahHari }, (_, i) => {
       const hari = String(i + 1).padStart(2, "0");
 
       return `${bulan}-${hari}`;
-    });
-  }, [bulan, jumlahHari]);
+    }).filter((tanggal) => jadwal[tanggal] === "mengaji");
+  }, [bulan, jumlahHari, jadwal]);
 
   // Tanggal hari ini (zona lokal) dalam format YYYY-MM-DD
   const todayStr = useMemo(() => {
