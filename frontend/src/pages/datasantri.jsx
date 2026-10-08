@@ -2,7 +2,13 @@ import TableLoadingRow from "../components/TableLoadingRow";
 import useSedangMemuat from "../hooks/useSedangMemuat";
 import { useEffect, useState } from "react";
 
-import { Download, FileSpreadsheet, FileText } from "lucide-react";
+import {
+  Download,
+  FileSpreadsheet,
+  FileText,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 import * as XLSX from "xlsx";
 
@@ -101,6 +107,41 @@ export default function DataSantri() {
 
   const handleNextPage = () => {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  };
+
+  // Nomor halaman dipadatkan dengan "..." supaya tidak melebar
+  // di layar kecil saat jumlah halaman banyak.
+  const getPageNumbers = (total, current) => {
+    if (total <= 7) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const pages = new Set([
+      1,
+      2,
+      total - 1,
+      total,
+      current - 1,
+      current,
+      current + 1,
+    ]);
+    const sorted = [...pages]
+      .filter((p) => p >= 1 && p <= total)
+      .sort((a, b) => a - b);
+
+    const result = [];
+    let prev = 0;
+
+    for (const page of sorted) {
+      if (prev && page - prev > 1) {
+        result.push("...");
+      }
+
+      result.push(page);
+      prev = page;
+    }
+
+    return result;
   };
 
   const handlePageChange = (page) => {
@@ -654,10 +695,10 @@ export default function DataSantri() {
       {/* ================= PAGINATION ================= */}
 
       {filteredData.length > 0 && (
-        <div className="flex flex-col md:flex-row items-center justify-between gap-3 pt-2">
+        <div className="flex flex-col items-center gap-3 pt-2 md:flex-row md:justify-between">
           {/* INFO JUMLAH DATA */}
 
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-gray-500 text-center md:text-left">
             Menampilkan {startIndex + 1}–
             {Math.min(startIndex + itemsPerPage, filteredData.length)} dari{" "}
             {filteredData.length} data
@@ -666,29 +707,37 @@ export default function DataSantri() {
           {/* BUTTON PAGINATION */}
 
           {totalPages > 1 && (
-            <div className="flex items-center gap-1">
+            <div className="flex flex-wrap items-center justify-center gap-1">
               {/* SEBELUMNYA */}
 
               <button
                 type="button"
                 onClick={handlePreviousPage}
                 disabled={currentPage === 1}
-                className="px-3 py-1.5 text-xs rounded border bg-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50"
+                className="flex items-center gap-1 rounded border bg-white px-2 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-40 hover:bg-gray-50 sm:px-3"
               >
-                Sebelumnya
+                <ChevronLeft size={14} />
+                <span className="hidden sm:inline">Sebelumnya</span>
               </button>
 
               {/* NOMOR HALAMAN */}
 
-              {Array.from({ length: totalPages }, (_, index) => index + 1).map(
-                (page) => (
+              {getPageNumbers(totalPages, currentPage).map((page, index) =>
+                page === "..." ? (
+                  <span
+                    key={`ellipsis-${index}`}
+                    className="px-1.5 text-xs text-gray-400"
+                  >
+                    …
+                  </span>
+                ) : (
                   <button
                     key={page}
                     type="button"
                     onClick={() => handlePageChange(page)}
-                    className={`px-3 py-1.5 text-xs rounded border ${
+                    className={`min-w-[28px] rounded border px-2 py-1.5 text-xs ${
                       currentPage === page
-                        ? "bg-blue-600 text-white border-blue-600"
+                        ? "border-blue-600 bg-blue-600 text-white"
                         : "bg-white text-gray-700 hover:bg-gray-50"
                     }`}
                   >
@@ -703,9 +752,10 @@ export default function DataSantri() {
                 type="button"
                 onClick={handleNextPage}
                 disabled={currentPage === totalPages}
-                className="px-3 py-1.5 text-xs rounded border bg-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50"
+                className="flex items-center gap-1 rounded border bg-white px-2 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-40 hover:bg-gray-50 sm:px-3"
               >
-                Berikutnya
+                <span className="hidden sm:inline">Berikutnya</span>
+                <ChevronRight size={14} />
               </button>
             </div>
           )}
