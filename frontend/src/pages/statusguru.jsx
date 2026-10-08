@@ -21,6 +21,7 @@ export default function StatusGuru() {
 
   const [guru, setGuru] = useState([]);
   const [absensi, setAbsensi] = useState([]);
+  const [jadwal, setJadwal] = useState({});
   const [gajiPerHari, setGajiPerHari] = useState(GAJI_PER_HARI);
   const [search, setSearch] = useState("");
   const [filterPeriode, setFilterPeriode] = useState("");
@@ -63,6 +64,22 @@ export default function StatusGuru() {
     if (saved) {
       setStatusData(JSON.parse(saved));
     }
+  }, []);
+
+  // ================= JADWAL MENGAJI DARI KALENDER =================
+  useEffect(() => {
+    const fetchJadwal = async () => {
+      try {
+        const res = await api.get("/jadwal");
+
+        setJadwal(res.data || {});
+      } catch (err) {
+        console.error("Gagal ambil jadwal kalender:", err);
+        setJadwal({});
+      }
+    };
+
+    fetchJadwal();
   }, []);
 
   // ================= FETCH DATA =================
@@ -150,7 +167,11 @@ export default function StatusGuru() {
       (a) =>
         a.tipe === "guru" &&
         Number(a.person_id) === Number(guruId) &&
-        a.status === "H",
+        a.status === "H" &&
+        // Hanya hitung kalau tanggalnya masih "mengaji" di kalender.
+        // Kalau diubah jadi libur, absensi H yang sudah ada tidak
+        // ikut dihitung lagi.
+        jadwal[String(a.tanggal).slice(0, 10)] === "mengaji",
     ).length;
   };
 
