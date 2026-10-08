@@ -420,13 +420,13 @@ export default function ProgresHafalan() {
   // =========================================================
 
   return (
-    <div className="p-4">
-      <div className="bg-white rounded-2xl shadow p-0 overflow-x-auto">
-        {/* =====================================================
-            TITLE
-        ===================================================== */}
+    <div className="p-4 space-y-4">
+      {/* =====================================================
+          HEADER
+      ===================================================== */}
 
-        <h1 className="text-lg font-light tracking-wide text-black ml-2 mb-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <h1 className="text-lg font-light tracking-wide text-black">
           PROGRES HAFALAN
         </h1>
 
@@ -434,7 +434,7 @@ export default function ProgresHafalan() {
             SEARCH + DOWNLOAD
         ===================================================== */}
 
-        <div className="mb-4 flex flex-col sm:flex-row gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           {/* SEARCH */}
 
           <input
@@ -546,11 +546,13 @@ export default function ProgresHafalan() {
             )}
           </div>
         </div>
+      </div>
 
-        {/* =====================================================
-            DESKTOP TABLE
-        ===================================================== */}
+      {/* =====================================================
+          DAFTAR SANTRI
+      ===================================================== */}
 
+      <div className="p-0 md:bg-white md:rounded-xl md:shadow md:p-4 md:overflow-x-auto">
         <table className="hidden md:table w-full border text-xs text-black">
           <thead className="bg-gray-100 text-black">
             <tr>
@@ -572,7 +574,7 @@ export default function ProgresHafalan() {
 
           <tbody>
             {sedangMemuat ? (
-              <TableLoadingRow colSpan={8} />
+              <TableLoadingRow colSpan={7} />
             ) : (
               <>
                 {santri.length === 0 ? (
