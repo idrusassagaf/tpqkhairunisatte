@@ -1,7 +1,13 @@
 import TableLoadingRow from "../components/TableLoadingRow";
 import useSedangMemuat from "../hooks/useSedangMemuat";
 import { useEffect, useState } from "react";
-import { Download, FileSpreadsheet, FileText } from "lucide-react";
+import {
+  Download,
+  FileSpreadsheet,
+  FileText,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -155,6 +161,41 @@ export default function ProgresQuran() {
   }, [search, filterJuz, filterSurah, filterProgres, filterPrestasi]);
 
   // ================= PAGINATION =================
+  // Nomor halaman dipadatkan dengan "..." supaya tidak melebar
+  // di layar kecil saat jumlah halaman banyak.
+  const getPageNumbers = (total, current) => {
+    if (total <= 7) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const pages = new Set([
+      1,
+      2,
+      total - 1,
+      total,
+      current - 1,
+      current,
+      current + 1,
+    ]);
+    const sorted = [...pages]
+      .filter((p) => p >= 1 && p <= total)
+      .sort((a, b) => a - b);
+
+    const result = [];
+    let prev = 0;
+
+    for (const page of sorted) {
+      if (prev && page - prev > 1) {
+        result.push("...");
+      }
+
+      result.push(page);
+      prev = page;
+    }
+
+    return result;
+  };
+
   const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
 
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -820,7 +861,7 @@ export default function ProgresQuran() {
             {/* BUTTON PAGINATION */}
 
             {totalPages > 1 && (
-              <div className="flex items-center gap-1">
+              <div className="flex flex-wrap items-center justify-center gap-1">
                 {/* SEBELUMNYA */}
 
                 <button
@@ -828,29 +869,36 @@ export default function ProgresQuran() {
                     setCurrentPage((prev) => Math.max(prev - 1, 1))
                   }
                   disabled={currentPage === 1}
-                  className="px-3 py-2 border rounded-lg text-xs disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                  className="flex items-center gap-1 border rounded-lg px-2 py-2 text-xs disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 sm:px-3"
                 >
-                  Sebelumnya
+                  <ChevronLeft size={14} />
+                  <span className="hidden sm:inline">Sebelumnya</span>
                 </button>
 
                 {/* NOMOR HALAMAN */}
 
-                {Array.from(
-                  { length: totalPages },
-                  (_, index) => index + 1,
-                ).map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`min-w-9 px-3 py-2 rounded-lg text-xs border ${
-                      currentPage === page
-                        ? "bg-purple-600 text-white border-purple-600"
-                        : "bg-white text-gray-700 hover:bg-gray-100"
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
+                {getPageNumbers(totalPages, currentPage).map((page, index) =>
+                  page === "..." ? (
+                    <span
+                      key={`ellipsis-${index}`}
+                      className="px-1.5 text-xs text-gray-400"
+                    >
+                      …
+                    </span>
+                  ) : (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`min-w-9 px-3 py-2 rounded-lg text-xs border ${
+                        currentPage === page
+                          ? "bg-purple-600 text-white border-purple-600"
+                          : "bg-white text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ),
+                )}
 
                 {/* BERIKUTNYA */}
 
@@ -859,9 +907,10 @@ export default function ProgresQuran() {
                     setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                   }
                   disabled={currentPage === totalPages}
-                  className="px-3 py-2 border rounded-lg text-xs disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                  className="flex items-center gap-1 border rounded-lg px-2 py-2 text-xs disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 sm:px-3"
                 >
-                  Berikutnya
+                  <span className="hidden sm:inline">Berikutnya</span>
+                  <ChevronRight size={14} />
                 </button>
               </div>
             )}

@@ -2,7 +2,14 @@ import TableLoadingRow from "../components/TableLoadingRow";
 import useSedangMemuat from "../hooks/useSedangMemuat";
 import { useEffect, useState } from "react";
 import { api } from "../api";
-import { Eye, Download, FileSpreadsheet, FileText } from "lucide-react";
+import {
+  Eye,
+  Download,
+  FileSpreadsheet,
+  FileText,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
@@ -93,6 +100,41 @@ export default function ProgresHafalan() {
   // =========================================================
   // PAGINATION
   // =========================================================
+
+  // Nomor halaman dipadatkan dengan "..." supaya tidak melebar
+  // di layar kecil saat jumlah halaman banyak.
+  const getPageNumbers = (total, current) => {
+    if (total <= 7) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const pages = new Set([
+      1,
+      2,
+      total - 1,
+      total,
+      current - 1,
+      current,
+      current + 1,
+    ]);
+    const sorted = [...pages]
+      .filter((p) => p >= 1 && p <= total)
+      .sort((a, b) => a - b);
+
+    const result = [];
+    let prev = 0;
+
+    for (const page of sorted) {
+      if (prev && page - prev > 1) {
+        result.push("...");
+      }
+
+      result.push(page);
+      prev = page;
+    }
+
+    return result;
+  };
 
   const totalPages = Math.ceil(filteredSantri.length / itemsPerPage);
 
@@ -721,7 +763,7 @@ export default function ProgresHafalan() {
             {/* BUTTON PAGINATION */}
 
             {totalPages > 1 && (
-              <div className="flex items-center gap-1">
+              <div className="flex flex-wrap items-center justify-center gap-1">
                 {/* SEBELUMNYA */}
 
                 <button
@@ -730,39 +772,37 @@ export default function ProgresHafalan() {
                     setCurrentPage((prev) => Math.max(prev - 1, 1))
                   }
                   disabled={currentPage === 1}
-                  className="
-                    px-3 py-1.5
-                    text-xs
-                    rounded
-                    border
-                    bg-white
-                    disabled:opacity-40
-                    disabled:cursor-not-allowed
-                    hover:bg-gray-50
-                  "
+                  className="flex items-center gap-1 px-2 py-1.5 text-xs rounded border bg-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 sm:px-3"
                 >
-                  Sebelumnya
+                  <ChevronLeft size={14} />
+                  <span className="hidden sm:inline">Sebelumnya</span>
                 </button>
 
                 {/* NOMOR HALAMAN */}
 
-                {Array.from(
-                  { length: totalPages },
-                  (_, index) => index + 1,
-                ).map((page) => (
-                  <button
-                    key={page}
-                    type="button"
-                    onClick={() => setCurrentPage(page)}
-                    className={`px-3 py-1.5 text-xs rounded border ${
-                      currentPage === page
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "bg-white text-gray-700 hover:bg-gray-50"
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ))}
+                {getPageNumbers(totalPages, currentPage).map((page, index) =>
+                  page === "..." ? (
+                    <span
+                      key={`ellipsis-${index}`}
+                      className="px-1.5 text-xs text-gray-400"
+                    >
+                      …
+                    </span>
+                  ) : (
+                    <button
+                      key={page}
+                      type="button"
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-1.5 text-xs rounded border ${
+                        currentPage === page
+                          ? "bg-blue-600 text-white border-blue-600"
+                          : "bg-white text-gray-700 hover:bg-gray-50"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ),
+                )}
 
                 {/* BERIKUTNYA */}
 
@@ -772,18 +812,10 @@ export default function ProgresHafalan() {
                     setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                   }
                   disabled={currentPage === totalPages}
-                  className="
-                    px-3 py-1.5
-                    text-xs
-                    rounded
-                    border
-                    bg-white
-                    disabled:opacity-40
-                    disabled:cursor-not-allowed
-                    hover:bg-gray-50
-                  "
+                  className="flex items-center gap-1 px-2 py-1.5 text-xs rounded border bg-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 sm:px-3"
                 >
-                  Berikutnya
+                  <span className="hidden sm:inline">Berikutnya</span>
+                  <ChevronRight size={14} />
                 </button>
               </div>
             )}
