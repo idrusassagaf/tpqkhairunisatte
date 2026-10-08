@@ -158,6 +158,13 @@ export default function KehadiranGuru() {
           Number(absen.person_id) === Number(item.id),
       );
 
+      // Hanya hitung absensi pada tanggal yang masih "mengaji" di
+      // kalender sekarang. Kalau tanggal itu diubah jadi libur,
+      // absensi yang sudah ada tidak ikut dihitung lagi.
+      const dataValid = data.filter(
+        (x) => jadwal[String(x.tanggal).slice(0, 10)] === "mengaji",
+      );
+
       // Alpa = A yang diisi manual + hari lewat yang belum ada absensinya
       const alpaOtomatis = daftarTanggal.filter(
         (tanggal) =>
@@ -170,9 +177,9 @@ export default function KehadiranGuru() {
         id: item.id,
         nama_guru: item.nama_guru,
         nig: item.nig,
-        H: data.filter((x) => x.status === "H").length,
-        I: data.filter((x) => x.status === "I").length,
-        A: data.filter((x) => x.status === "A").length + alpaOtomatis,
+        H: dataValid.filter((x) => x.status === "H").length,
+        I: dataValid.filter((x) => x.status === "I").length,
+        A: dataValid.filter((x) => x.status === "A").length + alpaOtomatis,
       };
     });
   }, [guru, absensi, daftarTanggal, todayStr, jadwal]);

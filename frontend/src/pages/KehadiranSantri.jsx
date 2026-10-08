@@ -155,6 +155,13 @@ export default function KehadiranSantri() {
           Number(absen.person_id) === Number(item.id),
       );
 
+      // Hanya hitung absensi pada tanggal yang masih "mengaji" di
+      // kalender sekarang. Kalau tanggal itu diubah jadi libur,
+      // absensi yang sudah ada tidak ikut dihitung lagi.
+      const dataValid = data.filter(
+        (x) => jadwal[String(x.tanggal).slice(0, 10)] === "mengaji",
+      );
+
       // Alpa = A yang diisi manual + hari mengaji yang lewat tanpa absensi
       const alpaOtomatis = daftarTanggal.filter(
         (tanggal) =>
@@ -167,9 +174,9 @@ export default function KehadiranSantri() {
         id: item.id,
         nama: item.nama,
         nis: item.nis,
-        H: data.filter((x) => x.status === "H").length,
-        I: data.filter((x) => x.status === "I").length,
-        A: data.filter((x) => x.status === "A").length + alpaOtomatis,
+        H: dataValid.filter((x) => x.status === "H").length,
+        I: dataValid.filter((x) => x.status === "I").length,
+        A: dataValid.filter((x) => x.status === "A").length + alpaOtomatis,
       };
     });
   }, [santri, absensi, daftarTanggal, todayStr, jadwal]);
