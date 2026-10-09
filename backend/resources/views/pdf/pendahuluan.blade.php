@@ -21,7 +21,7 @@ $label = $labels[$pdfLanguage] ?? $labels['id'];
 </h2>
 
 <p style="text-align:justify; line-height:1.8;">
-    {!! nl2br(e($setting->narasi['pendahuluan'] ?? '')) !!}
+    {!! str_contains($setting->narasi['pendahuluan'] ?? '', '<') ? $setting->narasi['pendahuluan'] : nl2br(e($setting->narasi['pendahuluan'] ?? '')) !!}
 </p>
 
 <hr>

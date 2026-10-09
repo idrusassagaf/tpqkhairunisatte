@@ -37,7 +37,7 @@
         line-height:1.8;
         font-size:14px;
     ">
-        {!! $setting->narasi['cover'] ?? '' !!}
+        {!! str_contains($setting->narasi['cover'] ?? '', '<') ? $setting->narasi['cover'] : nl2br(e($setting->narasi['cover'] ?? '')) !!}
     </div>
 
 </div>

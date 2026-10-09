@@ -4,7 +4,7 @@
 
 <p style="text-align:justify; line-height:1.8;">
 
-    {{ $setting->narasi['bab8'] }}
+    {!! str_contains($setting->narasi['bab8'] ?? '', '<') ? $setting->narasi['bab8'] : nl2br(e($setting->narasi['bab8'] ?? '')) !!}
 
 </p>
 

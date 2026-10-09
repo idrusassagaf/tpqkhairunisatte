@@ -129,6 +129,7 @@ export default function Sidebar({ open, setOpen }) {
           name: "Status & Gaji Guru",
           icon: CircleUser,
           to: "/dashboard/status-guru",
+          adminOnly: true,
         },
       ],
     },
@@ -513,39 +514,41 @@ export default function Sidebar({ open, setOpen }) {
           </button>
 
           {openGuru &&
-            menu[2].items.map((item, i) => {
-              const Icon = item.icon;
+            menu[2].items
+              .filter((item) => !item.adminOnly || isAdmin)
+              .map((item, i) => {
+                const Icon = item.icon;
 
-              let badge = null;
+                let badge = null;
 
-              if (item.to === "/dashboard/data-guru") {
-                badge = countGuru;
-              }
+                if (item.to === "/dashboard/data-guru") {
+                  badge = countGuru;
+                }
 
-              return (
-                <NavLink
-                  key={i}
-                  to={item.to}
-                  className={(props) => navItemClass(props, open)}
-                >
-                  <Icon size={16} />
+                return (
+                  <NavLink
+                    key={i}
+                    to={item.to}
+                    className={(props) => navItemClass(props, open)}
+                  >
+                    <Icon size={16} />
 
-                  {open ? (
-                    <div className="flex justify-between items-center w-full">
-                      <span>{item.name}</span>
+                    {open ? (
+                      <div className="flex justify-between items-center w-full">
+                        <span>{item.name}</span>
 
-                      {badge !== null && (
-                        <span className="text-[10px] px-2 py-[1px] rounded-full bg-purple-400 text-white">
-                          {badge}
-                        </span>
-                      )}
-                    </div>
-                  ) : (
-                    <span className={tooltipClass}>{item.name}</span>
-                  )}
-                </NavLink>
-              );
-            })}
+                        {badge !== null && (
+                          <span className="text-[10px] px-2 py-[1px] rounded-full bg-purple-400 text-white">
+                            {badge}
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className={tooltipClass}>{item.name}</span>
+                    )}
+                  </NavLink>
+                );
+              })}
           {/* =================================================
               ABSENSI
               HANYA UNTUK ADMIN

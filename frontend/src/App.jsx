@@ -319,7 +319,14 @@ export default function App() {
           {/* ===================================================
               DATA GURU
           ==================================================== */}
-          <Route path="status-guru" element={<StatusGuru />} />
+          <Route
+            path="status-guru"
+            element={
+              <RoleRoute allowedRoles={["Admin"]}>
+                <StatusGuru />
+              </RoleRoute>
+            }
+          />
 
           {/* ===================================================
               MANAGEMENT DATA

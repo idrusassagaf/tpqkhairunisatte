@@ -3,9 +3,6 @@ import { useOutletContext } from "react-router-dom";
 import heroImage from "../assets/hero-putih04.jpg";
 import { ChevronDown, FileText } from "lucide-react";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
-
 export default function LaporanPublic() {
   const { language } = useOutletContext();
 
@@ -20,8 +17,6 @@ export default function LaporanPublic() {
       laporanDescription:
         "Laporan resmi Sistem Informasi Manajemen TPQ Hairunnisa yang diperbarui secara otomatis berdasarkan data terbaru.",
       format: "Format : PDF",
-      preview: "Preview PDF",
-      download: "Download PDF",
     },
 
     en: {
@@ -34,8 +29,6 @@ export default function LaporanPublic() {
       laporanDescription:
         "Official report of the TPQ Hairunnisa Management Information System, automatically updated based on the latest data.",
       format: "Format: PDF",
-      preview: "Preview PDF",
-      download: "Download PDF",
     },
 
     ar: {
@@ -48,15 +41,10 @@ export default function LaporanPublic() {
       laporanDescription:
         "التقرير الرسمي لنظام المعلومات الإدارية لـ TPQ Hairunnisa، والذي يتم تحديثه تلقائيًا بناءً على أحدث البيانات.",
       format: "التنسيق: PDF",
-      preview: "معاينة PDF",
-      download: "تنزيل PDF",
     },
   };
 
   const t = translations[language] || translations.id;
-
-  // Bahasa yang dikirim ke backend PDF.
-  const pdfLanguage = language === "en" || language === "ar" ? language : "id";
 
   const scrollToDokumen = () => {
     document.getElementById("daftar-laporan")?.scrollIntoView({
@@ -241,37 +229,17 @@ export default function LaporanPublic() {
             text-center
             "
           >
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="flex items-center gap-5">
-                <div className="text-left">
-                  <h3 className="text-1xl font-extralight text-green-600">
-                    {t.laporan}
-                  </h3>
+            <div className="flex items-center justify-center gap-5">
+              <div className="text-left">
+                <h3 className="text-1xl font-extralight text-green-600">
+                  {t.laporan}
+                </h3>
 
-                  <p className="text-gray-600 mt-2 text-justify">
-                    {t.laporanDescription}
-                  </p>
+                <p className="text-gray-600 mt-2 text-justify">
+                  {t.laporanDescription}
+                </p>
 
-                  <p className="text-sm text-gray-400 mt-2">{t.format}</p>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <a
-                  href={`${API_BASE_URL}/laporan-ringkas/view?language=${pdfLanguage}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl"
-                >
-                  {t.preview}
-                </a>
-
-                <a
-                  href={`${API_BASE_URL}/laporan-ringkas/pdf?language=${pdfLanguage}`}
-                  className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-xl"
-                >
-                  {t.download}
-                </a>
+                <p className="text-sm text-gray-400 mt-2">{t.format}</p>
               </div>
             </div>
           </div>

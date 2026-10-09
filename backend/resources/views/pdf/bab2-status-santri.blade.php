@@ -36,7 +36,7 @@ $label = $labels[$pdfLanguage] ?? $labels['id'];
 
 <p style="text-align:justify; line-height:1.8;">
 
-    {{ $setting->narasi['bab2'] ?? '' }}
+    {!! str_contains($setting->narasi['bab2'] ?? '', '<') ? $setting->narasi['bab2'] : nl2br(e($setting->narasi['bab2'] ?? '')) !!}
 
 </p>
 

@@ -88,7 +88,7 @@ $persenOrangTua = $totalSantri > 0
     line-height:1.8;
     margin-bottom:20px;
 ">
-    {!! $setting->narasi['ringkasan'] ?? '' !!}
+    {!! str_contains($setting->narasi['ringkasan'] ?? '', '<') ? $setting->narasi['ringkasan'] : nl2br(e($setting->narasi['ringkasan'] ?? '')) !!}
 </div>
 
 {{-- =========================================================
