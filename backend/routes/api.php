@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\SantriController;
 use App\Http\Controllers\Api\ProgresIqraController;
 use App\Http\Controllers\Api\ProgresQuranController;
 use App\Http\Controllers\Api\AbsensiController;
+use App\Http\Controllers\Api\FotoController;
 use App\Http\Controllers\Api\BeritaController;
 use App\Http\Controllers\Api\BeritaTranslationController;
 use App\Http\Controllers\Api\PengumumanTranslationController;
@@ -296,6 +297,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post(
         '/profile',
         [AuthController::class, 'updateProfile']
+    );
+
+    // Foto santri/guru untuk PDF kartu (lewat API agar ada CORS)
+    Route::get(
+        '/foto',
+        [FotoController::class, 'show']
     );
 
 
