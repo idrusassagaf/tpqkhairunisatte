@@ -533,17 +533,41 @@ export default function MasterData() {
   );
 
   // =========================================================
-  // HELPER PAGINATION
+  // HELPER PAGINATION (condensed with ellipses)
   // =========================================================
 
-  const getPageNumbers = (totalPages, currentPage) => {
-    const pages = [];
-
-    for (let i = 1; i <= totalPages; i++) {
-      pages.push(i);
+  const getPageNumbers = (total, current) => {
+    if (total <= 7) {
+      return Array.from({ length: total }, (_, i) => i + 1);
     }
 
-    return pages;
+    const pages = new Set([
+      1,
+      2,
+      total - 1,
+      total,
+      current - 1,
+      current,
+      current + 1,
+    ]);
+
+    const sorted = [...pages]
+      .filter((p) => p >= 1 && p <= total)
+      .sort((a, b) => a - b);
+
+    const result = [];
+    let prev = 0;
+
+    for (const page of sorted) {
+      if (prev && page - prev > 1) {
+        result.push("...");
+      }
+
+      result.push(page);
+      prev = page;
+    }
+
+    return result;
   };
 
   // =========================================================

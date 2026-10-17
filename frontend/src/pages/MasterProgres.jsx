@@ -273,6 +273,44 @@ export default function MasterProgres() {
     startIndexQuran + itemsPerPage,
   );
 
+  // =========================================================
+  // HELPER PAGINATION (condensed with ellipses)
+  // =========================================================
+
+  const getPageNumbers = (total, current) => {
+    if (total <= 7) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const pages = new Set([
+      1,
+      2,
+      total - 1,
+      total,
+      current - 1,
+      current,
+      current + 1,
+    ]);
+
+    const sorted = [...pages]
+      .filter((p) => p >= 1 && p <= total)
+      .sort((a, b) => a - b);
+
+    const result = [];
+    let prev = 0;
+
+    for (const page of sorted) {
+      if (prev && page - prev > 1) {
+        result.push("...");
+      }
+
+      result.push(page);
+      prev = page;
+    }
+
+    return result;
+  };
+
   // ================= AUTO PRESTASI =================
   const getPrestasi = (progres, jilid) => {
     if (progres === "Lancar" && jilid === "Iqra 6") {
@@ -935,25 +973,30 @@ export default function MasterProgres() {
                     Sebelumnya
                   </button>
 
-                  {Array.from(
-                    {
-                      length: totalPagesIqra,
-                    },
-                    (_, index) => index + 1,
-                  ).map((page) => (
-                    <button
-                      key={page}
-                      type="button"
-                      onClick={() => setCurrentPageIqra(page)}
-                      className={`px-3 py-1.5 text-xs rounded border ${
-                        currentPageIqra === page
-                          ? "bg-blue-600 text-white border-blue-600"
-                          : "bg-white text-gray-700 hover:bg-gray-50"
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ))}
+                  {getPageNumbers(totalPagesIqra, currentPageIqra).map(
+                    (page, index) =>
+                      page === "..." ? (
+                        <span
+                          key={`ellipsis-iqra-${index}`}
+                          className="px-1.5 text-xs text-gray-400"
+                        >
+                          …
+                        </span>
+                      ) : (
+                        <button
+                          key={page}
+                          type="button"
+                          onClick={() => setCurrentPageIqra(page)}
+                          className={`px-3 py-1.5 text-xs rounded border ${
+                            currentPageIqra === page
+                              ? "bg-blue-600 text-white border-blue-600"
+                              : "bg-white text-gray-700 hover:bg-gray-50"
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      ),
+                  )}
 
                   <button
                     type="button"
@@ -1500,25 +1543,30 @@ export default function MasterProgres() {
                     Sebelumnya
                   </button>
 
-                  {Array.from(
-                    {
-                      length: totalPagesQuran,
-                    },
-                    (_, index) => index + 1,
-                  ).map((page) => (
-                    <button
-                      key={page}
-                      type="button"
-                      onClick={() => setCurrentPageQuran(page)}
-                      className={`px-3 py-1.5 text-xs rounded border ${
-                        currentPageQuran === page
-                          ? "bg-blue-600 text-white border-blue-600"
-                          : "bg-white text-gray-700 hover:bg-gray-50"
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  ))}
+                  {getPageNumbers(totalPagesQuran, currentPageQuran).map(
+                    (page, index) =>
+                      page === "..." ? (
+                        <span
+                          key={`ellipsis-quran-${index}`}
+                          className="px-1.5 text-xs text-gray-400"
+                        >
+                          …
+                        </span>
+                      ) : (
+                        <button
+                          key={page}
+                          type="button"
+                          onClick={() => setCurrentPageQuran(page)}
+                          className={`px-3 py-1.5 text-xs rounded border ${
+                            currentPageQuran === page
+                              ? "bg-blue-600 text-white border-blue-600"
+                              : "bg-white text-gray-700 hover:bg-gray-50"
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      ),
+                  )}
 
                   <button
                     type="button"
