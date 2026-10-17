@@ -45,9 +45,7 @@
 {{-- Narasi Admin --}}
 {{-- ========================= --}}
 
-<p style="text-align:justify; line-height:1.8;">
-    {!! str_contains($setting->narasi['bab1'] ?? '', '<') ? $setting->narasi['bab1'] : nl2br(e($setting->narasi['bab1'] ?? '')) !!}
-</p>
+@include('pdf.partials.narasi', ['key' => 'bab1'])
 
 {{-- ========================= --}}
 {{-- Narasi Otomatis --}}

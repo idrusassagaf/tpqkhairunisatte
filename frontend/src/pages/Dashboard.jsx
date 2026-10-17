@@ -16,6 +16,14 @@ import {
 export default function Dashboard() {
   const navigate = useNavigate();
 
+  const [user] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("user")) || {};
+    } catch {
+      return {};
+    }
+  });
+
   const [santri, setSantri] = useState([]);
   const [guru, setGuru] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -117,6 +125,19 @@ export default function Dashboard() {
       iconColor: "text-amber-700",
     },
   ];
+
+  // ================ PERMISSIONS ================
+  const permissionMap = {
+    Admin: ["master-data", "master-progres", "master-hafalan", "data-santri"],
+    Operator: ["master-data", "master-progres", "data-santri"],
+    Guru: ["master-progres", "master-hafalan", "data-santri"],
+    Viewer: ["data-santri"],
+  };
+
+  const isAllowed = (key) => {
+    const role = user?.role || "";
+    return (permissionMap[role] || []).includes(key);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6">
@@ -328,109 +349,221 @@ export default function Dashboard() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* MASTER DATA */}
+            {user?.role === "Admin" ? (
+              // Admin: show master management shortcuts
+              <>
+                {isAllowed("master-data") && (
+                  <button
+                    type="button"
+                    onClick={() => navigate("/dashboard/master-data")}
+                    className="group bg-white rounded-2xl border border-gray-100 shadow-sm p-5 text-left hover:shadow-md hover:border-purple-200 transition-all"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
+                        <Users size={20} className="text-purple-700" />
+                      </div>
 
-            <button
-              type="button"
-              onClick={() => navigate("/dashboard/master-data")}
-              className="group bg-white rounded-2xl border border-gray-100 shadow-sm p-5 text-left hover:shadow-md hover:border-purple-200 transition-all"
-            >
-              <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
-                  <Users size={20} className="text-purple-700" />
-                </div>
+                      <ArrowRight
+                        size={18}
+                        className="text-gray-300 group-hover:text-purple-600 transition"
+                      />
+                    </div>
 
-                <ArrowRight
-                  size={18}
-                  className="text-gray-300 group-hover:text-purple-600 transition"
-                />
-              </div>
+                    <h3 className="mt-4 font-semibold text-gray-800">
+                      Master Data
+                    </h3>
 
-              <h3 className="mt-4 font-semibold text-gray-800">Master Data</h3>
+                    <p className="mt-1 text-xs text-gray-500">
+                      Pendaftaran dan Kelola Data Santri dan Guru
+                    </p>
+                  </button>
+                )}
 
-              <p className="mt-1 text-xs text-gray-500">
-                Pendaftaran dan Kelola Data Santri dan Guru
-              </p>
-            </button>
+                {isAllowed("master-progres") && (
+                  <button
+                    type="button"
+                    onClick={() => navigate("/dashboard/master-progres")}
+                    className="group bg-white rounded-2xl border border-gray-100 shadow-sm p-5 text-left hover:shadow-md hover:border-blue-200 transition-all"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+                        <ClipboardCheck size={20} className="text-blue-700" />
+                      </div>
 
-            {/* MASTER PROGRES */}
+                      <ArrowRight
+                        size={18}
+                        className="text-gray-300 group-hover:text-blue-600 transition"
+                      />
+                    </div>
 
-            <button
-              type="button"
-              onClick={() => navigate("/dashboard/master-progres")}
-              className="group bg-white rounded-2xl border border-gray-100 shadow-sm p-5 text-left hover:shadow-md hover:border-blue-200 transition-all"
-            >
-              <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-                  <ClipboardCheck size={20} className="text-blue-700" />
-                </div>
+                    <h3 className="mt-4 font-semibold text-gray-800">
+                      Master Progres
+                    </h3>
 
-                <ArrowRight
-                  size={18}
-                  className="text-gray-300 group-hover:text-blue-600 transition"
-                />
-              </div>
+                    <p className="mt-1 text-xs text-gray-500">
+                      Kelola data dan progres Iqra dan Al-Qur'an
+                    </p>
+                  </button>
+                )}
 
-              <h3 className="mt-4 font-semibold text-gray-800">
-                Master Progres
-              </h3>
+                {isAllowed("master-hafalan") && (
+                  <button
+                    type="button"
+                    onClick={() => navigate("/dashboard/master-hafalan")}
+                    className="group bg-white rounded-2xl border border-gray-100 shadow-sm p-5 text-left hover:shadow-md hover:border-emerald-200 transition-all"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+                        <Award size={20} className="text-emerald-700" />
+                      </div>
 
-              <p className="mt-1 text-xs text-gray-500">
-                Kelola data dan progres Iqra dan Al-Qur'an
-              </p>
-            </button>
+                      <ArrowRight
+                        size={18}
+                        className="text-gray-300 group-hover:text-emerald-600 transition"
+                      />
+                    </div>
 
-            {/* MASTER HAFALAN */}
+                    <h3 className="mt-4 font-semibold text-gray-800">
+                      Master Hafalan
+                    </h3>
 
-            <button
-              type="button"
-              onClick={() => navigate("/dashboard/master-hafalan")}
-              className="group bg-white rounded-2xl border border-gray-100 shadow-sm p-5 text-left hover:shadow-md hover:border-emerald-200 transition-all"
-            >
-              <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
-                  <Award size={20} className="text-emerald-700" />
-                </div>
+                    <p className="mt-1 text-xs text-gray-500">
+                      Kelola data dan progres hafalan santri
+                    </p>
+                  </button>
+                )}
 
-                <ArrowRight
-                  size={18}
-                  className="text-gray-300 group-hover:text-emerald-600 transition"
-                />
-              </div>
+                {isAllowed("data-santri") && (
+                  <button
+                    type="button"
+                    onClick={() => navigate("/dashboard/data-santri")}
+                    className="group bg-white rounded-2xl border border-gray-100 shadow-sm p-5 text-left hover:shadow-md hover:border-amber-200 transition-all"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+                        <BookMarked size={20} className="text-amber-700" />
+                      </div>
 
-              <h3 className="mt-4 font-semibold text-gray-800">
-                Master Hafalan
-              </h3>
+                      <ArrowRight
+                        size={18}
+                        className="text-gray-300 group-hover:text-amber-600 transition"
+                      />
+                    </div>
 
-              <p className="mt-1 text-xs text-gray-500">
-                Kelola data dan progres hafalan santri
-              </p>
-            </button>
+                    <h3 className="mt-4 font-semibold text-gray-800">
+                      Data Santri
+                    </h3>
 
-            {/* DATA SANTRI */}
+                    <p className="mt-1 text-xs text-gray-500">
+                      Lihat seluruh data santri dan orang tua
+                    </p>
+                  </button>
+                )}
+              </>
+            ) : (
+              // Non-admin: show raport and progres shortcuts
+              <>
+                <button
+                  type="button"
+                  onClick={() => navigate("/dashboard/raport-santri")}
+                  className="group bg-white rounded-2xl border border-gray-100 shadow-sm p-5 text-left hover:shadow-md hover:border-purple-200 transition-all"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
+                      <Sparkles size={20} className="text-purple-700" />
+                    </div>
 
-            <button
-              type="button"
-              onClick={() => navigate("/dashboard/data-santri")}
-              className="group bg-white rounded-2xl border border-gray-100 shadow-sm p-5 text-left hover:shadow-md hover:border-amber-200 transition-all"
-            >
-              <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
-                  <BookMarked size={20} className="text-amber-700" />
-                </div>
+                    <ArrowRight
+                      size={18}
+                      className="text-gray-300 group-hover:text-purple-600 transition"
+                    />
+                  </div>
 
-                <ArrowRight
-                  size={18}
-                  className="text-gray-300 group-hover:text-amber-600 transition"
-                />
-              </div>
+                  <h3 className="mt-4 font-semibold text-gray-800">
+                    Raport Santri
+                  </h3>
 
-              <h3 className="mt-4 font-semibold text-gray-800">Data Santri</h3>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Lihat raport santri
+                  </p>
+                </button>
 
-              <p className="mt-1 text-xs text-gray-500">
-                Lihat seluruh data santri dan orang tua
-              </p>
-            </button>
+                <button
+                  type="button"
+                  onClick={() => navigate("/dashboard/progres-iqra")}
+                  className="group bg-white rounded-2xl border border-gray-100 shadow-sm p-5 text-left hover:shadow-md hover:border-blue-200 transition-all"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
+                      <BookOpen size={20} className="text-blue-700" />
+                    </div>
+
+                    <ArrowRight
+                      size={18}
+                      className="text-gray-300 group-hover:text-blue-600 transition"
+                    />
+                  </div>
+
+                  <h3 className="mt-4 font-semibold text-gray-800">
+                    Progres Iqra
+                  </h3>
+
+                  <p className="mt-1 text-xs text-gray-500">
+                    Lihat progres Iqra
+                  </p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => navigate("/dashboard/progres-quran")}
+                  className="group bg-white rounded-2xl border border-gray-100 shadow-sm p-5 text-left hover:shadow-md hover:border-amber-200 transition-all"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
+                      <BookMarked size={20} className="text-amber-700" />
+                    </div>
+
+                    <ArrowRight
+                      size={18}
+                      className="text-gray-300 group-hover:text-amber-600 transition"
+                    />
+                  </div>
+
+                  <h3 className="mt-4 font-semibold text-gray-800">
+                    Progres Qur'an
+                  </h3>
+
+                  <p className="mt-1 text-xs text-gray-500">
+                    Lihat progres Al-Qur'an
+                  </p>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => navigate("/dashboard/progres-hafalan")}
+                  className="group bg-white rounded-2xl border border-gray-100 shadow-sm p-5 text-left hover:shadow-md hover:border-emerald-200 transition-all"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+                      <Award size={20} className="text-emerald-700" />
+                    </div>
+
+                    <ArrowRight
+                      size={18}
+                      className="text-gray-300 group-hover:text-emerald-600 transition"
+                    />
+                  </div>
+
+                  <h3 className="mt-4 font-semibold text-gray-800">
+                    Progres Hafalan
+                  </h3>
+
+                  <p className="mt-1 text-xs text-gray-500">
+                    Lihat progres hafalan
+                  </p>
+                </button>
+              </>
+            )}
           </div>
         </div>
 

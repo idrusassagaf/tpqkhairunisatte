@@ -2,11 +2,7 @@
 
 <h3>KESIMPULAN</h3>
 
-<p style="text-align:justify; line-height:1.8;">
-
-    {!! str_contains($setting->narasi['bab8'] ?? '', '<') ? $setting->narasi['bab8'] : nl2br(e($setting->narasi['bab8'] ?? '')) !!}
-
-</p>
+@include('pdf.partials.narasi', ['key' => 'bab8'])
 
 <table>
 

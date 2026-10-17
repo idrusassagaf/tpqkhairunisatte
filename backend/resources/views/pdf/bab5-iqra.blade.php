@@ -49,11 +49,7 @@ $label = $labels[$pdfLanguage] ?? $labels['id'];
 
 <h3>{{ $label['title'] }}</h3>
 
-<p style="text-align:justify; line-height:1.8;">
-
-    {!! str_contains($setting->narasi['bab5'] ?? '', '<') ? $setting->narasi['bab5'] : nl2br(e($setting->narasi['bab5'] ?? '')) !!}
-
-</p>
+@include('pdf.partials.narasi', ['key' => 'bab5'])
 
 <table>
 
