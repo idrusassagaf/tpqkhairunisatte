@@ -218,6 +218,48 @@ export default function MasterHafalan() {
   );
 
   // =========================================================
+  // DAFTAR NOMOR HALAMAN (DENGAN TITIK-TITIK)
+  //
+  // Contoh (total 20 halaman):
+  // Halaman 1  : 1 2 3 ... 20
+  // Halaman 10 : 1 ... 9 10 11 ... 20
+  // Halaman 20 : 1 ... 18 19 20
+  // =========================================================
+
+  const getPageNumbers = () => {
+    const maxVisible = 5;
+
+    // Jika total halaman sedikit, tampilkan semua
+    if (totalPages <= maxVisible + 2) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    const pages = [];
+    const siblings = 1; // jumlah halaman di kiri/kanan halaman aktif
+
+    const left = Math.max(currentPage - siblings, 2);
+    const right = Math.min(currentPage + siblings, totalPages - 1);
+
+    pages.push(1);
+
+    if (left > 2) {
+      pages.push("...");
+    }
+
+    for (let p = left; p <= right; p++) {
+      pages.push(p);
+    }
+
+    if (right < totalPages - 1) {
+      pages.push("...");
+    }
+
+    pages.push(totalPages);
+
+    return pages;
+  };
+
+  // =========================================================
   // RETURN
   // =========================================================
 
@@ -264,7 +306,7 @@ export default function MasterHafalan() {
 
           <tbody>
             {sedangMemuat ? (
-              <TableLoadingRow colSpan={8} />
+              <TableLoadingRow colSpan={7} />
             ) : (
               <>
                 {santri.length === 0 ? (
@@ -420,7 +462,7 @@ export default function MasterHafalan() {
 
         {totalPages > 1 && (
           <div className="flex flex-col md:flex-row items-center justify-between gap-3 mt-4 pt-4 border-t p-2">
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-gray-500 text-center md:text-left">
               Menampilkan{" "}
               <span className="font-semibold text-gray-700">
                 {startIndex + 1}
@@ -436,7 +478,7 @@ export default function MasterHafalan() {
               santri
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className="flex flex-wrap items-center justify-center gap-1 max-w-full">
               <button
                 type="button"
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -453,8 +495,15 @@ export default function MasterHafalan() {
                 Sebelumnya
               </button>
 
-              {Array.from({ length: totalPages }, (_, index) => index + 1).map(
-                (page) => (
+              {getPageNumbers().map((page, index) =>
+                page === "..." ? (
+                  <span
+                    key={`dots-${index}`}
+                    className="px-2 py-2 text-xs text-gray-400 select-none"
+                  >
+                    ...
+                  </span>
+                ) : (
                   <button
                     type="button"
                     key={page}
