@@ -26,6 +26,7 @@ export default function Dashboard() {
 
   const [santri, setSantri] = useState([]);
   const [guru, setGuru] = useState([]);
+  const [progresIqra, setProgresIqra] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,10 +37,14 @@ export default function Dashboard() {
     try {
       setLoading(true);
 
-      const res = await api.get("/master-data");
+      const [masterRes, iqraRes] = await Promise.all([
+        api.get("/master-data"),
+        api.get("/progres-iqra").catch(() => ({ data: { data: [] } })),
+      ]);
 
-      setSantri(res?.data?.data?.santri || []);
-      setGuru(res?.data?.data?.guru || []);
+      setSantri(masterRes?.data?.data?.santri || []);
+      setGuru(masterRes?.data?.data?.guru || []);
+      setProgresIqra(iqraRes?.data?.data || []);
     } catch (error) {
       console.error("Gagal mengambil data dashboard:", error);
     } finally {
@@ -48,6 +53,56 @@ export default function Dashboard() {
   };
 
   // ================= DATA RINGKASAN =================
+
+  const totalAlQuran = useMemo(() => {
+    return santri.filter((s) => {
+      const kelas = (s.kelas || "").trim().toLowerCase();
+
+      return (
+        kelas === "al quran" || kelas === "alquran" || kelas === "al-qur'an"
+      );
+    }).length;
+  }, [santri]);
+
+  const totalIqra = useMemo(() => {
+    const fromSantri = santri.filter(
+      (s) => (s.kelas || "").trim().toLowerCase() === "iqra",
+    ).length;
+
+    const fromProgress = progresIqra.reduce((total, row) => {
+      const jilid = String(row?.jilid || "").trim();
+      return total + (jilid ? 1 : 0);
+    }, 0);
+
+    return fromSantri || fromProgress;
+  }, [santri, progresIqra]);
+
+  const iqraLevelCounts = useMemo(() => {
+    const counts = {};
+
+    for (let i = 1; i <= 6; i += 1) {
+      const label = `Iqra ${i}`;
+      counts[label] = progresIqra.filter(
+        (row) => String(row?.jilid || "").trim() === label,
+      ).length;
+    }
+
+    return counts;
+  }, [progresIqra]);
+
+  const iqraLevelItems = useMemo(() => {
+    return Array.from({ length: 6 }, (_, index) => {
+      const label = `Iqra ${index + 1}`;
+      const count = iqraLevelCounts[label] || 0;
+      const percentage = totalIqra > 0 ? (count / totalIqra) * 100 : 0;
+
+      return {
+        label,
+        count,
+        percentage,
+      };
+    });
+  }, [iqraLevelCounts, totalIqra]);
 
   const jumlahIqra = useMemo(() => {
     return santri.filter((s) => (s.kelas || "").trim().toLowerCase() === "iqra")
@@ -244,52 +299,76 @@ export default function Dashboard() {
             </div>
 
             <div className="space-y-4">
-              {/* IQRA */}
+              {[
+                {
+                  label: "Total Al-Qur'an",
+                  count: totalAlQuran,
+                  color: "bg-amber-500",
+                },
+                {
+                  label: "Total Iqra",
+                  count: totalIqra,
+                  color: "bg-violet-500",
+                },
+              ].map(({ label, count, color }) => {
+                const maxValue = Math.max(totalAlQuran, totalIqra, 1);
 
-              <div>
-                <div className="flex justify-between text-sm mb-1.5">
-                  <span className="text-gray-600">Iqra</span>
+                return (
+                  <div key={label}>
+                    <div className="flex justify-between items-center text-sm mb-1.5">
+                      <span className="text-gray-700 font-medium">{label}</span>
 
-                  <span className="font-semibold text-gray-800">
-                    {loading ? "-" : jumlahIqra}
-                  </span>
-                </div>
+                      <span className="font-semibold text-gray-800">
+                        {loading ? "-" : count}
+                      </span>
+                    </div>
 
-                <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-purple-500 rounded-full transition-all"
-                    style={{
-                      width:
-                        santri.length > 0
-                          ? `${(jumlahIqra / santri.length) * 100}%`
-                          : "0%",
-                    }}
-                  />
-                </div>
-              </div>
+                    <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full ${color} rounded-full transition-all`}
+                        style={{
+                          width: loading
+                            ? "0%"
+                            : `${(count / maxValue) * 100}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
 
-              {/* AL-QURAN */}
+              <div className="pt-1 space-y-3">
+                {iqraLevelItems.map(({ label, count }) => {
+                  const maxValue = Math.max(
+                    ...iqraLevelItems.map((item) => item.count || 0),
+                    1,
+                  );
 
-              <div>
-                <div className="flex justify-between text-sm mb-1.5">
-                  <span className="text-gray-600">Al-Qur'an</span>
+                  return (
+                    <div key={label}>
+                      <div className="flex justify-between items-center text-sm mb-1.5">
+                        <span className="text-gray-700 font-medium">
+                          {label}
+                        </span>
 
-                  <span className="font-semibold text-gray-800">
-                    {loading ? "-" : jumlahQuran}
-                  </span>
-                </div>
+                        <span className="font-semibold text-gray-800">
+                          {loading ? "-" : count}
+                        </span>
+                      </div>
 
-                <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-blue-500 rounded-full transition-all"
-                    style={{
-                      width:
-                        santri.length > 0
-                          ? `${(jumlahQuran / santri.length) * 100}%`
-                          : "0%",
-                    }}
-                  />
-                </div>
+                      <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-violet-500 to-purple-500 rounded-full transition-all"
+                          style={{
+                            width: loading
+                              ? "0%"
+                              : `${(count / maxValue) * 100}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
